@@ -1,0 +1,42 @@
+is_cage
+is_float
+is_static 
+
+
+[+] is_ocean  (only by name)
+
+get_ocean from selection
+
+
+
+
+ocean_data: [{obj: weight.002}]
+
+
+bugs and test: 
+
+[] is manually changed material chagned when new ocean is added?
+
+
+changes to Multiple: if only one ocean ==> old behavior (needs name independency) otherwise add selected objects to the active ocean 
+[] Float 
+[] Static 
+[] Remove interaction 
+
+[] remaping to other ocean (check float/static change system), option for float on several objects 
+
+[] UI show selectec when there are more oceans 
+
+[] update material 
+[] update and new presets 
+
+
+GeoNodes Features: 
+[] Waves 
+[] Waves Break particles 
+[] Spray 
+
+
+
+
+fixed bugs:
