@@ -27,8 +27,16 @@ changes to Multiple: if only one ocean ==> old behavior (needs name independency
 
 [] UI show selectec when there are more oceans 
 
+
+
 [] update material 
+
+[] move foam with attribute: foam textures must move a bit with the waves (aligment). Put driver to get value from alignment
+    --> siehe Materialstudie moving foam
+
+presets
 [] update and new presets 
+
 
 
 GeoNodes Features: 
@@ -37,6 +45,9 @@ GeoNodes Features:
 [] Spray 
 
 
+Loop animation: 
+[] of selected ocean
+https://www.youtube.com/watch?v=Xh2Xuo00f0c
 
 
 fixed bugs:

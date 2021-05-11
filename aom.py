@@ -736,18 +736,16 @@ def RemoveInterActSingle(obj):  # remove interaction aber mit nur einem Object
 
     return objinitial
 
-
-# def BrushCanvas():
+    # def BrushCanvas():
 
     # bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces['Surface'].brush_collection = bpy.data.groups["Paint"] # für die zweite Canvas wird Paint als beeinflussende Gruppe bestimmt
 
+    #    print(bpy.context.active_object.name + " in BrushCanvas" )
 
-#    print(bpy.context.active_object.name + " in BrushCanvas" )
 
-def AdvOceanMat(ocean):
+def AdvOceanMat(context, ocean):
     scene = bpy.context.scene
     data = bpy.data
-    context = bpy.context
 
     ob = ocean
     print(bpy.context.active_object.name + " in AdvOceanMat")
@@ -759,7 +757,7 @@ def AdvOceanMat(ocean):
 
     # material zuweisen aus dem internet
     # Get material
-    mat = bpy.data.materials.get("AdvOceanMat")
+    mat = data.materials.get("AdvOceanMat")
     if mat is None:
         # create material
         mat = bpy.data.materials.new(name="AdvOceanMat")
@@ -772,7 +770,7 @@ def AdvOceanMat(ocean):
       #  no slots
         ob.data.materials.append(mat)
 
-    bpy.context.object.active_material.use_nodes = True
+    context.object.active_material.use_nodes = True
 
     # Nodes bauen
     # bpy.data.materials['AdvOceanMat'].node_tree.nodes.active.color   erinnerung an den langen pfad
@@ -867,20 +865,282 @@ def AdvOceanMat(ocean):
     links.new(nodes['Value'].outputs[0], nodes['Refraction BSDF'].inputs[1])
 
     # Foamfactor
+    ################################################################################################################
+    ################################################################################################################
+    FoamFac_ancient(context, mat)
+
+    BubNG = get_BubbleNodeGroup(context)
+    node = nodes.new('ShaderNodeGroup')
+    node.node_tree = BubNG
+    node.location = (-400, 600)
+    #node = nodes.new(BubNG)
+
+    ################################################################################################################
+    ################################################################################################################
+    # Foam material
+
+    # principled shader basis für foam
+    node = nodes.new('ShaderNodeBsdfPrincipled')
+    node.location = (200, -700)
+    nodes['Principled BSDF'].inputs[0].default_value = (1.8, 1.8, 1.8, 1)
+    nodes['Principled BSDF'].inputs[15].default_value = 0.2
+    nodes['Principled BSDF'].inputs[7].default_value = 0.2
+    node = nodes.new('ShaderNodeBump')  # principled shader basis für foam
+    node.location = (000, -900)
+    node.inputs[0].default_value = 0.5
+    links.new(nodes['Bump'].outputs['Normal'],
+              nodes['Principled BSDF'].inputs['Normal'])
+    links.new(nodes['Mix.005'].outputs['Color'],
+              nodes['Bump'].inputs['Height'])
+
+    # node = nodes.new('ShaderNodeRGB') ### mixshader machen
+    # node.location = (-200,-200)
+    # nodes['RGB'].outputs['Color'].default_value[0] = 1
+    # nodes['RGB'].outputs['Color'].default_value[1] = 1
+    # nodes['RGB'].outputs['Color'].default_value[2] = 1
+    # node = nodes.new('ShaderNodeHueSaturation') ### Hue saturation.001
+    # node.location = (000,-200)
+    # node = nodes.new('ShaderNodeBsdfGlossy') ### Glossy shader .002
+    # node.location = (200,-100)
+    # node = nodes.new('ShaderNodeAddShader') ### mixshader machen
+    # node.location = (400,-200)
+
+    # link foam material
+    #links.new(nodes['RGB'].outputs['Color'], nodes['Hue Saturation Value.002'].inputs['Color']) #
+    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Ambient Occlusion'].inputs['Color']) #
+    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Glossy BSDF.002'].inputs['Color']) #
+    #links.new(nodes['Glossy BSDF.002'].outputs['BSDF'], nodes['Add Shader'].inputs[0]) #
+   # links.new(nodes['Ambient Occlusion'].outputs['AO'], nodes['Add Shader'].inputs[1]) #
+
+    ###Finaler Mix in den Material Output#################################
+
+    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+    node.location = (2200, 200)
+    node.operation = 'MULTIPLY'
+    node.use_clamp = True
+    node.inputs[1].default_value = 0.0
+
+    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
+    node.location = (2200, 000)
+
+    links.new(nodes['Mix.005'].outputs['Color'],
+              nodes['Mix Shader.003'].inputs[0])  # Factor des Schaumes
+    # Schaum material in den EndMixer
+    links.new(nodes['Principled BSDF'].outputs['BSDF'],
+              nodes['Mix Shader.003'].inputs[2])
+    links.new(nodes['Mix Shader.002'].outputs['Shader'],
+              nodes['Mix Shader.003'].inputs[1])  # Oceanmateril in den EndMixer
+
+    try:
+        links.new(nodes['Mix Shader.003'].outputs['Shader'],
+                  nodes['Material Output'].inputs[0])  # EndMixer in den Surface
+    except:
+        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
+        node.location = (2400, 000)
+        node.target = 'CYCLES'
+        links.new(nodes['Mix Shader.003'].outputs['Shader'],
+                  nodes['Material Output'].inputs['Surface'])  # EndMixer in den Surface
+
+    try:
+        links.new(nodes['Mix Shader.003'].outputs['Shader'],
+                  nodes['Material Output.001'].inputs[0])  # EndMixer in den Surface
+    except:
+        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
+        node.location = (2400, -200)
+        node.name = 'Material Output Eevee'
+        node.target = 'EEVEE'
+        links.new(nodes['Mix Shader.003'].outputs['Shader'],
+                  nodes['Material Output Eevee'].inputs['Surface'])  # EndMixer in den Surface
+
+    # Displacement connect
+    # EndMixer in den Surface
+    links.new(nodes['Math.002'].outputs[0], nodes['Mix.005'].inputs[1])
+
+    links.new(nodes['Math.003'].outputs['Value'],
+              nodes['Material Output'].inputs['Displacement'])
+   # links.new(nodes['Math.002'].outputs['Value'], nodes['Material Output'].inputs['Displacement']) #EndMixer in den Surface
+
+    links.new(nodes['Math.003'].outputs['Value'],
+              nodes['Material Output'].inputs['Displacement'])
+
+    # Bubble extra
+    node = nodes.new('ShaderNodeValue')  # Multiplier für Displacement
+    node.location = (000, 400)
+    nodes['Value.002'].outputs[0].default_value = 100
+
+    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+    node.location = (200, 600)
+    nodes['Math.004'].operation = 'MULTIPLY'
+    nodes['Math.004'].inputs[1].default_value = 2
+
+    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+    node.location = (200, 400)
+    nodes['Math.005'].operation = 'MULTIPLY'
+    nodes['Math.005'].inputs[1].default_value = 1
+
+    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+    node.location = (200, 200)
+    nodes['Math.006'].operation = 'MULTIPLY'
+    nodes['Math.006'].inputs[1].default_value = 0.5
+
+    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.004'].inputs[0])
+    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.005'].inputs[0])
+    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.006'].inputs[0])
+
+    links.new(nodes['Math.004'].outputs['Value'],
+              nodes['Voronoi Texture'].inputs['Scale'])
+    links.new(nodes['Math.005'].outputs['Value'],
+              nodes['Voronoi Texture.001'].inputs['Scale'])
+    links.new(nodes['Math.006'].outputs['Value'],
+              nodes['Voronoi Texture.002'].inputs['Scale'])
+    links.new(nodes['Mix.005'].outputs['Color'], nodes['Math.003'].inputs[0])
+
+    # seperated material outputs for eevee and cycles
+
+    # Set eevee transparency
+    REngine = bpy.context.scene.render.engine
+    bpy.context.scene.render.engine = 'BLENDER_EEVEE'
+    bpy.context.object.active_material.blend_method = 'HASHED'
+    bpy.context.scene.render.engine = REngine
+
+
+def get_BubbleNodeGroup(context):
+    data = bpy.data
+    if "BubbleNG" in data.node_groups:
+        return data.node_groups["BubbleNG"]
+
+    ng = data.node_groups.new(name="BubbleNG", type='ShaderNodeTree')
+    ng.name = 'BubbleNG'
+
+    # create group inputs
+    group_inputs = ng.nodes.new('NodeGroupInput')
+    group_inputs.location = (-850, 0)
+    ng.inputs.new('NodeSocketVector', 'Vector')
+    ng.inputs.new('NodeSocketFloat', 'Scale')
+    ng.inputs.new('NodeSocketFloat', 'Convexness')
+    ng.inputs.new('NodeSocketFloat', 'Min')
+    ng.inputs.new('NodeSocketFloat', 'Amount')
+
+    nodes = ng.nodes
+    links = ng.links
+
+    node = nodes.new('ShaderNodeTexVoronoi')
+    node.location = (-400, 675)
+    nodes["Voronoi Texture"].inputs[1].default_value = 100
+    node = nodes.new('ShaderNodeValToRGB')
+    node.location = (-000, 875)
+    node.color_ramp.interpolation = 'B_SPLINE'
+    node.color_ramp.elements[0].color = 1, 1, 1, 1
+    node.color_ramp.elements[0].position = 0.3
+    node.color_ramp.elements[1].color = 0, 0, 0, 1
+
+    node = nodes.new('ShaderNodeMapRange')
+    node.location = (400, 950)
+
+    # bottom half
+
+    node = nodes.new('ShaderNodeTexVoronoi')
+    node.name = "VorRadius"
+    node.location = (-400, 200)
+    node.feature = 'N_SPHERE_RADIUS'
+    #nodes["Voronoi Texture.001"].inputs[1].default_value = 50
+
+    node = nodes.new('ShaderNodeMath')
+    node.operation = 'MULTIPLY'
+    node.inputs[1].default = 1
+    node.location = (000, 000)
+
+    node = nodes.new('ShaderNodeMath')
+    node.operation = 'LESS_THAN'
+    node.location = (300, 000)
+
+    node = nodes.new('ShaderNodeMath')
+    node.operation = 'MULTIPLY'
+    node.location = (600, 000)
+
+    node = nodes.new('ShaderNodeMath')
+    node.operation = 'GREATER_THAN'
+    node.location = (000, -200)
+
+    # mid
+    node = nodes.new('ShaderNodeMath')
+    node.operation = 'MULTIPLY_ADD'
+    node.inputs[2].default_value = 0.1
+    node.location = (800, 200)
+
+    links.new(nodes['Group Input'].outputs[0],
+              nodes['Voronoi Texture'].inputs[0])
+    links.new(nodes['Group Input'].outputs[0], nodes['VorRadius'].inputs[0])
+    links.new(nodes['Group Input'].outputs[1],
+              nodes['Voronoi Texture'].inputs[2])
+    links.new(nodes['Group Input'].outputs[1], nodes['VorRadius'].inputs[2])
+
+    # min
+    links.new(nodes['Group Input'].outputs[3], nodes['Map Range'].inputs[3])
+
+    links.new(nodes['Voronoi Texture'].outputs[0],
+              nodes['ColorRamp'].inputs[0])
+    links.new(nodes['Voronoi Texture'].outputs[0], nodes['Math'].inputs[0])
+
+    links.new(nodes['ColorRamp'].outputs[0], nodes['Map Range'].inputs[0])
+
+    links.new(nodes['Voronoi Texture'].outputs[1], nodes['Math.003'].inputs[0])
+    links.new(nodes['Group Input'].outputs[4], nodes['Math.003'].inputs[1])
+
+    links.new(nodes['Math'].outputs[0], nodes['Math.001'].inputs[0])
+    links.new(nodes['VorRadius'].outputs['Radius'],
+              nodes['Math.001'].inputs[1])
+
+    links.new(nodes['Math.001'].outputs[0], nodes['Math.002'].inputs[0])
+    links.new(nodes['Math.003'].outputs[0], nodes['Math.002'].inputs[1])
+
+    links.new(nodes['Group Input'].outputs[2], nodes['Math.004'].inputs[0])
+    links.new(nodes['Math.002'].outputs[0], nodes['Math.004'].inputs[1])
+    links.new(nodes['Math.004'].outputs[0], nodes['Map Range'].inputs[3])
+
+    group_inputs = ng.nodes.new('NodeGroupOutput')
+    group_inputs.location = (1250, 0)
+    ng.outputs.new('NodeSocketColor', 'SoftShape')
+    ng.outputs.new('NodeSocketColor', 'HardShape')
+
+    links.new(nodes['Map Range'].outputs[0], nodes['Group Output'].inputs[0])
+    links.new(nodes['Math.002'].outputs[0], nodes['Group Output'].inputs[1])
+
+    return ng
+
+
+def FoamFac_ancient(context, mat):
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+
     node = nodes.new('ShaderNodeAttribute')  # Attribute foam
-    node.location = (000, 1400)
+    node.location = (-250, 1400)
     nodes['Attribute'].attribute_name = "foam"
-    node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-    node.location = (200, 1400)
-    nodes["Gamma"].inputs[1].default_value = 0.3
+    # node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
+    #node.location = (200, 1400)
+    #nodes["Gamma"].inputs[1].default_value = 0.3
+    node = nodes.new('ShaderNodeValToRGB')
+    node.name = "CRFoam"
+    node.location = (000, 1500)
+    node.color_ramp.interpolation = 'B_SPLINE'
+    #node.color_ramp.elements[1].color = 1, 1, 1, 1
+    node.color_ramp.elements[1].position = 0.74
+    #node.color_ramp.elements[1].color = 0, 0, 0, 1
 
     node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
-    node.location = (000, 1250)
+    node.location = (-250, 1250)
     nodes['Attribute.001'].attribute_name = "dp_wetmap"
-    node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-    node.location = (200, 1250)
+    # node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
+    #node.location = (200, 1250)
     # Gamma wert wetmap##########
-    nodes["Gamma.001"].inputs[1].default_value = 5
+    #nodes["Gamma.001"].inputs[1].default_value = 5
+    node = nodes.new('ShaderNodeValToRGB')
+    node.name = "CRWet"
+    node.location = (000, 1250)
+    node.color_ramp.interpolation = 'B_SPLINE'
+    #node.color_ramp.elements[1].color = 1, 1, 1, 1
+    node.color_ramp.elements[0].position = 0.5
+    #node.color_ramp.elements[1].color = 0, 0, 0, 1
 
     node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
     node.location = (400, 1275)
@@ -890,11 +1150,11 @@ def AdvOceanMat(ocean):
 
     # link Attribute notes additiv
     links.new(nodes['Attribute.001'].outputs['Fac'],
-              nodes['Gamma.001'].inputs['Color'])
-    links.new(nodes['Gamma'].outputs['Color'], nodes['Mix'].inputs['Color2'])
+              nodes['CRWet'].inputs[0])
+    links.new(nodes['CRFoam'].outputs[0], nodes['Mix'].inputs['Color2'])
     links.new(nodes['Attribute'].outputs['Fac'],
-              nodes['Gamma'].inputs['Color'])
-    links.new(nodes['Gamma.001'].outputs['Color'],
+              nodes['CRFoam'].inputs[0])
+    links.new(nodes['CRWet'].outputs[0],
               nodes['Mix'].inputs['Color1'])
 
     node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
@@ -1060,132 +1320,6 @@ def AdvOceanMat(ocean):
     links.new(nodes['Value.001'].outputs[0], nodes['Mix.001'].inputs[0])
     links.new(nodes['Value.001'].outputs[0], nodes['Mix.002'].inputs[0])
 
- # Foam material
-
-    # principled shader basis für foam
-    node = nodes.new('ShaderNodeBsdfPrincipled')
-    node.location = (200, -700)
-    nodes['Principled BSDF'].inputs[0].default_value = (1.8, 1.8, 1.8, 1)
-    nodes['Principled BSDF'].inputs[15].default_value = 0.2
-    nodes['Principled BSDF'].inputs[7].default_value = 0.2
-    node = nodes.new('ShaderNodeBump')  # principled shader basis für foam
-    node.location = (000, -900)
-    node.inputs[0].default_value = 0.5
-    links.new(nodes['Bump'].outputs['Normal'],
-              nodes['Principled BSDF'].inputs['Normal'])
-    links.new(nodes['Mix.005'].outputs['Color'],
-              nodes['Bump'].inputs['Height'])
-
-    # node = nodes.new('ShaderNodeRGB') ### mixshader machen
-    # node.location = (-200,-200)
-    # nodes['RGB'].outputs['Color'].default_value[0] = 1
-    # nodes['RGB'].outputs['Color'].default_value[1] = 1
-    # nodes['RGB'].outputs['Color'].default_value[2] = 1
-    # node = nodes.new('ShaderNodeHueSaturation') ### Hue saturation.001
-    # node.location = (000,-200)
-    # node = nodes.new('ShaderNodeBsdfGlossy') ### Glossy shader .002
-    # node.location = (200,-100)
-    # node = nodes.new('ShaderNodeAddShader') ### mixshader machen
-    # node.location = (400,-200)
-
-    # link foam material
-    #links.new(nodes['RGB'].outputs['Color'], nodes['Hue Saturation Value.002'].inputs['Color']) #
-    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Ambient Occlusion'].inputs['Color']) #
-    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Glossy BSDF.002'].inputs['Color']) #
-    #links.new(nodes['Glossy BSDF.002'].outputs['BSDF'], nodes['Add Shader'].inputs[0]) #
-   # links.new(nodes['Ambient Occlusion'].outputs['AO'], nodes['Add Shader'].inputs[1]) #
-
-    ###Finaler Mix in den Material Output#################################
-
-    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
-    node.location = (2200, 200)
-    node.operation = 'MULTIPLY'
-    node.use_clamp = True
-    node.inputs[1].default_value = 0.0
-
-    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
-    node.location = (2200, 000)
-
-    links.new(nodes['Mix.005'].outputs['Color'],
-              nodes['Mix Shader.003'].inputs[0])  # Factor des Schaumes
-    # Schaum material in den EndMixer
-    links.new(nodes['Principled BSDF'].outputs['BSDF'],
-              nodes['Mix Shader.003'].inputs[2])
-    links.new(nodes['Mix Shader.002'].outputs['Shader'],
-              nodes['Mix Shader.003'].inputs[1])  # Oceanmateril in den EndMixer
-
-    try:
-        links.new(nodes['Mix Shader.003'].outputs['Shader'],
-                  nodes['Material Output'].inputs[0])  # EndMixer in den Surface
-    except:
-        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
-        node.location = (2400, 000)
-        node.target = 'CYCLES'
-        links.new(nodes['Mix Shader.003'].outputs['Shader'],
-                  nodes['Material Output'].inputs['Surface'])  # EndMixer in den Surface
-
-    try:
-        links.new(nodes['Mix Shader.003'].outputs['Shader'],
-                  nodes['Material Output.001'].inputs[0])  # EndMixer in den Surface
-    except:
-        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
-        node.location = (2400, -200)
-        node.name = 'Material Output Eevee'
-        node.target = 'EEVEE'
-        links.new(nodes['Mix Shader.003'].outputs['Shader'],
-                  nodes['Material Output Eevee'].inputs['Surface'])  # EndMixer in den Surface
-
-    # Displacement connect
-    # EndMixer in den Surface
-    links.new(nodes['Math.002'].outputs[0], nodes['Mix.005'].inputs[1])
-
-    links.new(nodes['Math.003'].outputs['Value'],
-              nodes['Material Output'].inputs['Displacement'])
-   # links.new(nodes['Math.002'].outputs['Value'], nodes['Material Output'].inputs['Displacement']) #EndMixer in den Surface
-
-    links.new(nodes['Math.003'].outputs['Value'],
-              nodes['Material Output'].inputs['Displacement'])
-
-    # Bubble extra
-    node = nodes.new('ShaderNodeValue')  # Multiplier für Displacement
-    node.location = (000, 400)
-    nodes['Value.002'].outputs[0].default_value = 100
-
-    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
-    node.location = (200, 600)
-    nodes['Math.004'].operation = 'MULTIPLY'
-    nodes['Math.004'].inputs[1].default_value = 2
-
-    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
-    node.location = (200, 400)
-    nodes['Math.005'].operation = 'MULTIPLY'
-    nodes['Math.005'].inputs[1].default_value = 1
-
-    node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
-    node.location = (200, 200)
-    nodes['Math.006'].operation = 'MULTIPLY'
-    nodes['Math.006'].inputs[1].default_value = 0.5
-
-    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.004'].inputs[0])
-    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.005'].inputs[0])
-    links.new(nodes['Value.002'].outputs['Value'], nodes['Math.006'].inputs[0])
-
-    links.new(nodes['Math.004'].outputs['Value'],
-              nodes['Voronoi Texture'].inputs['Scale'])
-    links.new(nodes['Math.005'].outputs['Value'],
-              nodes['Voronoi Texture.001'].inputs['Scale'])
-    links.new(nodes['Math.006'].outputs['Value'],
-              nodes['Voronoi Texture.002'].inputs['Scale'])
-    links.new(nodes['Mix.005'].outputs['Color'], nodes['Math.003'].inputs[0])
-
-    # seperated material outputs for eevee and cycles
-
-    # Set eevee transparency
-    REngine = bpy.context.scene.render.engine
-    bpy.context.scene.render.engine = 'BLENDER_EEVEE'
-    bpy.context.object.active_material.blend_method = 'HASHED'
-    bpy.context.scene.render.engine = REngine
-
 
 # Bool für Foam an aus definieren
 bpy.types.Scene.ObjFoamBool = bpy.props.BoolProperty(  # definiere neue Variable, als integer ...irgendwie
@@ -1302,7 +1436,7 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
         initialize_addon(context)
         ocean = GenOcean(context)
 
-        AdvOceanMat(ocean)
+        AdvOceanMat(context, ocean)
         # PreSetMod()
 
         return{"FINISHED"}
