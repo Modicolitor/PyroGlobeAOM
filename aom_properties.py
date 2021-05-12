@@ -6,11 +6,11 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     IgnoreMainCut = bpy.props.BoolProperty(
         name="Keep Connector", default=False)
 
-    Floatobjs = bpy.props.EnumProperty(
+    MaterialSel = bpy.props.EnumProperty(
         name='',  # SingleCoupltypes
         description='List of forms avaiable in single connector mode',
-        items=[('1', 'Flat', ''),
-               ('2', 'Joint', ''),
+        items=[('1', '3.0 Material', ''),
+               ('2', '2.8 Material', ''),
                ]
     )
 
