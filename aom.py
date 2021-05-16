@@ -259,7 +259,8 @@ bpy.types.Scene.OceAniEnd = bpy.props.IntProperty(  # definiere neue Variable, a
 
 def initialize_addon(context):
     from .aom_properties import AOMPropertyGroup
-    bpy.types.Scene.aom = bpy.props.PointerProperty(type=AOMPropertyGroup)
+    bpy.types.Scene.aom_props = bpy.props.PointerProperty(
+        type=AOMPropertyGroup)
 
     bpy.types.Object.aom_data = bpy.props.CollectionProperty(
         type=FloatdataItem)
@@ -745,7 +746,10 @@ def RemoveInterActSingle(obj):  # remove interaction aber mit nur einem Object
 
 
 def AdvOceanMat(context, ocean):
-    scene = bpy.context.scene
+    MatHandler = AOMMatHandler(context)
+    MatHandler.make_material(ocean)
+
+    '''scene = bpy.context.scene
     data = bpy.data
 
     ob = ocean
@@ -944,7 +948,7 @@ def AdvOceanMat(context, ocean):
     bpy.context.scene.render.engine = 'BLENDER_EEVEE'
     # Better 'BLEND'??????????'HASHED'
     bpy.context.object.active_material.blend_method = 'BLEND'
-    bpy.context.scene.render.engine = REngine
+    bpy.context.scene.render.engine = REngine'''
 
 
 # Bool für Foam an aus definieren
@@ -1062,10 +1066,7 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
         initialize_addon(context)
         ocean = GenOcean(context)
 
-        MatHandler = AOMMatHandler(context)
-        MatHandler.make_material(ocean)
-
-        #AdvOceanMat(context, ocean)
+        AdvOceanMat(context, ocean)
         # PreSetMod()
 
         return{"FINISHED"}

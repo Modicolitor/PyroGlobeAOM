@@ -297,10 +297,10 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
         col = flow.column()
 
         subcol = col.column()
-
-   # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
- #    row = layout.row(align=True)
-
+        try:
+            subcol.prop(context.scene.aom_props, "MaterialSel")
+        except:
+            pass
         subcol.operator("gen.ocmat", icon="MATERIAL")
 
         if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
