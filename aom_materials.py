@@ -1,4 +1,5 @@
 import bpy
+#from .aom import add_driver
 
 
 class AOMMatHandler:
@@ -502,18 +503,49 @@ class AOMMatHandler:
         ############################################
         ###############Driver stuff, rotation needed #################
         # value frame durch was
+        #
+
         node = nodes.new('ShaderNodeValue')
         node.name = 'SpeedMoveWave'
         node.location = (-1400, 1300)
 
+        source = node.outputs[0]
+        target = bpy.context.scene
+        prop = 'default_value'
+        data_path = "frame_current"
+        id_type = 'SCENE'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="0.0003*", id_type=id_type)
+
         # multiply with aligement factor driver
         node = nodes.new('ShaderNodeMath')
         node.name = 'AligmentDriver'
+        node.operation = 'MULTIPLY'
         node.location = (-1200, 1300)
+
+        source = node.inputs[1]
+        target = bpy.context.object
+        prop = 'default_value'
+        data_path = 'modifiers["Ocean"].wave_alignment'
+        id_type = 'OBJECT'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="", id_type=id_type)
 
         node = nodes.new('ShaderNodeCombineXYZ')
         node.name = 'MoveWaveCombXYZ'
         node.location = (-1000, 1300)
+
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.name = 'RotCombXYZ'
+        node.location = (-1000, 1600)
+
+        source = node.inputs[2]
+        target = bpy.context.object
+        prop = 'default_value'
+        data_path = 'modifiers["Ocean"].wave_direction'
+        id_type = 'OBJECT'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="", id_type=id_type)
 
         # link moving waves
         links.new(nodes['SpeedMoveWave'].outputs[0],
@@ -521,6 +553,7 @@ class AOMMatHandler:
         links.new(nodes['AligmentDriver'].outputs[0],
                   nodes['MoveWaveCombXYZ'].inputs[0])
         links.new(nodes['MoveWaveCombXYZ'].outputs[0], nodes['Map'].inputs[1])
+        links.new(nodes['RotCombXYZ'].outputs[0], nodes['Map'].inputs[2])
 
         links.new(nodes['TexCoordBub'].outputs['UV'],
                   nodes['Map'].inputs[0])
@@ -979,3 +1012,25 @@ class AOMMatHandler:
                   nodes['MaterialOutCycles'].inputs[2])
 
         print('3.0')
+
+    def add_driver(
+        self, source, target, prop, dataPath,
+        index=-1, negative=False, func='', id_type=''
+    ):
+        ''' Add driver to source prop (at index), driven by target dataPath '''
+
+        if index != -1:
+            d = source.driver_add(prop, index).driver
+        else:
+            d = source.driver_add(prop).driver
+
+        v = d.variables.new()
+        v.name = prop
+        v.targets[0].id_type = id_type
+        v.targets[0].id = target
+        v.targets[0].data_path = dataPath
+
+        d.expression = func + "(" + v.name + ")" if func else v.name
+        d.expression = d.expression if not negative else "-1 * " + d.expression
+
+        return d
