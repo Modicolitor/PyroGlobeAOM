@@ -172,6 +172,112 @@ class AOMMatHandler:
         links.new(nodes['Value'].outputs[0],
                   nodes['Refraction BSDF'].inputs[1])
 
+        # bump
+        node = nodes.new('ShaderNodeBump')
+        node.name = "WaterBump"
+        node.location = (-1700, 000)
+        node.inputs[1].default_value = 0.1
+
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Glossy BSDF'].inputs[2])
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Glossy BSDF.001'].inputs[2])
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Refraction BSDF'].inputs[3])
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Layer Weight'].inputs[1])
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Layer Weight.001'].inputs[1])
+        links.new(nodes['WaterBump'].outputs[0],
+                  nodes['Layer Weight.002'].inputs[1])
+
+        node = nodes.new('ShaderNodeMixRGB')
+        node.name = "CombTex"
+        node.location = (-2000, 000)
+        node.blend_type = 'ADD'
+        node.inputs[0].default_value = 0.1
+
+        node = nodes.new('ShaderNodeTexMusgrave')
+        node.name = "TexMusgraveL"
+        node.musgrave_dimensions = '4D'
+        node.location = (-2300, 000)
+        node.inputs[3].default_value = 2
+        node.inputs[4].default_value = 2
+        node.inputs[5].default_value = 2
+
+        node = nodes.new('ShaderNodeTexMusgrave')
+        node.name = "TexMusgraveS"
+        node.location = (-2300, -300)
+        node.musgrave_dimensions = '4D'
+        node.inputs[3].default_value = 1
+        node.inputs[4].default_value = 0.2
+        node.inputs[5].default_value = 1.6
+
+        node = nodes.new('ShaderNodeMath')
+        node.name = "ScaleMultiS"
+        node.location = (-2500, -300)
+        node.inputs[1].default_value = 4
+        node.operation = 'MULTIPLY'
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = "Timer"
+        node.location = (-2700, 000)
+        source = node.outputs[0]
+        target = bpy.context.scene
+        prop = 'default_value'
+        data_path = "frame_current"
+        id_type = 'SCENE'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="0.0002*", id_type=id_type)
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = "WaterBumpTexScale"
+        node.location = (-2700, -300)
+        node.outputs[0].default_value = 250
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = "WaterBumpStrength"
+        node.location = (-2700, -500)
+        node.outputs[0].default_value = 0.02
+
+        node = nodes.new('ShaderNodeMapping')
+        node.name = "WaterMap"
+        node.location = (-3000, 000)
+
+        node = nodes.new('ShaderNodeTexCoord')
+        node.name = "WaterTexCo"
+        node.location = (-3300, 000)
+
+        links.new(nodes['WaterTexCo'].outputs[2],
+                  nodes['WaterMap'].inputs[0])
+        links.new(nodes['WaterMap'].outputs[0],
+                  nodes['TexMusgraveL'].inputs[0])
+        links.new(nodes['WaterMap'].outputs[0],
+                  nodes['TexMusgraveS'].inputs[0])
+
+        links.new(nodes['WaterBumpTexScale'].outputs[0],
+                  nodes['TexMusgraveL'].inputs[2])
+        links.new(nodes['WaterBumpTexScale'].outputs[0],
+                  nodes['ScaleMultiS'].inputs[0])
+        links.new(nodes['ScaleMultiS'].outputs[0],
+                  nodes['TexMusgraveS'].inputs[2])
+
+        links.new(nodes['Timer'].outputs[0],
+                  nodes['TexMusgraveL'].inputs[1])
+        links.new(nodes['Timer'].outputs[0],
+                  nodes['TexMusgraveS'].inputs[1])
+
+        links.new(nodes['WaterBumpStrength'].outputs[0],
+                  nodes['WaterBump'].inputs[0])
+
+        links.new(nodes['TexMusgraveL'].outputs[0],
+                  nodes['CombTex'].inputs[1])
+        links.new(nodes['TexMusgraveS'].outputs[0],
+                  nodes['CombTex'].inputs[2])
+
+        links.new(nodes['CombTex'].outputs[0],
+                  nodes['WaterBump'].inputs[2])
+
     def foam_material_30(self, node_tree):
         nodes = node_tree.nodes
         links = node_tree.links
