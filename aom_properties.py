@@ -7,32 +7,41 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
         name="Keep Connector", default=False)
 
     MaterialSel = bpy.props.EnumProperty(
-        name='',  # SingleCoupltypes
-        description='List of forms avaiable in single connector mode',
+        name='Material Selector',
+        description='Show available Materials',
         items=[('1', '3.0 Material', ''),
                ('2', '2.8 Material', ''),
+               ])
+
+    PresetSel = bpy.props.EnumProperty(
+        name='Global Presets',  # SingleCoupltypes
+        description='Global Presets',
+        items=[('1', 'Lovely', ''),
+               ('2', 'Lively', ''),
+               ('3', 'Stormy', ''),
                ]
+
     )
 
 
 class FloatdataItem(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(default="Unknown")
     namenum: bpy.props.IntProperty(default=99999)
-    #obj: bpy.props.PointerProperty()
+    # obj: bpy.props.PointerProperty()
 
-#bpy.types.Scene.my_settings = bpy.props.CollectionProperty(type=SceneSettingItem)
+# bpy.types.Scene.my_settings = bpy.props.CollectionProperty(type=SceneSettingItem)
 
 
 # Assume an armature object selected.
 print("Adding 2 values!")
 
-#my_item = bpy.context.scene.my_settings.add()
-#my_item.name = "Spam"
-#my_item.value = 1000
+# my_item = bpy.context.scene.my_settings.add()
+# my_item.name = "Spam"
+# my_item.value = 1000
 
-#my_item = bpy.context.scene.my_settings.add()
-#my_item.name = "Eggs"
-#my_item.value = 30
+# my_item = bpy.context.scene.my_settings.add()
+# my_item.name = "Eggs"
+# my_item.value = 30
 
 # for my_item in bpy.context.scene.my_settings:
 #    print(my_item.name, my_item.value)

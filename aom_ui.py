@@ -69,9 +69,13 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
             # row = layout.row(align=True)
             subcol = col.column()
             subcol.alignment = 'EXPAND'
-            subcol.operator("set.lov")  # , icon="IPO_QUAD"
-            subcol.operator("set.mod")  # , icon="IPO_CUBIC")
-            subcol.operator("set.storm")  # , icon="IPO_CUBIC")
+
+            subcol.prop(context.scene.aom_props, "PresetSel")
+            subcol.operator("aom.set_preset")
+
+            # subcol.operator("set.lov")  # , icon="IPO_QUAD"
+            # subcol.operator("set.mod")  # , icon="IPO_CUBIC")
+            # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
 
             subcol = col.column()
             # row = layout.row(align=True)

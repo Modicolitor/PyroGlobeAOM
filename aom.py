@@ -4,7 +4,7 @@ import mathutils
 from .aom_def import is_ocean, is_floatcage
 from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
-
+from .aom_presets import AOMPreset_Handler
 
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
@@ -100,7 +100,7 @@ def GenOcean(context):
     ob.modifiers[0].keyframe_insert(data_path="time")  # uses current frame
 
     context.scene.frame_current = 250
-    ob.modifiers[0].time = 10
+    ob.modifiers[0].time = 5
     ob.modifiers[0].keyframe_insert(data_path="time")  # uses current frame
     context.scene.frame_current = 250
     # animation muss eingebaut werden, aber ich kenne den code zum keyframe setzen nicht
@@ -160,6 +160,7 @@ def CollectionIndex(ColName):
     return -1
 
 
+'''
 def PreSetLov():
     Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
     Ocean.choppiness = 1.00
@@ -213,7 +214,7 @@ def PreSetStorm():
     except:
         print("There seems to be no AdvOceanMaterial")
 
-
+'''
 # neue Floatvariable für die min größe
 bpy.types.Scene.WeatherX = FloatProperty(
     name="Weather",
@@ -1115,6 +1116,19 @@ class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
         return{"FINISHED"}
 
 
+class BE_OT_SetPreset(bpy.types.Operator):
+    bl_label = "Apply Preset"
+    bl_idname = "aom.set_preset"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        pre = AOMPreset_Handler()
+        pre.set_preset(context)
+
+        return{"FINISHED"}
+
+
+'''
 class BE_OT_SetLov(bpy.types.Operator):
     bl_label = "Lovely"
     bl_idname = "set.lov"
@@ -1148,6 +1162,8 @@ class BE_OT_SetStorm(bpy.types.Operator):
         return{"FINISHED"}
 
         # Generate Ocena Material  Button
+
+'''
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):

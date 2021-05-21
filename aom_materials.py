@@ -34,7 +34,7 @@ class AOMMatHandler:
             self.water_28(node_tree)
             self.foam_material_30(node_tree)
             self.FoamFac_bubbly(node_tree)
-
+            self.foam_fac_ctl(node_tree)
             self.constructor_30(node_tree)
 
         elif self.context.scene.aom_props.MaterialSel == '2':
@@ -44,6 +44,8 @@ class AOMMatHandler:
             self.foam_material_30(node_tree)
             self.FoamFac_legacy(node_tree)
             self.constructor_legacy(node_tree)
+
+        self.label_nodes(node_tree)
 
     def outputnodes(self, node_tree):
         nodes = node_tree.nodes
@@ -286,7 +288,8 @@ class AOMMatHandler:
         offsety = 0
         # Foam material
 
-        node = nodes.new('ShaderNodeBump')  # principled shader basis für foam
+        node = nodes.new('ShaderNodeBump')
+        node.name = "FoamBump"
         node.location = (-200, -1500)
         node.inputs[0].default_value = 0.5
 
@@ -325,8 +328,73 @@ class AOMMatHandler:
         node.inputs[1].default_value = 0.3
         node.inputs[2].default_value = (0.1, 0.1, 0.1)
         node.inputs[3].default_value = (1, 1, 1, 1)
+        node.inputs[14].default_value = 1.33
         node.inputs[15].default_value = 0.2
         node.inputs[7].default_value = 0.2
+
+        self.foam_ctl(node_tree)
+
+    def foam_fac_ctl(self, node_tree):
+        nodes = node_tree.nodes
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'LowerOceanFoamCut'
+        node.location = (-1600, 3000)
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'FoamBaseStrength'
+        node.location = (-1600, 2700)
+        node.outputs[0].default_value = 1.0
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'LowerObjectCut'
+        node.location = (-1600, 2400)
+        node.outputs[0].default_value = 0.1
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'ObjectBaseStrength'
+        node.location = (-1600, 2100)
+        node.outputs[0].default_value = 1
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'Patchiness'
+        node.location = (-1600, 1800)
+        node.outputs[0].default_value = 0.2
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'DisplStrength'
+        node.location = (-1600, 1500)
+        node.outputs[0].default_value = 0.02
+
+    def foam_ctl(self, node_tree):
+        # controll values foam
+        nodes = node_tree.nodes
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'FoamSubsurf'
+        node.location = (-600, -600)
+        node.outputs[0].default_value = 0.2
+
+        node = nodes.new('ShaderNodeRGB')
+        node.name = 'FoamColor'
+        node.location = (-600, -900)
+        node.outputs[0].default_value = (1, 1, 1, 1)
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'FoamRoughness'
+        node.location = (-600, -1200)
+        node.outputs[0].default_value = 0.2
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'FoamTransmission'
+        node.location = (-600, -1500)
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'FoamBumpCtl'
+        node.location = (-600, -1800)
+        node.outputs[0].default_value = 0.4
 
     def get_BubbleNodeGroup(self):
         data = bpy.data
@@ -456,11 +524,11 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        # patchiness
-        node = nodes.new('ShaderNodeValue')  # Attribute foam
-        node.name = "Patchiness"
-        node.location = (1000, 2600)
-        node.outputs[0].default_value = 0.3
+        # patchiness --> ctl
+        # node = nodes.new('ShaderNodeValue')  # Attribute foam
+        #node.name = "Patchiness"
+        #node.location = (-1600, 1800)
+        #node.outputs[0].default_value = 0.3
 
         node = nodes.new('ShaderNodeAttribute')  # Attribute foam
         node.name = "Foam"
@@ -469,29 +537,18 @@ class AOMMatHandler:
         # node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
         #node.location = (200, 1400)
         #nodes["Gamma"].inputs[1].default_value = 0.3
-        node = nodes.new('ShaderNodeValToRGB')
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRFoam"
         node.location = (000, 2700)
-        node.color_ramp.interpolation = 'B_SPLINE'
-        node.color_ramp.elements[0].position = 0.29
-        node.color_ramp.elements[0].color = (0, 0, 0, 1)
-        node.color_ramp.elements[1].position = 0.34
-        node.color_ramp.elements[1].color = (0, 0, 0, 1)
-        node.color_ramp.elements.new(position=1.0)
-        node.color_ramp.elements[2].color = (1, 1, 1, 1)
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Wet"
         node.location = (-250, 2450)
         node.attribute_name = "dp_wetmap"
 
-        node = nodes.new('ShaderNodeValToRGB')
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRWet"
         node.location = (000, 2450)
-        node.color_ramp.interpolation = 'B_SPLINE'
-        #node.color_ramp.elements[1].color = 1, 1, 1, 1
-        node.color_ramp.elements[0].position = 0.5
-        #node.color_ramp.elements[1].color = 0, 0, 0, 1
 
         node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
         node.name = "MixFoamWet"
@@ -531,10 +588,10 @@ class AOMMatHandler:
         links.new(nodes['SubNoise1'].outputs['Color'],
                   nodes['SubNoise2'].inputs['Color1'])
 
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise2'].inputs[0])
+        # links.new(nodes['Patchiness'].outputs[0],
+        #          nodes['SubNoise1'].inputs[0])
+        # links.new(nodes['Patchiness'].outputs[0],
+        #          nodes['SubNoise2'].inputs[0])
 
         # noise texture (000)
         node = nodes.new('ShaderNodeTexNoise')  # mixshader machen
@@ -545,9 +602,9 @@ class AOMMatHandler:
         node.inputs['Roughness'].default_value = 0.8
 
         # Texture Coordinate für die Noise Textures
-        node = nodes.new('ShaderNodeTexCoord')
-        node.name = 'TexCoordNoise'
-        node.location = (000, 2350)
+        #node = nodes.new('ShaderNodeTexCoord')
+        #node.name = 'TexCoordNoise'
+        #node.location = (000, 2350)
         # Hue Saturation 000 für noise texture2
 
         node = nodes.new('ShaderNodeMapRange')
@@ -580,10 +637,6 @@ class AOMMatHandler:
         node.inputs[3].default_value = 0.0
         node.inputs[4].default_value = 1.0
 
-        links.new(nodes['TexCoordNoise'].outputs['UV'],
-                  nodes['Noise1'].inputs['Vector'])
-        links.new(nodes['TexCoordNoise'].outputs['UV'],
-                  nodes['Noise2'].inputs['Vector'])
         links.new(nodes['Noise1'].outputs['Fac'],
                   nodes['Hue1'].inputs[0])
         links.new(nodes['Noise2'].outputs['Fac'],
@@ -663,6 +716,12 @@ class AOMMatHandler:
 
         links.new(nodes['TexCoordBub'].outputs['UV'],
                   nodes['Map'].inputs[0])
+
+        # link coord to noise
+        links.new(nodes['TexCoordBub'].outputs['UV'],
+                  nodes['Noise1'].inputs['Vector'])
+        links.new(nodes['TexCoordBub'].outputs['UV'],
+                  nodes['Noise2'].inputs['Vector'])
 
         #####################################
         #####################################
@@ -1073,10 +1132,8 @@ class AOMMatHandler:
         links.new(nodes['Math.001'].outputs[0], nodes['Mix.004'].inputs[0])
 
         # patchiness of foam
-        node = nodes.new('ShaderNodeValue')  # mixshader machen
-        node.location = (600, 1300)
-        links.new(nodes['Value.001'].outputs[0], nodes['Mix.001'].inputs[0])
-        links.new(nodes['Value.001'].outputs[0], nodes['Mix.002'].inputs[0])
+        # node = nodes.new('ShaderNodeValue')  # mixshader machen
+        #node.location = (600, 1300)
 
         nodes['Mix.004'].name = "FoamFacOut"
 
@@ -1088,6 +1145,10 @@ class AOMMatHandler:
         links.new(nodes['FoamFacOut'].outputs[0], nodes['MainMix'].inputs[0])
         links.new(nodes['OceanOut'].outputs[0], nodes['MainMix'].inputs[1])
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
+
+        # pathchiness
+        links.new(nodes['Patchiness'].outputs[0], nodes['Mix.001'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0], nodes['Mix.002'].inputs[0])
 
     def constructor_30(self, node_tree):
         nodes = node_tree.nodes
@@ -1106,18 +1167,55 @@ class AOMMatHandler:
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
                   nodes['FoamOut'].inputs['Subsurface'])
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
                   nodes['FoamOut'].inputs['Transmission'])
 
-        links.new(nodes['Disp'].outputs[0],
-                  nodes['MaterialOutEevee'].inputs[2])
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+
+        # links.new(nodes['Disp'].outputs[0],
+        #          nodes['MaterialOutEevee'].inputs[2])
         links.new(nodes['Disp'].outputs[0],
                   nodes['MaterialOutCycles'].inputs[2])
 
-        print('3.0')
+        # link foam ctl
+        links.new(nodes['FoamSubsurf'].outputs[0],
+                  nodes['MRSubsurface'].inputs[4])
+
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[0])
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[3])
+
+        links.new(nodes['FoamRoughness'].outputs[0],
+                  nodes['CRFoamRough'].inputs[4])
+        links.new(nodes['FoamTransmission'].outputs[0],
+                  nodes['CRFoamTransmission'].inputs[4])
+        links.new(nodes['FoamBumpCtl'].outputs[0],
+                  nodes['FoamBump'].inputs[0])
+
+        # link foam fac ctl
+        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+                  nodes['CRFoam'].inputs[1])
+        links.new(nodes['FoamBaseStrength'].outputs[0],
+                  nodes['CRFoam'].inputs[4])
+
+        links.new(nodes['LowerObjectCut'].outputs[0],
+                  nodes['CRWet'].inputs[1])
+        links.new(nodes['ObjectBaseStrength'].outputs[0],
+                  nodes['CRWet'].inputs[4])
+
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise2'].inputs[0])
+        links.new(nodes['DisplStrength'].outputs[0],
+                  nodes['Disp'].inputs[2])
 
     def add_driver(
         self, source, target, prop, dataPath,
@@ -1140,3 +1238,10 @@ class AOMMatHandler:
         d.expression = d.expression if not negative else "-1 * " + d.expression
 
         return d
+
+    def label_nodes(self, node_tree):
+
+        nodes = node_tree.nodes
+
+        for node in nodes:
+            node.label = node.name
