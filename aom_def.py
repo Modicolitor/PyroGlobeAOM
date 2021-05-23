@@ -1,4 +1,4 @@
-def is_ocean(ob):
+def is_ocean(context, ob):
     if "AdvOcean" in ob.name:
         return True
     return False

@@ -42,7 +42,27 @@ class AOMMatHandler:
             self.outputnodes(node_tree)
             self.water_28(node_tree)
             self.foam_material_30(node_tree)
+            self.FoamFac_legacy_improve(node_tree)
+            self.FoamFac_legacy_improve_TransBub(node_tree)
+            self.foam_fac_ctl(node_tree)
+            self.constructor_wet2(node_tree)
+
+        elif self.context.scene.aom_props.MaterialSel == '3':
+            self.del_nodes()
+            self.outputnodes(node_tree)
+            self.water_28(node_tree)
+            self.foam_material_30(node_tree)
+            self.FoamFac_legacy_improve(node_tree)
+            self.foam_fac_ctl(node_tree)
+            self.constructor_legacy_improve(node_tree)
+
+        elif self.context.scene.aom_props.MaterialSel == '4':
+            self.del_nodes()
+            self.outputnodes(node_tree)
+            self.water_28(node_tree)
+            self.foam_material_30(node_tree)
             self.FoamFac_legacy(node_tree)
+            self.foam_fac_ctl(node_tree)
             self.constructor_legacy(node_tree)
 
         self.label_nodes(node_tree)
@@ -367,6 +387,17 @@ class AOMMatHandler:
         node.location = (-1600, 1500)
         node.outputs[0].default_value = 0.02
 
+        # noise scale
+        node = nodes.new('ShaderNodeValue')
+        node.location = (000, 1200)
+        node.name = 'NoiseScale'
+        node.outputs[0].default_value = 20
+
+        node = nodes.new('ShaderNodeMath')
+        node.location = (000, 900)
+        node.name = 'MultiNoiseScale'
+        node.inputs[1].default_value = 5
+
     def foam_ctl(self, node_tree):
         # controll values foam
         nodes = node_tree.nodes
@@ -611,7 +642,7 @@ class AOMMatHandler:
         node.name = 'Hue1'
         node.location = (600, 2275)
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
-        node.inputs[4].default_value = 0.2
+        node.inputs[4].default_value = 1
 
         # noise texture (001)
         node = nodes.new('ShaderNodeTexNoise')
@@ -628,7 +659,7 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeMapRange')
         node.name = 'Hue2'
         node.location = (600, 2100)
-        node.inputs[4].default_value = 0.7
+        node.inputs[4].default_value = 1
 
         node = nodes.new('ShaderNodeMapRange')
         node.name = 'MPScaleNoise'
@@ -919,48 +950,29 @@ class AOMMatHandler:
         nodes['MPScaleFoamMain'].name = "FoamFacOut"
         nodes['AddNoise'].name = "FoamMatInfo"
 
-    def FoamFac_legacy(self, node_tree):
+    def FoamFac_legacy_improve(self, node_tree):
         nodes = node_tree.nodes
         links = node_tree.links
 
         node = nodes.new('ShaderNodeAttribute')  # Attribute foam
         node.location = (-250, 1400)
-        nodes['Attribute'].attribute_name = "foam"
-        # node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-        #node.location = (200, 1400)
-        #nodes["Gamma"].inputs[1].default_value = 0.3
-        node = nodes.new('ShaderNodeValToRGB')
+        node.attribute_name = "foam"
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRFoam"
         node.location = (000, 1500)
-        node.color_ramp.interpolation = 'B_SPLINE'
-        #node.color_ramp.elements[1].color = 1, 1, 1, 1
-        node.color_ramp.elements[0].position = 0.29
-        node.color_ramp.elements[0].color = (0, 0, 0, 1)
-        node.color_ramp.elements[1].position = 0.34
-        node.color_ramp.elements[1].color = (0, 0, 0, 1)
-
-        node.color_ramp.elements.new(position=1.0, color=(1, 1, 1, 1))
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.location = (-250, 1250)
-        nodes['Attribute.001'].attribute_name = "dp_wetmap"
-        # node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-        #node.location = (200, 1250)
-        # Gamma wert wetmap##########
-        #nodes["Gamma.001"].inputs[1].default_value = 5
-        node = nodes.new('ShaderNodeValToRGB')
+        node.attribute_name = "dp_wetmap"
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRWet"
         node.location = (000, 1250)
-        node.color_ramp.interpolation = 'B_SPLINE'
-        #node.color_ramp.elements[1].color = 1, 1, 1, 1
-        node.color_ramp.elements[0].position = 0.5
-        #node.color_ramp.elements[1].color = 0, 0, 0, 1
 
         node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
         node.location = (400, 1275)
-        nodes["Mix"].blend_type = 'ADD'
-        nodes["Mix"].use_clamp = True
-        nodes["Mix"].inputs[0].default_value = 1.0
+        node.blend_type = 'ADD'
+        node.use_clamp = True
+        node.inputs[0].default_value = 1.0
 
         # link Attribute notes additiv
         links.new(nodes['Attribute.001'].outputs['Fac'],
@@ -973,64 +985,143 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
         node.location = (800, 1175)
-        nodes["Mix.001"].blend_type = 'SUBTRACT'
-        nodes["Mix.001"].use_clamp = True
-        nodes["Mix.001"].inputs[0].default_value = 0.6
+        node.name = 'SubNoise1'
+        node.blend_type = 'SUBTRACT'
+        node.use_clamp = True
+        node.inputs[0].default_value = 0.6
 
         # RGB mixshader für zweite Noise Texture
         node = nodes.new('ShaderNodeMixRGB')
         node.location = (1000, 975)
-        nodes["Mix.002"].blend_type = 'SUBTRACT'
-        nodes["Mix.002"].use_clamp = True
-        nodes["Mix.002"].inputs[0].default_value = 0.6
+        node.name = 'SubNoise2'
+        node.blend_type = 'SUBTRACT'
+        node.use_clamp = True
+        node.inputs[0].default_value = 0.6
 
         # link Add notes to Subtract
         links.new(nodes['Mix'].outputs['Color'],
-                  nodes['Mix.001'].inputs['Color1'])
-        links.new(nodes['Mix.001'].outputs['Color'],
-                  nodes['Mix.002'].inputs['Color1'])
-
-        # noise texture (000)
-        node = nodes.new('ShaderNodeTexNoise')  # mixshader machen
-        node.location = (400, 1100)
-        nodes['Noise Texture'].inputs['Scale'].default_value = 2
-        nodes['Noise Texture'].inputs['Detail'].default_value = 5
+                  nodes['SubNoise1'].inputs['Color1'])
+        links.new(nodes['SubNoise1'].outputs['Color'],
+                  nodes['SubNoise2'].inputs['Color1'])
 
         # Texture Coordinate für die Noise Textures
+        #node = nodes.new('ShaderNodeTexCoord')
+        # node.location = (000, 850)
+
+        # moving foam ######################
+        ####################################
+        # bubblegroup textCoord
         node = nodes.new('ShaderNodeTexCoord')
-        node.location = (000, 850)
+        node.name = 'TexCoordBub'
+        node.location = (-1200, 1800)
+
+        node = nodes.new('ShaderNodeMapping')
+        node.name = 'Map'
+        node.location = (-800, 1800)
+
+        ############################################
+        ###############Driver stuff, rotation needed #################
+        # value frame durch was
+        #
+
+        node = nodes.new('ShaderNodeValue')
+        node.name = 'SpeedMoveWave'
+        node.location = (-1400, 1300)
+
+        source = node.outputs[0]
+        target = bpy.context.scene
+        prop = 'default_value'
+        data_path = "frame_current"
+        id_type = 'SCENE'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="0.0003*", id_type=id_type)
+
+        # multiply with aligement factor driver
+        node = nodes.new('ShaderNodeMath')
+        node.name = 'AligmentDriver'
+        node.operation = 'MULTIPLY'
+        node.location = (-1200, 1300)
+
+        source = node.inputs[1]
+        target = bpy.context.object
+        prop = 'default_value'
+        data_path = 'modifiers["Ocean"].wave_alignment'
+        id_type = 'OBJECT'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="", id_type=id_type)
+
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.name = 'MoveWaveCombXYZ'
+        node.location = (-1000, 1300)
+
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.name = 'RotCombXYZ'
+        node.location = (-1000, 1600)
+
+        source = node.inputs[2]
+        target = bpy.context.object
+        prop = 'default_value'
+        data_path = 'modifiers["Ocean"].wave_direction'
+        id_type = 'OBJECT'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="", id_type=id_type)
+
+        # link moving waves
+        links.new(nodes['SpeedMoveWave'].outputs[0],
+                  nodes['AligmentDriver'].inputs[0])
+        links.new(nodes['AligmentDriver'].outputs[0],
+                  nodes['MoveWaveCombXYZ'].inputs[0])
+        links.new(nodes['MoveWaveCombXYZ'].outputs[0], nodes['Map'].inputs[1])
+        links.new(nodes['RotCombXYZ'].outputs[0], nodes['Map'].inputs[2])
+
+        links.new(nodes['TexCoordBub'].outputs['UV'],
+                  nodes['Map'].inputs[0])
+
+        # SHORTCUT
+        nodes['Map'].name = 'Texture Coordinate'
+
         # Hue Saturation 000 für noise texture2
-        node = nodes.new('ShaderNodeHueSaturation')
+        node = nodes.new('ShaderNodeMapRange')
         node.location = (600, 1075)
+        node.name = "MRNoise1"
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
-        nodes['Hue Saturation Value'].inputs['Value'].default_value = 1.3
-        nodes['Hue Saturation Value'].inputs['Saturation'].default_value = 0.0
+        node.inputs[4].default_value = 0.8
+        #node.inputs['Saturation'].default_value = 0.0
+
+        # noise texture (000)
+        node = nodes.new('ShaderNodeTexNoise')
+        node.location = (400, 1100)
+        node.name = "Noise1"
+        node.inputs['Scale'].default_value = 20
+        node.inputs['Detail'].default_value = 5
 
        # noise texture (001)
         node = nodes.new('ShaderNodeTexNoise')  # mixshader machen
         node.location = (400, 900)
-        nodes['Noise Texture.001'].inputs['Detail'].default_value = 5
-        nodes['Noise Texture.001'].inputs['Scale'].default_value = 10
+        node.name = "Noise2"
+        nodes['Noise2'].inputs['Detail'].default_value = 5
+        nodes['Noise2'].inputs['Scale'].default_value = 100
         # node = nodes.new('ShaderNodeTexCoord') ### mixshader machen
         # node.location = (000,150)
         # Hue Saturation 001 für noise texture2
-        node = nodes.new('ShaderNodeHueSaturation')
+        node = nodes.new('ShaderNodeMapRange')
         node.location = (600, 900)
-        nodes['Hue Saturation Value.001'].inputs['Value'].default_value = 1.3
-        nodes['Hue Saturation Value.001'].inputs['Saturation'].default_value = 0.0
+        node.name = "MRNoise2"
+        node.inputs[4].default_value = 1.0
+        #node.inputs['Saturation'].default_value = 0.0
 
-        links.new(nodes['Texture Coordinate'].outputs['Object'],
-                  nodes['Noise Texture'].inputs['Vector'])
-        links.new(nodes['Texture Coordinate'].outputs['Object'],
-                  nodes['Noise Texture.001'].inputs['Vector'])
-        links.new(nodes['Noise Texture'].outputs['Fac'],
-                  nodes['Hue Saturation Value'].inputs['Color'])
-        links.new(nodes['Noise Texture.001'].outputs['Fac'],
-                  nodes['Hue Saturation Value.001'].inputs['Color'])
-        links.new(nodes['Hue Saturation Value'].outputs['Color'],
-                  nodes['Mix.001'].inputs['Color2'])
-        links.new(nodes['Hue Saturation Value.001'].outputs['Color'],
-                  nodes['Mix.002'].inputs['Color2'])
+        links.new(nodes['Texture Coordinate'].outputs[0],
+                  nodes['Noise1'].inputs['Vector'])
+        links.new(nodes['Texture Coordinate'].outputs[0],
+                  nodes['Noise2'].inputs['Vector'])
+        links.new(nodes['Noise1'].outputs['Fac'],
+                  nodes['MRNoise1'].inputs[0])
+        links.new(nodes['Noise2'].outputs['Fac'],
+                  nodes['MRNoise2'].inputs[0])
+        links.new(nodes['MRNoise1'].outputs[0],
+                  nodes['SubNoise1'].inputs['Color2'])
+        links.new(nodes['MRNoise2'].outputs[0],
+                  nodes['SubNoise2'].inputs['Color2'])
 
         # Voronoi bubble setup
         node = nodes.new('ShaderNodeTexVoronoi')
@@ -1063,32 +1154,328 @@ class AOMMatHandler:
         node.color_ramp.elements[0].position = 0.3
         node.color_ramp.elements[1].color = 0, 0, 0, 1
 
+        # voronoi scale
+        # Bubble extra
+        node = nodes.new('ShaderNodeValue')  # Multiplier für Displacement
+        node.location = (000, 400)
+        node.name = 'ScaleBub'
+        node.outputs[0].default_value = 3000
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 600)
+        node.name = 'Math.004'
+        node.operation = 'MULTIPLY'
+        node.inputs[1].default_value = 2
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 400)
+        node.name = 'Math.005'
+        node.operation = 'MULTIPLY'
+        node.inputs[1].default_value = 1
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 200)
+        node.name = 'Math.006'
+        node.operation = 'MULTIPLY'
+        node.inputs[1].default_value = 0.5
+
+        links.new(nodes['ScaleBub'].outputs['Value'],
+                  nodes['Math.004'].inputs[0])
+        links.new(nodes['ScaleBub'].outputs['Value'],
+                  nodes['Math.005'].inputs[0])
+        links.new(nodes['ScaleBub'].outputs['Value'],
+                  nodes['Math.006'].inputs[0])
+
+        links.new(nodes['Math.004'].outputs['Value'],
+                  nodes['Voronoi Texture'].inputs['Scale'])
+        links.new(nodes['Math.005'].outputs['Value'],
+                  nodes['Voronoi Texture.001'].inputs['Scale'])
+        links.new(nodes['Math.006'].outputs['Value'],
+                  nodes['Voronoi Texture.002'].inputs['Scale'])
+        # links.new(nodes['Mix.005'].outputs['Color'],
+        #          nodes['Math.003'].inputs[0])
+
      # mix die bubbles zu einander und nutze die noise pattern als factor
         node = nodes.new('ShaderNodeMixRGB')
         node.location = (1400, 475)
-        nodes["Mix.003"].blend_type = "LIGHTEN"
+        node.name = "Mix.003"
+        node.blend_type = "LIGHTEN"
 
         node = nodes.new('ShaderNodeMixRGB')
         node.location = (1600, 275)
-        nodes["Mix.004"].blend_type = "LIGHTEN"
+        node.name = "Mix.004"
+        node.blend_type = "LIGHTEN"
 
      # bubble verteilung durch den factor mit less and grater than
 
         node = nodes.new('ShaderNodeMath')
         node.location = (1200, 675)
-        nodes["Math"].operation = "GREATER_THAN"
-        nodes["Math"].inputs[0].default_value = 0.1
+        node.name = "Greater1"
+        node.operation = "GREATER_THAN"
+        node.inputs[0].default_value = 0.1
 
         node = nodes.new('ShaderNodeMath')
         node.location = (1400, 725)
-        nodes["Math.001"].operation = "GREATER_THAN"
-        nodes["Math.001"].inputs[0].default_value = 0.2
+        node.name = "Greater2"
+        node.operation = "GREATER_THAN"
+        node.inputs[0].default_value = 0.2
 
         node = nodes.new('ShaderNodeMath')
         node.location = (1700, 725)
-        nodes["Math.002"].operation = "MULTIPLY"
-        nodes["Math.002"].inputs[1].default_value = 30
-        nodes["Math.002"].use_clamp = True
+        node.name = "Multi1"
+        node.operation = "MULTIPLY"
+        node.inputs[1].default_value = 30
+        node.use_clamp = True
+
+        ####voronoi teil####################################
+        links.new(nodes['Texture Coordinate'].outputs[0],
+                  nodes['Voronoi Texture'].inputs['Vector'])
+        links.new(nodes['Texture Coordinate'].outputs[0],
+                  nodes['Voronoi Texture.001'].inputs['Vector'])
+        links.new(nodes['Texture Coordinate'].outputs[0],
+                  nodes['Voronoi Texture.002'].inputs['Vector'])
+
+        links.new(nodes['Voronoi Texture'].outputs['Distance'],
+                  nodes['ColorRamp'].inputs['Fac'])
+        links.new(nodes['Voronoi Texture.001'].outputs['Distance'],
+                  nodes['ColorRamp.001'].inputs['Fac'])
+        links.new(nodes['Voronoi Texture.002'].outputs['Distance'],
+                  nodes['ColorRamp.002'].inputs['Fac'])
+
+        links.new(nodes['ColorRamp'].outputs['Color'],
+                  nodes['Mix.003'].inputs['Color2'])
+        links.new(nodes['ColorRamp.001'].outputs['Color'],
+                  nodes['Mix.003'].inputs['Color1'])
+        links.new(nodes['ColorRamp.002'].outputs['Color'],
+                  nodes['Mix.004'].inputs['Color1'])
+        links.new(nodes['Mix.003'].outputs['Color'],
+                  nodes['Mix.004'].inputs['Color2'])
+
+        # mix voronoi mit noise
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (1800, 275)
+        node.name = "Mix.005"
+        node.blend_type = "MULTIPLY"
+        node.inputs[0].default_value = 1.0
+        node.use_clamp = True
+
+        node = nodes.new('ShaderNodeDisplacement')
+        node.location = (2000, 275)
+        node.name = "Disp"
+
+        links.new(nodes['Mix.004'].outputs['Color'],
+                  nodes['Mix.005'].inputs['Color2'])
+        links.new(nodes['SubNoise2'].outputs['Color'],
+                  nodes['Greater1'].inputs[1])
+        links.new(nodes['SubNoise2'].outputs['Color'],
+                  nodes["Greater2"].inputs[1])
+        links.new(nodes['SubNoise2'].outputs['Color'],
+                  nodes['Multi1'].inputs[0])
+        links.new(nodes['Greater1'].outputs[0], nodes['Mix.003'].inputs[0])
+        links.new(nodes["Greater2"].outputs[0], nodes['Mix.004'].inputs[0])
+        links.new(nodes["Multi1"].outputs[0], nodes['Mix.005'].inputs[1])
+        links.new(nodes["Mix.005"].outputs[0], nodes['Disp'].inputs[0])
+
+        # patchiness of foam
+        # node = nodes.new('ShaderNodeValue')  # mixshader machen
+        #node.location = (600, 1300)
+
+        nodes['Mix.005'].name = "FoamFacOut"
+
+    def FoamFac_legacy(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        node = nodes.new('ShaderNodeAttribute')  # Attribute foam
+        node.location = (-250, 1400)
+        node.attribute_name = "foam"
+        node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
+        node.location = (200, 1400)
+        node.inputs[1].default_value = 0.3
+        node.name = "CRFoam"
+
+        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
+        node.location = (-250, 1250)
+        node.attribute_name = "dp_wetmap"
+        node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
+        node.location = (200, 1250)
+        #Gamma wert wetmap##########
+        node.inputs[1].default_value = 5
+        node.name = "CRWet"
+
+        node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
+        node.location = (400, 1275)
+        node.blend_type = 'ADD'
+        node.use_clamp = True
+        node.inputs[0].default_value = 1.0
+
+        # link Attribute notes additiv
+        links.new(nodes['Attribute.001'].outputs['Fac'],
+                  nodes['CRWet'].inputs[0])
+        links.new(nodes['CRFoam'].outputs[0], nodes['Mix'].inputs['Color2'])
+        links.new(nodes['Attribute'].outputs['Fac'],
+                  nodes['CRFoam'].inputs[0])
+        links.new(nodes['CRWet'].outputs[0],
+                  nodes['Mix'].inputs['Color1'])
+
+        node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
+        node.location = (800, 1175)
+        node.blend_type = 'SUBTRACT'
+        node.use_clamp = True
+        node.inputs[0].default_value = 0.6
+
+        # RGB mixshader für zweite Noise Texture
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (1000, 975)
+        node.blend_type = 'SUBTRACT'
+        node.use_clamp = True
+        node.inputs[0].default_value = 0.6
+
+        # link Add notes to Subtract
+        links.new(nodes['Mix'].outputs['Color'],
+                  nodes['Mix.001'].inputs['Color1'])
+        links.new(nodes['Mix.001'].outputs['Color'],
+                  nodes['Mix.002'].inputs['Color1'])
+
+        # noise texture (000)
+        node = nodes.new('ShaderNodeTexNoise')  # mixshader machen
+        node.location = (400, 1100)
+        node.inputs['Scale'].default_value = 2
+        node.inputs['Detail'].default_value = 5
+
+        # Texture Coordinate für die Noise Textures
+        node = nodes.new('ShaderNodeTexCoord')
+        node.location = (000, 850)
+        # Hue Saturation 000 für noise texture2
+        node = nodes.new('ShaderNodeHueSaturation')
+        node.location = (600, 1075)
+        #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
+        node.inputs['Value'].default_value = 1.3
+        node.inputs['Saturation'].default_value = 0.0
+
+       # noise texture (001)
+        node = nodes.new('ShaderNodeTexNoise')  # mixshader machen
+        node.location = (400, 900)
+        node.inputs['Detail'].default_value = 5
+        node.inputs['Scale'].default_value = 10
+        # node = nodes.new('ShaderNodeTexCoord') ### mixshader machen
+        # node.location = (000,150)
+        # Hue Saturation 001 für noise texture2
+        node = nodes.new('ShaderNodeHueSaturation')
+        node.location = (600, 900)
+        node.inputs['Value'].default_value = 1.3
+        node.inputs['Saturation'].default_value = 0.0
+
+        links.new(nodes['Texture Coordinate'].outputs['Object'],
+                  nodes['Noise Texture'].inputs['Vector'])
+        links.new(nodes['Texture Coordinate'].outputs['Object'],
+                  nodes['Noise Texture.001'].inputs['Vector'])
+        links.new(nodes['Noise Texture'].outputs['Fac'],
+                  nodes['Hue Saturation Value'].inputs['Color'])
+        links.new(nodes['Noise Texture.001'].outputs['Fac'],
+                  nodes['Hue Saturation Value.001'].inputs['Color'])
+        links.new(nodes['Hue Saturation Value'].outputs['Color'],
+                  nodes['Mix.001'].inputs['Color2'])
+        links.new(nodes['Hue Saturation Value.001'].outputs['Color'],
+                  nodes['Mix.002'].inputs['Color2'])
+
+        # BubblesizeMultiplier
+        node = nodes.new('ShaderNodeValue')
+        node.name = "Value.002"
+        node.location = (000, 400)
+        nodes['Value.002'].outputs[0].default_value = 100
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 600)
+        node.name = "Math.004"
+        nodes['Math.004'].operation = 'MULTIPLY'
+        nodes['Math.004'].inputs[1].default_value = 2
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 400)
+        node.name = "Math.005"
+        nodes['Math.005'].operation = 'MULTIPLY'
+        nodes['Math.005'].inputs[1].default_value = 1
+
+        node = nodes.new('ShaderNodeMath')  # Multiplier für Displacement
+        node.location = (200, 200)
+        node.name = "Math.006"
+        nodes['Math.006'].operation = 'MULTIPLY'
+        nodes['Math.006'].inputs[1].default_value = 0.5
+
+        links.new(nodes['Value.002'].outputs['Value'],
+                  nodes['Math.004'].inputs[0])
+        links.new(nodes['Value.002'].outputs['Value'],
+                  nodes['Math.005'].inputs[0])
+        links.new(nodes['Value.002'].outputs['Value'],
+                  nodes['Math.006'].inputs[0])
+
+        # Voronoi bubble setup
+        node = nodes.new('ShaderNodeTexVoronoi')
+        node.location = (400, 675)
+        nodes["Voronoi Texture"].inputs[1].default_value = 100
+        node = nodes.new('ShaderNodeValToRGB')
+        node.location = (600, 675)
+        node.color_ramp.interpolation = 'B_SPLINE'
+        node.color_ramp.elements[0].color = 1, 1, 1, 1
+        node.color_ramp.elements[0].position = 0.3
+        node.color_ramp.elements[1].color = 0, 0, 0, 1
+
+        node = nodes.new('ShaderNodeTexVoronoi')
+        node.location = (400, 450)
+        nodes["Voronoi Texture.001"].inputs[1].default_value = 50
+        node = nodes.new('ShaderNodeValToRGB')
+        node.location = (600, 450)
+        node.color_ramp.interpolation = 'B_SPLINE'
+        node.color_ramp.elements[0].color = 1, 1, 1, 1
+        node.color_ramp.elements[0].position = 0.3
+        node.color_ramp.elements[1].color = 0, 0, 0, 1
+
+        node = nodes.new('ShaderNodeTexVoronoi')
+        node.location = (400, 200)
+        nodes["Voronoi Texture.002"].inputs[1].default_value = 30
+        node = nodes.new('ShaderNodeValToRGB')
+        node.location = (600, 200)
+        node.color_ramp.interpolation = 'B_SPLINE'
+        node.color_ramp.elements[0].color = 1, 1, 1, 1
+        node.color_ramp.elements[0].position = 0.3
+        node.color_ramp.elements[1].color = 0, 0, 0, 1
+
+        links.new(nodes['Math.004'].outputs['Value'],
+                  nodes['Voronoi Texture'].inputs['Scale'])
+        links.new(nodes['Math.005'].outputs['Value'],
+                  nodes['Voronoi Texture.001'].inputs['Scale'])
+        links.new(nodes['Math.006'].outputs['Value'],
+                  nodes['Voronoi Texture.002'].inputs['Scale'])
+        # links.new(nodes['Math.005'].outputs['Color'],
+        #          nodes['Math.003'].inputs[0])
+
+     # mix die bubbles zu einander und nutze die noise pattern als factor
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (1400, 475)
+        node.blend_type = "LIGHTEN"
+
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (1600, 275)
+        node.blend_type = "LIGHTEN"
+
+     # bubble verteilung durch den factor mit less and grater than
+
+        node = nodes.new('ShaderNodeMath')
+        node.location = (1200, 675)
+        node.operation = "GREATER_THAN"
+        node.inputs[0].default_value = 0.1
+
+        node = nodes.new('ShaderNodeMath')
+        node.location = (1400, 725)
+        node.operation = "GREATER_THAN"
+        node.inputs[0].default_value = 0.2
+
+        node = nodes.new('ShaderNodeMath')
+        node.location = (1700, 725)
+        node.operation = "MULTIPLY"
+        node.inputs[1].default_value = 30
+        node.use_clamp = True
 
         ####voronoi teil####################################
         links.new(nodes['Texture Coordinate'].outputs['Object'],
@@ -1116,10 +1503,15 @@ class AOMMatHandler:
 
         # mix voronoi mit noise
         node = nodes.new('ShaderNodeMixRGB')
+        node.name = "Mix.005"
         node.location = (1800, 275)
-        nodes["Mix.005"].blend_type = "MULTIPLY"
-        nodes["Mix.005"].inputs[0].default_value = 1.0
-        nodes["Mix.005"].use_clamp = True
+        node.blend_type = "MULTIPLY"
+        node.inputs[0].default_value = 1.0
+        node.use_clamp = True
+
+        node = nodes.new('ShaderNodeDisplacement')
+        node.location = (2100, 275)
+        node.name = 'Disp'
 
         links.new(nodes['Mix.004'].outputs['Color'],
                   nodes['Mix.005'].inputs['Color2'])
@@ -1131,11 +1523,220 @@ class AOMMatHandler:
         links.new(nodes['Math'].outputs[0], nodes['Mix.003'].inputs[0])
         links.new(nodes['Math.001'].outputs[0], nodes['Mix.004'].inputs[0])
 
+        links.new(nodes['Math.002'].outputs[0], nodes['Mix.005'].inputs[1])
+        links.new(nodes['Mix.005'].outputs[0], nodes['Disp'].inputs[1])
+
         # patchiness of foam
         # node = nodes.new('ShaderNodeValue')  # mixshader machen
         #node.location = (600, 1300)
 
-        nodes['Mix.004'].name = "FoamFacOut"
+        nodes['Mix.005'].name = "FoamFacOut"
+
+        nodes['Noise Texture'].name = 'Noise1'
+        nodes['Noise Texture.001'].name = 'Noise2'
+
+    def FoamFac_legacy_improve_TransBub(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        node = nodes.new('ShaderNodeMapRange')
+        node.location = (1800, 000)
+        node.name = "MPInvertBubs"
+        node.inputs[2].default_value = 0.9
+        node.inputs[3].default_value = 3.7
+        node.inputs[4].default_value = 0.0
+
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (2100, 275)
+        #node.inputs[1].default_value = 0.3
+        node.name = "AddBase"
+        node.blend_type = 'ADD'
+
+        node = nodes.new('ShaderNodeMixRGB')
+        node.location = (2400, 275)
+        node.inputs[0].default_value = 1
+        node.name = "MultiInvertBub"
+        node.blend_type = 'MULTIPLY'
+
+        links.new(nodes["Multi1"].outputs[0], nodes['AddBase'].inputs[2])
+        links.new(nodes["FoamFacOut"].outputs[0], nodes['AddBase'].inputs[1])
+        links.new(nodes["AddBase"].outputs[0],
+                  nodes['MultiInvertBub'].inputs[1])
+        links.new(nodes["Mix.004"].outputs[0],
+                  nodes['MPInvertBubs'].inputs[0])
+        links.new(nodes["MPInvertBubs"].outputs[0],
+                  nodes['MultiInvertBub'].inputs[2])
+
+        nodes['FoamFacOut'].name = 'FoamMatInfo'
+        nodes['MultiInvertBub'].name = 'FoamFacOut'
+
+    def constructor_legacy_improve(self, node_tree):
+        print('legacy')
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        links.new(nodes['FoamFacOut'].outputs[0], nodes['MainMix'].inputs[0])
+        links.new(nodes['OceanOut'].outputs[0], nodes['MainMix'].inputs[1])
+        links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
+
+        # pathchiness
+        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
+
+        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+                  nodes['CRFoam'].inputs[1])
+        links.new(nodes['FoamBaseStrength'].outputs[0],
+                  nodes['CRFoam'].inputs[4])
+
+        links.new(nodes['LowerObjectCut'].outputs[0],
+                  nodes['CRWet'].inputs[1])
+        links.new(nodes['ObjectBaseStrength'].outputs[0],
+                  nodes['CRWet'].inputs[4])
+
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise2'].inputs[0])
+        links.new(nodes['DisplStrength'].outputs[0],
+                  nodes['Disp'].inputs[2])
+
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutCycles'].inputs[2])
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutEevee'].inputs[2])
+
+        # foam mat ctl
+        links.new(nodes['FoamFacOut'].outputs[0],
+                  nodes['CRFoamRough'].inputs[0])
+        links.new(nodes['FoamFacOut'].outputs[0],
+                  nodes['CRFoamTransmission'].inputs[0])
+
+        links.new(nodes['FoamFacOut'].outputs[0],
+                  nodes['MRSubsurface'].inputs[0])
+        links.new(nodes['MRSubsurface'].outputs[0],
+                  nodes['FoamOut'].inputs['Subsurface'])
+        links.new(nodes['FoamFacOut'].outputs[0],
+                  nodes['FoamBump'].inputs[2])
+
+        links.new(nodes['CRFoamRough'].outputs[0],
+                  nodes['FoamOut'].inputs['Roughness'])
+        links.new(nodes['CRFoamTransmission'].outputs[0],
+                  nodes['FoamOut'].inputs['Transmission'])
+
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+        links.new(nodes['FoamFacOut'].outputs[0],
+                  nodes['FoamBump'].inputs['Height'])
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+
+        links.new(nodes['FoamSubsurf'].outputs[0],
+                  nodes['MRSubsurface'].inputs[4])
+
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[0])
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[3])
+
+        links.new(nodes['FoamRoughness'].outputs[0],
+                  nodes['CRFoamRough'].inputs[4])
+        links.new(nodes['FoamTransmission'].outputs[0],
+                  nodes['CRFoamTransmission'].inputs[4])
+        links.new(nodes['FoamBumpCtl'].outputs[0],
+                  nodes['FoamBump'].inputs[0])
+
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['Noise1'].inputs['Scale'])
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['MultiNoiseScale'].inputs[0])
+        links.new(nodes['MultiNoiseScale'].outputs[0],
+                  nodes['Noise2'].inputs['Scale'])
+
+        nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.2
+
+    def constructor_wet2(self, node_tree):
+        print('legacy')
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        links.new(nodes['FoamFacOut'].outputs[0], nodes['MainMix'].inputs[0])
+        links.new(nodes['OceanOut'].outputs[0], nodes['MainMix'].inputs[1])
+        links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
+
+        # pathchiness
+        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
+
+        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+                  nodes['CRFoam'].inputs[1])
+        links.new(nodes['FoamBaseStrength'].outputs[0],
+                  nodes['CRFoam'].inputs[4])
+
+        links.new(nodes['LowerObjectCut'].outputs[0],
+                  nodes['CRWet'].inputs[1])
+        links.new(nodes['ObjectBaseStrength'].outputs[0],
+                  nodes['CRWet'].inputs[4])
+
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['SubNoise2'].inputs[0])
+        links.new(nodes['DisplStrength'].outputs[0],
+                  nodes['Disp'].inputs[2])
+
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutCycles'].inputs[2])
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutEevee'].inputs[2])
+
+        # foam mat ctl
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['CRFoamRough'].inputs[0])
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['CRFoamTransmission'].inputs[0])
+
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['MRSubsurface'].inputs[0])
+        links.new(nodes['MRSubsurface'].outputs[0],
+                  nodes['FoamOut'].inputs['Subsurface'])
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['FoamBump'].inputs[2])
+
+        links.new(nodes['CRFoamRough'].outputs[0],
+                  nodes['FoamOut'].inputs['Roughness'])
+        links.new(nodes['CRFoamTransmission'].outputs[0],
+                  nodes['FoamOut'].inputs['Transmission'])
+
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+        links.new(nodes['FoamMatInfo'].outputs[0],
+                  nodes['FoamBump'].inputs['Height'])
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+
+        links.new(nodes['FoamSubsurf'].outputs[0],
+                  nodes['MRSubsurface'].inputs[4])
+
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[0])
+        links.new(nodes['FoamColor'].outputs[0],
+                  nodes['FoamOut'].inputs[3])
+
+        links.new(nodes['FoamRoughness'].outputs[0],
+                  nodes['CRFoamRough'].inputs[4])
+        links.new(nodes['FoamTransmission'].outputs[0],
+                  nodes['CRFoamTransmission'].inputs[4])
+        links.new(nodes['FoamBumpCtl'].outputs[0],
+                  nodes['FoamBump'].inputs[0])
+
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['Noise1'].inputs['Scale'])
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['MultiNoiseScale'].inputs[0])
+        links.new(nodes['MultiNoiseScale'].outputs[0],
+                  nodes['Noise2'].inputs['Scale'])
+
+        nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.2
 
     def constructor_legacy(self, node_tree):
         print('legacy')
@@ -1150,14 +1751,53 @@ class AOMMatHandler:
         links.new(nodes['Patchiness'].outputs[0], nodes['Mix.001'].inputs[0])
         links.new(nodes['Patchiness'].outputs[0], nodes['Mix.002'].inputs[0])
 
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutCycles'].inputs[2])
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutEevee'].inputs[2])
+
+        links.new(nodes['FoamSubsurf'].outputs[0], nodes['FoamOut'].inputs[1])
+        links.new(nodes['FoamColor'].outputs[0], nodes['FoamOut'].inputs[0])
+        links.new(nodes['FoamColor'].outputs[0], nodes['FoamOut'].inputs[3])
+        links.new(nodes['FoamRoughness'].outputs[0],
+                  nodes['FoamOut'].inputs[7])
+        links.new(nodes['FoamTransmission'].outputs[0],
+                  nodes['FoamOut'].inputs[15])
+        links.new(nodes['FoamBumpCtl'].outputs[0],
+                  nodes['FoamBump'].inputs['Height'])
+        links.new(nodes['FoamBump'].outputs[0],
+                  nodes['FoamOut'].inputs['Normal'])
+
+        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+                  nodes['CRFoam'].inputs[1])
+        links.new(nodes['LowerObjectCut'].outputs[0], nodes['CRWet'].inputs[1])
+
+        links.new(nodes['DisplStrength'].outputs[0],
+                  nodes['Disp'].inputs['Scale'])
+
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['Noise1'].inputs['Scale'])
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['MultiNoiseScale'].inputs[0])
+        links.new(nodes['MultiNoiseScale'].outputs[0],
+                  nodes['Noise2'].inputs['Scale'])
+
+        nodes['LowerOceanFoamCut'].outputs[0].default_value = 1.6
+        nodes['LowerObjectCut'].outputs[0].default_value = 3.4
+        nodes['Patchiness'].outputs[0].default_value = 0.2
+        nodes['NoiseScale'].outputs[0].default_value = 2
+        #nodes['NoiseScale'].outputs[0].default_value = 100
+
     def constructor_30(self, node_tree):
         nodes = node_tree.nodes
         links = node_tree.links
 
+        # main controll
         links.new(nodes['FoamFacOut'].outputs[0], nodes['MainMix'].inputs[0])
         links.new(nodes['OceanOut'].outputs[0], nodes['MainMix'].inputs[1])
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
 
+        # foam material
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['CRFoamRough'].inputs[0])
         links.new(nodes['FoamMatInfo'].outputs[0],
@@ -1178,8 +1818,8 @@ class AOMMatHandler:
         links.new(nodes['FoamBump'].outputs[0],
                   nodes['FoamOut'].inputs['Normal'])
 
-        # links.new(nodes['Disp'].outputs[0],
-        #          nodes['MaterialOutEevee'].inputs[2])
+        links.new(nodes['Disp'].outputs[0],
+                  nodes['MaterialOutEevee'].inputs[2])
         links.new(nodes['Disp'].outputs[0],
                   nodes['MaterialOutCycles'].inputs[2])
 
@@ -1216,6 +1856,13 @@ class AOMMatHandler:
                   nodes['SubNoise2'].inputs[0])
         links.new(nodes['DisplStrength'].outputs[0],
                   nodes['Disp'].inputs[2])
+
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['Noise1'].inputs['Scale'])
+        links.new(nodes['NoiseScale'].outputs[0],
+                  nodes['MultiNoiseScale'].inputs[0])
+        links.new(nodes['MultiNoiseScale'].outputs[0],
+                  nodes['Noise2'].inputs['Scale'])
 
     def add_driver(
         self, source, target, prop, dataPath,

@@ -9,8 +9,11 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     MaterialSel = bpy.props.EnumProperty(
         name='Material Selector',
         description='Show available Materials',
-        items=[('1', '3.0 Material', ''),
-               ('2', '2.8 Material', ''),
+        default='4',
+        items=[('1', 'Wet Foam', ''),
+               ('2', 'Wet Foam2', ''),
+               ('3', 'Dry Foam', ''),
+               ('4', 'Legacy', ''),
                ])
 
     PresetSel = bpy.props.EnumProperty(

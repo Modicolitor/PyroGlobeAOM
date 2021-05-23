@@ -160,61 +160,6 @@ def CollectionIndex(ColName):
     return -1
 
 
-'''
-def PreSetLov():
-    Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-    Ocean.choppiness = 1.00
-    Ocean.wave_scale = 0.2
-    Ocean.wind_velocity = 5
-    Ocean.wave_scale_min = 0.01
-    Ocean.wave_alignment = 0.0
-    Ocean.foam_coverage = 0.3
-
-    try:
-        mat = bpy.data.materials['AdvOceanMat']
-        nodes = mat.node_tree.nodes
-        bpy.data.objects['AdvOcean'].material_slots['AdvOceanMat'].material.node_tree.nodes['Value.001'].outputs['Value'].default_value = 0.7
-
-    except:
-        print("There seems to be no AdvOceanMaterial")
-
-
-def PreSetMod():
-    Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-    Ocean.wave_scale = 1.0
-    Ocean.choppiness = 1.00
-    Ocean.wind_velocity = 6
-    Ocean.wave_scale_min = 0.01
-    Ocean.wave_alignment = 0.2
-
-    Ocean.foam_coverage = 0.3
-    try:
-        mat = bpy.data.materials['AdvOceanMat']
-        # nodes = mat.node_tree.nodes
-        bpy.data.objects['AdvOcean'].material_slots['AdvOceanMat'].material.node_tree.nodes['Value.001'].outputs['Value'].default_value = 0.6
-
-    except:
-        print("There seems to be no AdvOceanMaterial")
-
-
-def PreSetStorm():
-    Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-    Ocean.wave_scale = 3
-    Ocean.wave_alignment = 3
-    Ocean.choppiness = 0.7
-    Ocean.wind_velocity = 15
-    Ocean.wave_scale_min = 0.01
-    Ocean.foam_coverage = 0.3
-
-    try:
-        mat = bpy.data.materials['AdvOceanMat']
-        nodes = mat.node_tree.nodes
-        bpy.data.objects['AdvOcean'].material_slots['AdvOceanMat'].material.node_tree.nodes['Value.001'].outputs['Value'].default_value = 0.45
-
-    except:
-        print("There seems to be no AdvOceanMaterial")
-
-'''
 # neue Floatvariable für die min größe
 bpy.types.Scene.WeatherX = FloatProperty(
     name="Weather",
@@ -1128,42 +1073,12 @@ class BE_OT_SetPreset(bpy.types.Operator):
         return{"FINISHED"}
 
 
-'''
-class BE_OT_SetLov(bpy.types.Operator):
-    bl_label = "Lovely"
-    bl_idname = "set.lov"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        PreSetLov()
-
-        return{"FINISHED"}
-
-
-class BE_OT_SetMod(bpy.types.Operator):
-    bl_label = "Lively"
-    bl_idname = "set.mod"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        PreSetMod()
-
-        return{"FINISHED"}
-
-
-class BE_OT_SetStorm(bpy.types.Operator):
-    bl_label = "Stormy"
-    bl_idname = "set.storm"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        PreSetStorm()
-
-        return{"FINISHED"}
-
-        # Generate Ocena Material  Button
-
-'''
+def get_ocean_from_list(context, list):
+    oceans = []
+    for ob in list:
+        if is_ocean(context, ob):
+            oceans.append(ob)
+    return oceans
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):
@@ -1172,7 +1087,17 @@ class BE_OT_GenOceanMat(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        AdvOceanMat()
+        oceans = get_ocean_from_list(context, context.selected_objects)
+
+        if len(oceans) != 0:
+            # one or more ocean selected
+            for oc in oceans:
+                AdvOceanMat(context, oc)
+        else:
+            # no oceans selected
+            active = bpy.data.objects['AdvOcean']
+            if active != None:
+                AdvOceanMat(context, active)
 
         return{"FINISHED"}
 
