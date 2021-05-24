@@ -26,6 +26,10 @@ class AOMMatHandler:
     def make_material(self, ob):
 
         self.handle_materialslots(ob)
+
+        self.material.use_screen_refraction = True
+        self.material.use_sss_translucency = True
+
         node_tree = self.material.node_tree
 
         if self.context.scene.aom_props.MaterialSel == '1':
@@ -1781,6 +1785,8 @@ class AOMMatHandler:
                   nodes['MultiNoiseScale'].inputs[0])
         links.new(nodes['MultiNoiseScale'].outputs[0],
                   nodes['Noise2'].inputs['Scale'])
+
+        nodes['Math.002'].name = 'BubbleNoiseThreshold'
 
         nodes['LowerOceanFoamCut'].outputs[0].default_value = 1.6
         nodes['LowerObjectCut'].outputs[0].default_value = 3.4

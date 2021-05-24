@@ -9,7 +9,7 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     MaterialSel = bpy.props.EnumProperty(
         name='Material Selector',
         description='Show available Materials',
-        default='4',
+        default='1',
         items=[('1', 'Wet Foam', ''),
                ('2', 'Wet Foam2', ''),
                ('3', 'Dry Foam', ''),
@@ -36,7 +36,7 @@ class FloatdataItem(bpy.types.PropertyGroup):
 
 
 # Assume an armature object selected.
-print("Adding 2 values!")
+#print("Adding 2 values!")
 
 # my_item = bpy.context.scene.my_settings.add()
 # my_item.name = "Spam"

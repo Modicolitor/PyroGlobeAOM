@@ -168,7 +168,7 @@ bpy.types.Scene.WeatherX = FloatProperty(
     max=1.0,
     description="From Lovely (0) to Stormy (1)")
 
-
+'''
 def WeatherSlid():
     Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
     WeatherX = bpy.context.scene.WeatherX
@@ -179,7 +179,7 @@ def WeatherSlid():
     Ocean.choppiness = -0.7 * WeatherX + 1
     Ocean.wave_alignment = 7 * WeatherX
     Ocean.foam_coverage = 0.3 * WeatherX
-
+'''
 ##################################################################################
 #####Start and End Frame der Ocean Animation################
 #############################################
@@ -211,6 +211,8 @@ def initialize_addon(context):
     bpy.types.Object.aom_data = bpy.props.CollectionProperty(
         type=FloatdataItem)
 
+    context.scene.eevee.use_ssr = True
+    context.scene.eevee.use_ssr_refraction = True
     #my_item = bpy.context.scene.my_settings.add()
     #my_item.name = "Spam"
     #my_item.value = 1000
@@ -1079,6 +1081,22 @@ def get_ocean_from_list(context, list):
         if is_ocean(context, ob):
             oceans.append(ob)
     return oceans
+
+
+def get_active_ocean(context):
+    oceans = get_ocean_from_list(context, context.selected_objects)
+    # when ocean is active
+    if is_ocean(context, context.object):
+        return context.object
+    # when oceans are in the selected
+    elif len(oceans) != 0:
+        return oceans[0]
+    # no ocean selected
+    else:
+        for ob in context.scene.objects:
+            if is_ocean(context, ob):
+                return ob
+    return None
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):
