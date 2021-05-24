@@ -1786,7 +1786,6 @@ class AOMMatHandler:
         nodes['LowerObjectCut'].outputs[0].default_value = 3.4
         nodes['Patchiness'].outputs[0].default_value = 0.2
         nodes['NoiseScale'].outputs[0].default_value = 2
-        #nodes['NoiseScale'].outputs[0].default_value = 100
 
     def constructor_30(self, node_tree):
         nodes = node_tree.nodes
