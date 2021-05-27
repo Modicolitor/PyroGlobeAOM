@@ -23,11 +23,11 @@ from .aom import BE_OT_GenOceanMat
 #from .aom import BE_OT_SetMod
 #from .aom import BE_OT_SetLov
 from .aom import BE_OT_UpdateOceAniFrame
-from .aom import BE_OT_UpdateWeather
+#from .aom import BE_OT_UpdateWeather
 from .aom import BE_OT_GenOceanButton
 from .aom import BE_OT_CageVisability
 from .aom import BE_OT_RemBtn
-from .aom import BE_OT_GenObjFoam
+#from .aom import BE_OT_GenObjFoam
 from .aom import BE_OT_DeleteOcean
 from .aom import BE_OT_SetPreset
 
@@ -70,11 +70,11 @@ classes = (BE_PT_AdvOceanAdd,
            # BE_OT_SetMod,
            # BE_OT_SetLov,
            BE_OT_UpdateOceAniFrame,
-           BE_OT_UpdateWeather,
+           # BE_OT_UpdateWeather,
            BE_OT_GenOceanButton,
            BE_OT_CageVisability,
            BE_OT_RemBtn,
-           BE_OT_GenObjFoam,
+           # BE_OT_GenObjFoam,
            BE_OT_DeleteOcean,
            AOMPropertyGroup,
            BE_OT_SetPreset,

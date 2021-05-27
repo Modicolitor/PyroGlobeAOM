@@ -19,16 +19,27 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     PresetSel = bpy.props.EnumProperty(
         name='Global Presets',  # SingleCoupltypes
         description='Global Presets',
+        default='2',
         items=[('1', 'Lovely', ''),
                ('2', 'Lively', ''),
                ('3', 'Stormy', ''),
+               ('4', 'Shallow Lovely', ''),
+               ('5', 'Shallow Lively', ''),
+               ('6', 'Shallow Stormy', ''),
+               ('7', 'Established Lovely', ''),
+               ('8', 'Established Lively', ''),
+               ('9', 'Established Stormy', ''),
+               ('10', 'Abstract1', ''),
+               ('11', 'Abstract2', ''),
+               ('12', 'Abstract3', ''),
                ]
 
     )
 
 
 class FloatdataItem(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(default="Unknown")
+    ocean_id: bpy.props.StringProperty(default=None)
+    float_parent: bpy.props.StringProperty(default=None)
     namenum: bpy.props.IntProperty(default=99999)
     # obj: bpy.props.PointerProperty()
 

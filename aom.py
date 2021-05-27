@@ -213,6 +213,8 @@ def initialize_addon(context):
 
     context.scene.eevee.use_ssr = True
     context.scene.eevee.use_ssr_refraction = True
+    #context.space_data.shading.studio_light = 'sunrise.exr'
+
     #my_item = bpy.context.scene.my_settings.add()
     #my_item.name = "Spam"
     #my_item.value = 1000
@@ -977,6 +979,7 @@ def deselectall(context):
         ob.select_set(False)
 
 
+'''
 class BE_OT_GenObjFoam(bpy.types.Operator):
     bl_label = "Object Foam"
     bl_idname = "gen.obfoam"
@@ -986,6 +989,9 @@ class BE_OT_GenObjFoam(bpy.types.Operator):
         bpy.data.objects['AdvOcean'].modifiers['Ocean'].use_foam
 
         return{"FINISHED"}
+'''
+
+# !!!!!!!!!RemoveInteraction - Check for interaction
 
 
 class BE_OT_RemBtn(bpy.types.Operator):
@@ -1031,22 +1037,15 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
     bl_idname = "gen.ocean"
 
     def execute(self, context):
-        initialize_addon(context)
+        if not hasattr(context.scene, "PUrP"):
+            initialize_addon(context)
         ocean = GenOcean(context)
 
         AdvOceanMat(context, ocean)
+        pres = AOMPreset_Handler()
+        pres.set_initsettings(context)
+        pres.set_lively(context)
         # PreSetMod()
-
-        return{"FINISHED"}
-
-
-class BE_OT_UpdateWeather(bpy.types.Operator):
-    bl_label = "Update"
-    bl_idname = "upd.weather"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        WeatherSlid()
 
         return{"FINISHED"}
 

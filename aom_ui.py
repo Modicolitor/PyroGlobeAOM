@@ -352,13 +352,13 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
                 try:
                     subcol.prop(nodes['WaterBumpTexScale'].outputs[0],
-                                'default_value', text='Bump Strength')
+                                'default_value', text='Wave Texture Scale')
                 except:
                     pass
 
                 try:
                     subcol.prop(nodes['WaterBumpStrength'].outputs[0],
-                                'default_value', text='Fake Wave Scale')
+                                'default_value', text='Bump Strength')
                 except:
                     pass
 
