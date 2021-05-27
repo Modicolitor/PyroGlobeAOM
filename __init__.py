@@ -8,8 +8,9 @@
 # You should have received a copy of the GNU General Public License along with PuzzleUrPrint. If
 # not, see <https://www.gnu.org/licenses/>.
 import bpy
-from .aom_properties import FloatdataItem
+#from .aom_properties import FloatdataItem
 from .aom_properties import AOMPropertyGroup
+from .aom_properties import AOMObjProperties
 from .aom_ui import BE_PT_AdvOceanAdd
 from .aom_ui import BE_PT_AdvOceanMenu
 from .aom_ui import BE_PT_AdvOceanInteract
@@ -77,8 +78,10 @@ classes = (BE_PT_AdvOceanAdd,
            # BE_OT_GenObjFoam,
            BE_OT_DeleteOcean,
            AOMPropertyGroup,
+           AOMObjProperties,
            BE_OT_SetPreset,
-           FloatdataItem
+
+           # FloatdataItem
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

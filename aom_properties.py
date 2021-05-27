@@ -6,6 +6,22 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     IgnoreMainCut = bpy.props.BoolProperty(
         name="Keep Connector", default=False)
 
+    OceAniStart = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
+        name="Start Frame",  # was soll im eingabefeld stehen
+        default=1,  # start wert
+        # min=0,     ## kleinster Wert
+        # max=10,    ## größter Wert
+        description="Animation Start Frame")
+
+    # Define End Frame Animat
+    OceAniEnd = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
+        name="End Frame",  # was soll im eingabefeld stehen
+        default=250,  # start wert
+        # min=0,     ## kleinster Wert
+        # max=10,    ## größter Wert
+        description="Animation End Frame")
+    LastNamNum = bpy.props.IntProperty(default=-1)
+
     MaterialSel = bpy.props.EnumProperty(
         name='Material Selector',
         description='Show available Materials',
@@ -37,12 +53,22 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     )
 
 
+class AOMObjProperties(bpy.types.PropertyGroup):
+    is_ocean = bpy.props.BoolProperty(default=False)
+    is_floatcage = bpy.props.BoolProperty(default=False)
+    ocean_id = bpy.props.IntProperty(default=-1)
+    interaction_type = bpy.props.StringProperty(default='')
+    float_parent_id = bpy.props.IntProperty(default=-1)
+    namenum = bpy.props.IntProperty(default=-1)
+
+
+'''
 class FloatdataItem(bpy.types.PropertyGroup):
     ocean_id: bpy.props.StringProperty(default=None)
     float_parent: bpy.props.StringProperty(default=None)
     namenum: bpy.props.IntProperty(default=99999)
     # obj: bpy.props.PointerProperty()
-
+'''
 # bpy.types.Scene.my_settings = bpy.props.CollectionProperty(type=SceneSettingItem)
 
 

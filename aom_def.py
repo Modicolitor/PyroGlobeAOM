@@ -1,13 +1,13 @@
 def is_ocean(context, ob):
-    if "AdvOcean" in ob.name:
-        return True
-    return False
+    # if "AdvOcean" in ob.name:
+    #    return True
+    return ob.aom_data.is_ocean
 
 
 def is_floatcage(context, ob):
-    if "floatcage" in ob.name:
-        return True
-    return False
+    # if "FloatAnimCage" in ob.name:
+    #    return True
+    return ob.aom_data.is_floatcage
 
 
 def is_ocean_material(context, mat):

@@ -29,7 +29,7 @@ class BE_PT_AdvOceanAdd(bpy.types.Panel):
         if "AdvOcean" in bpy.data.objects:
 
             subcol = col.column()
-            #subcol.label(text="Ocean Presets")
+            # subcol.label(text="Ocean Presets")
             # row = layout.row(align=True)
             subcol = col.column()
             subcol.alignment = 'EXPAND'
@@ -195,8 +195,8 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
 
             box = subcol.box()
             box.label(text="Duration of Simulation")
-            box.prop(bpy.context.scene, "OceAniStart")
-            box.prop(bpy.context.scene, "OceAniEnd")
+            box.prop(bpy.context.scene.aom_props, "OceAniStart")
+            box.prop(bpy.context.scene.aom_props, "OceAniEnd")
             box.label(text="Foam")
             box.prop(bpy.context.scene, "OceanFoamBool")
             box.prop(bpy.context.scene, "ObjFoamBool")
@@ -293,156 +293,157 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
     def draw(self, context):
 
-        layout = self.layout
+        if hasattr(context.scene, "aom_props"):
+            layout = self.layout
 
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
+            layout.use_property_split = True
+            layout.use_property_decorate = False  # No animation.
 
-        flow = layout.grid_flow(row_major=True, columns=0,
-                                even_columns=False, even_rows=False, align=True)
-        col = flow.column()
+            flow = layout.grid_flow(row_major=True, columns=0,
+                                    even_columns=False, even_rows=False, align=True)
+            col = flow.column()
 
-        subcol = col.column()
-        try:
-            subcol.prop(context.scene.aom_props, "MaterialSel")
-        except:
-            pass
-        subcol.operator("gen.ocmat", icon="MATERIAL")
+            subcol = col.column()
+            try:
+                subcol.prop(context.scene.aom_props, "MaterialSel")
+            except:
+                pass
+            subcol.operator("gen.ocmat", icon="MATERIAL")
 
-        ocean = get_active_ocean(context)
+            ocean = get_active_ocean(context)
 
-        # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
-        # got a valid ocean
-        if ocean != None:
-            mat = ocean.material_slots['AdvOceanMat'].material
-            if is_ocean_material(context, mat):
-                nodes = mat.node_tree.nodes
-                subcol.label(text="Water Material Settings")
-                try:
+            # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
+            # got a valid ocean
+            if ocean != None:
+                mat = ocean.material_slots[0].material
+                if is_ocean_material(context, mat):
+                    nodes = mat.node_tree.nodes
+                    subcol.label(text="Water Material Settings")
+                    try:
 
-                    subcol.prop(nodes['RGB'].outputs[0],
-                                'default_value', text='Color')
-                except:
-                    pass
-                try:
-                    # Rougness value for the ocean
-                    subcol.prop(nodes['Value'].outputs['Value'],
-                                'default_value', text='Roughness')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['Layer Weight.002'].inputs[0],
-                                'default_value', text='Transparency')
-                except:
-                    pass
+                        subcol.prop(nodes['RGB'].outputs[0],
+                                    'default_value', text='Color')
+                    except:
+                        pass
+                    try:
+                        # Rougness value for the ocean
+                        subcol.prop(nodes['Value'].outputs['Value'],
+                                    'default_value', text='Roughness')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['Layer Weight.002'].inputs[0],
+                                    'default_value', text='Transparency')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['Layer Weight.001'].inputs[0],
-                                'default_value', text='Refraction')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['Layer Weight.001'].inputs[0],
+                                    'default_value', text='Refraction')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['Refraction BSDF'].inputs[2],
-                                'default_value', text='IOR')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['Refraction BSDF'].inputs[2],
+                                    'default_value', text='IOR')
+                    except:
+                        pass
 
-                subcol.label(text="Fake Bump Waves")
+                    subcol.label(text="Fake Bump Waves")
 
-                try:
-                    subcol.prop(nodes['WaterBumpTexScale'].outputs[0],
-                                'default_value', text='Wave Texture Scale')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['WaterBumpTexScale'].outputs[0],
+                                    'default_value', text='Wave Texture Scale')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['WaterBumpStrength'].outputs[0],
-                                'default_value', text='Bump Strength')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['WaterBumpStrength'].outputs[0],
+                                    'default_value', text='Bump Strength')
+                    except:
+                        pass
 
-                subcol.label(text="Foam Material Settings")
-                try:
-                    subcol.prop(nodes['FoamColor'].outputs[0],
-                                'default_value', text='Color')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['FoamSubsurf'].outputs[0],
-                                'default_value', text='Subsurface Scattering')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['FoamRoughness'].ouputs[0],
-                                'default_value', text='Roughness')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['FoamTransmission'].outputs[0],
-                                'default_value', text='Transmission')
-                except:
-                    pass
+                    subcol.label(text="Foam Material Settings")
+                    try:
+                        subcol.prop(nodes['FoamColor'].outputs[0],
+                                    'default_value', text='Color')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['FoamSubsurf'].outputs[0],
+                                    'default_value', text='Subsurface Scattering')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['FoamRoughness'].ouputs[0],
+                                    'default_value', text='Roughness')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['FoamTransmission'].outputs[0],
+                                    'default_value', text='Transmission')
+                    except:
+                        pass
 
-                subcol.label(text="Ocean Foam Finetune")
-                try:
-                    subcol.prop(nodes['FoamBaseStrength'].outputs[0],
-                                'default_value', text='Base Strength')
-                except:
-                    pass
+                    subcol.label(text="Ocean Foam Finetune")
+                    try:
+                        subcol.prop(nodes['FoamBaseStrength'].outputs[0],
+                                    'default_value', text='Base Strength')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['LowerOceanFoamCut'].outputs[0],  # LowerFoamCut, FoamBasestrength, LowerObjFoamCut, ObjectFoam Basestrength,
-                                'default_value', text='Low Cut')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['LowerOceanFoamCut'].outputs[0],  # LowerFoamCut, FoamBasestrength, LowerObjFoamCut, ObjectFoam Basestrength,
+                                    'default_value', text='Low Cut')
+                    except:
+                        pass
 
-                subcol.label(text="Object Foam Finetune")
-                try:
-                    subcol.prop(nodes['ObjectBaseStrength'].outputs[0],
-                                'default_value', text='Base Strength')
-                except:
-                    pass
+                    subcol.label(text="Object Foam Finetune")
+                    try:
+                        subcol.prop(nodes['ObjectBaseStrength'].outputs[0],
+                                    'default_value', text='Base Strength')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['LowerObjectCut'].outputs[0],
-                                'default_value', text='Low Cut')
-                except:
-                    pass
-                subcol.label(text="Foam Patches")
-                try:
-                    subcol.prop(nodes['Patchiness'].outputs[0],
-                                'default_value', text='Patchiness')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['NoiseScale'].outputs[0],
-                                'default_value', text='Noise Scale')
-                except:
-                    pass
-                subcol.label(text="Bubbles")
-                try:
-                    subcol.prop(nodes['ScaleBub'].outputs[0],
-                                'default_value', text='Bubblesize')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['LowerObjectCut'].outputs[0],
+                                    'default_value', text='Low Cut')
+                    except:
+                        pass
+                    subcol.label(text="Foam Patches")
+                    try:
+                        subcol.prop(nodes['Patchiness'].outputs[0],
+                                    'default_value', text='Patchiness')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['NoiseScale'].outputs[0],
+                                    'default_value', text='Noise Scale')
+                    except:
+                        pass
+                    subcol.label(text="Bubbles")
+                    try:
+                        subcol.prop(nodes['ScaleBub'].outputs[0],
+                                    'default_value', text='Bubblesize')
+                    except:
+                        pass
 
-                try:
-                    subcol.prop(nodes['BubbleNoiseThreshold'].inputs[1],
-                                'default_value', text='Bubble Noise Threshold')
-                    ###################################
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['FoamBumpCtl'].outputs[0],
-                                'default_value', text='BumpStrength')
-                except:
-                    pass
-                try:
-                    subcol.prop(nodes['DisplStrength'].outputs[0],
-                                'default_value', text='Displacement')
-                except:
-                    pass
+                    try:
+                        subcol.prop(nodes['BubbleNoiseThreshold'].inputs[1],
+                                    'default_value', text='Bubble Noise Threshold')
+                        ###################################
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['FoamBumpCtl'].outputs[0],
+                                    'default_value', text='BumpStrength')
+                    except:
+                        pass
+                    try:
+                        subcol.prop(nodes['DisplStrength'].outputs[0],
+                                    'default_value', text='Displacement')
+                    except:
+                        pass
 
             #  box = row.box()
             # row = layout.row(align=True)

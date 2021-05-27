@@ -2,7 +2,7 @@ from bpy.props import *
 import bpy
 import mathutils
 from .aom_def import is_ocean, is_floatcage
-from .aom_properties import FloatdataItem
+#from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
 from .aom_presets import AOMPreset_Handler
 
@@ -70,9 +70,11 @@ def GenOcean(context):
         MColName]
 
     bpy.ops.mesh.primitive_plane_add()
-    ob = bpy.context.object
+    ob = context.object
     ob.name = "AdvOcean"
     newname = ob.name
+    ob.aom_data.ocean_id = get_ocean_id(context)
+    ob.aom_data.is_ocean = True
 
     # data.collections[MColName].objects.link(data.objects['AdvOcean'])
 
@@ -85,13 +87,12 @@ def GenOcean(context):
     ob.modifiers["Ocean"].wave_scale_min = 0.01
     ob.modifiers["Ocean"].wave_alignment = 0.2
     ob.modifiers["Ocean"].random_seed = 1
-    # bpy.context.object.modifiers["Ocean"].size = 2
     ob.modifiers["Ocean"].use_foam = True
     ob.modifiers["Ocean"].use_normals = True
     ob.modifiers["Ocean"].foam_layer_name = "foam"
 
     # dieser wert bestimmt die Menge an Schaum, Lohnt sich bestimmt auszulagern
-    bpy.context.object.modifiers["Ocean"].foam_coverage = 0.6
+    context.object.modifiers["Ocean"].foam_coverage = 0.6
 
     # Animation
     ob.modifiers['Ocean'].time = 1
@@ -160,6 +161,27 @@ def CollectionIndex(ColName):
     return -1
 
 
+def get_ocean_id(context):
+    l = []
+    for ob in context.scene.objects:
+        if is_ocean(context, ob):
+            l.append(ob.aom_data.ocean_id)
+    l.sort()
+    if len(l) == 0:
+        return 0
+    else:
+        print(f'largest id is {l[len(l)-1]}')
+        return l[len(l)-1]+1
+
+
+def get_ocean_from_id(context, ocean_id):
+
+    for ob in context.scene.objects:
+        if ob.aom_data.ocean_id == ocean_id:
+            print(f"ocean found: {ob}")
+            return ob
+
+
 # neue Floatvariable für die min größe
 bpy.types.Scene.WeatherX = FloatProperty(
     name="Weather",
@@ -168,17 +190,6 @@ bpy.types.Scene.WeatherX = FloatProperty(
     max=1.0,
     description="From Lovely (0) to Stormy (1)")
 
-'''
-def WeatherSlid():
-    Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-    WeatherX = bpy.context.scene.WeatherX
-
-    Ocean.wave_scale = WeatherX * 5.5 + 0.2
-
-    Ocean.wind_velocity = 7 * WeatherX + 7
-    Ocean.choppiness = -0.7 * WeatherX + 1
-    Ocean.wave_alignment = 7 * WeatherX
-    Ocean.foam_coverage = 0.3 * WeatherX
 '''
 ##################################################################################
 #####Start and End Frame der Ocean Animation################
@@ -201,40 +212,34 @@ bpy.types.Scene.OceAniEnd = bpy.props.IntProperty(  # definiere neue Variable, a
     # min=0,     ## kleinster Wert
     # max=10,    ## größter Wert
     description="Animation End Frame")
+'''
 
 
 def initialize_addon(context):
     from .aom_properties import AOMPropertyGroup
+    from .aom_properties import AOMObjProperties
     bpy.types.Scene.aom_props = bpy.props.PointerProperty(
         type=AOMPropertyGroup)
 
-    bpy.types.Object.aom_data = bpy.props.CollectionProperty(
-        type=FloatdataItem)
+    bpy.types.Object.aom_data = bpy.props.PointerProperty(
+        type=AOMObjProperties)
 
     context.scene.eevee.use_ssr = True
     context.scene.eevee.use_ssr_refraction = True
-    #context.space_data.shading.studio_light = 'sunrise.exr'
-
-    #my_item = bpy.context.scene.my_settings.add()
-    #my_item.name = "Spam"
-    #my_item.value = 1000
 
 
-def OceAniFrame():
-    scene = bpy.context.scene
-    data = bpy.data
-    context = bpy.context
+def OceAniFrame(context, ocean):
 
-    canvas = bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings
-    OceAniStart = bpy.context.scene.OceAniStart
-    OceAniEnd = bpy.context.scene.OceAniEnd
+    canvas = ocean.modifiers['Dynamic Paint'].canvas_settings
+    OceAniStart = context.scene.aom_props.OceAniStart
+    OceAniEnd = context.scene.aom_props.OceAniEnd
 
     for can in canvas.canvas_surfaces:
-        canvas.canvas_surfaces[can.name].frame_start = OceAniStart
-        canvas.canvas_surfaces[can.name].frame_end = OceAniEnd
+        can.frame_start = OceAniStart
+        can.frame_end = OceAniEnd
 
-    bpy.data.objects['AdvOcean'].modifiers["Ocean"].frame_start = OceAniStart
-    bpy.data.objects['AdvOcean'].modifiers["Ocean"].frame_end = OceAniEnd
+    ocean.modifiers["Ocean"].frame_start = OceAniStart
+    ocean.modifiers["Ocean"].frame_end = OceAniEnd
 
 
 def floatablelist(context, list):
@@ -242,58 +247,61 @@ def floatablelist(context, list):
     for ob in list:
         if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH':
             floatable.append(ob)
+            print(f"Floatables are: {ob.name}")
     return floatable
 
 
-# lasse soviele objecte wie du willst auf einmal floaten
-def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
-    # if
-    scene = bpy.context.scene
-    data = bpy.data
-    context = bpy.context
+def oceanlist(context, list):
+    oceans = []
+    for ob in list:
+        if is_ocean(context, ob):
+            oceans.append(ob)
+    return oceans
 
-    active = bpy.context.view_layer.objects.active
+
+def get_new_namenum(context):
+    if context.scene.aom_props.LastNamNum == -1:
+        context.scene.aom_props.LastNamNum = 2
+    else:
+        context.scene.aom_props.LastNamNum += 1
+    return context.scene.aom_props.LastNamNum
+
+
+# lasse soviele objecte wie du willst auf einmal floaten
+
+
+def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
+    data = bpy.data
+
+    active = context.view_layer.objects.active
     nameori = active.name
     print("nameori: " + nameori)
 
-    sellistori = bpy.context.selected_objects[:]
-    sellist = []
+    sellistori = context.selected_objects[:]
 
-    for obj in sellistori:  # vorsortieren der selcted objects
-        if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
-            print(str(obj.name) +
-                  " does not float!!, wird nicht in die floatliste aufgenommen")
-        else:
-            sellist.append(obj)
-            print(str(obj.name) + " wurde in die floatliste zugefügt")
+    sellist = floatablelist(context, sellistori)
 
-    print("sellist: " + str(sellist))
-    # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
+    #print("sellist: " + str(sellist))
+
     for a, obj in enumerate(sellist):
         # bpy.context.selected_objects = sellist
-        active = bpy.context.view_layer.objects.active
         active = obj
-
         print(obj.name + " For schleife" + str(a))
 
-        # if obj.name in bpy.data.collections["Paint"].objects or obj.name in bpy.data.collections["Wave"].objects:  # test ob obj in Paint ist
-        bpy.context.view_layer.objects.active = RemoveInterActSingle(
-            obj)  # wenn ja entfernt mit der eigenen Funktion
-       # else:
-        #    print(str(obj.name) + "denkt es wäre nicht in Wave oder Paint. Remove Single nicht aktiv")
-        # active = obj    ###macht das SelectedObejct actives Object
-        Namenum = len(
-            bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
+        context.view_layer.objects.active = RemoveInterActSingle(context, obj)
+
+        Namenum = get_new_namenum(context)
+
+        # len(
+        # ocean.modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
 
         print("active: " + active.name + " obj name: " +
               obj.name + " nach else active" + str(a))
         #########
 
-    # weisst paint gruppe zu oder erzeugt sie
-
         col = bpy.data.collections
 
-        bpy.context.view_layer.objects.active = obj
+        context.view_layer.objects.active = obj
         # index = CollectionIndex('Paint')
         # print("Paintindex: " + str(index))
 
@@ -321,26 +329,25 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
         obj.modifiers['Dynamic Paint'].ui_type = 'BRUSH'
 
         bpy.ops.dpaint.type_toggle(type='BRUSH')
-        # bpy.context.space_data.context = 'OBJECT'   ### die ansicht ändern
         try:
             # Paint source auf Mesh Volume and Proximity
-            bpy.context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
+            context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
             print('try ob dynamic paint brush richtig ist, hat keinen !fehler ignoriert')
         except:
             print("Toggle Dynamic Paint add Brush exception raised")
             bpy.ops.object.modifier_remove(modifier="Dynamic Paint")
             bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-            bpy.context.object.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
+            obj.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
             bpy.ops.dpaint.type_toggle(type='BRUSH')
 
-        bpy.context.view_layer.objects.active = obj = sellist[a]
+        context.view_layer.objects.active = obj
 
         print(str(obj.modifiers['Dynamic Paint'].brush_settings) +
               "modifierliste des aktuellen objectes")
 
-        context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
-        context.object.modifiers["Dynamic Paint"].brush_settings.paint_distance = 1.0
-        context.object.modifiers["Dynamic Paint"].brush_settings.wave_factor = 1
+        obj.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
+        obj.modifiers["Dynamic Paint"].brush_settings.paint_distance = 1.0
+        obj.modifiers["Dynamic Paint"].brush_settings.wave_factor = 1
 
         print('jetzt gibt es rotation auf objekt in der schleifen nr.' + str(a))
         print('das active object for dem rotation constraint' + obj.name)
@@ -354,7 +361,7 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
         # maker collection
         colweight = data.collections.new(
             "Weight.00"+str(Namenum))  # collection erschaffen
-        bpy.context.scene.collection.children[MColName].children[Brush].children.link(
+        context.scene.collection.children[MColName].children[Brush].children.link(
             colweight)  # in die Brush Collection der aktuellen Szene
 
         # move empty to collection and remove from old place
@@ -367,14 +374,14 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
 
         # die constraints auf das Empty packen
         conRot1 = empty.constraints.new('COPY_ROTATION')
-        conRot1.target = bpy.data.objects["AdvOcean"]
+        conRot1.target = ocean
         conRot1.subtarget = "dp_weight.00" + str(Namenum)
         conRot1.use_z = False
         conRot1.invert_x = True
         conRot1.invert_y = True
 
         contLoc = empty.constraints.new('COPY_LOCATION')
-        contLoc.target = bpy.data.objects["AdvOcean"]
+        contLoc.target = ocean
         contLoc.subtarget = "dp_weight.00" + str(Namenum)
 
         conRot2 = empty.constraints.new('COPY_ROTATION')
@@ -405,23 +412,22 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
         name = obj.name
         print(name)
         bpy.ops.mesh.primitive_uv_sphere_add(location=empty.location)
-        bpy.context.object.name = name + ".FloatAnimCage"
-        name = bpy.context.object.name
-        ob = bpy.data.objects[name]
-
+        cage = context.object
+        cage.name = name + ".FloatAnimCage"
+        cage.aom_data.is_floatcage = True
         if dx > dy:
             print(obj.name + "x")
-            dy = 0.9*dy
-            dx = 0.9*dx
-            ob.scale[0] = dx
-            ob.scale[1] = dx
+            dy = 1.0*dy
+            dx = 1.0*dx
+            cage.scale[0] = dx
+            cage.scale[1] = dx
         else:
             print(obj.name + "y")
-            dy = 0.9*dy
-            dx = 0.9*dx
+            dy = 1.0*dy
+            dx = 1.0*dx
             print(dy)
-            ob.scale[0] = dy
-            ob.scale[1] = dy
+            cage.scale[0] = dy
+            cage.scale[1] = dy
 
         # x = bpy.data.objects["Cube"]
         # x.location = (5,0,0)
@@ -435,10 +441,10 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
 
         # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True) ### apply rotation, scale, location
 
-        bpy.context.object.display_type = 'WIRE'
+        context.object.display_type = 'WIRE'
         # das zum Brush wird zugefügt
         bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-        bpy.context.object.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
+        context.object.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
         bpy.ops.dpaint.type_toggle(type='BRUSH')
         bpy.data.objects[name].hide_render = True
 
@@ -449,54 +455,52 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
         # colweight = data.collections.new("Weight.00"+str(Namenum))  ###collection erschaffen
         # bpy.context.scene.collection.children[MColName].children[Brush].children.link(colweight) ### in die Brush Collection der aktuellen Szene
 
-        data.collections[colweight.name].objects.link(ob)
-        for col in ob.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
+        data.collections[colweight.name].objects.link(cage)
+        for col in cage.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
             if col.name != "Weight.00"+str(Namenum):
-                data.collections[col.name].objects.unlink(ob)
+                data.collections[col.name].objects.unlink(cage)
                 # print("Cage entfernt aus " + str(col.name))
                 break
 
         # helper transferEmpty as parent of object
 
-        bpy.context.view_layer.objects.active = bpy.data.objects["AdvOcean"]
-
         # print(active.name + "Akrives Objekt vor der AdvOcean")
+        #################################################################################################################
+        #################################################################################################################
+        #ocean = data.objects['AdvOcean']
+        context.view_layer.objects.active = ocean
 
-        ocean = data.objects['AdvOcean']
+        # Namenum = len(
+        #    bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
 
-        Namenum = len(
-            bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
-        print("Wenn dynamic paint surfaces weniger werden müsste diese Zahl kleiner Werden: " + str(Namenum))
         bpy.ops.dpaint.surface_slot_add()  # erzeugt neue Canvas
 
         try:
-            bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Surface.00"+str(
+            context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Surface.00"+str(
                 Namenum)].name = "Weight.00"+str(Namenum)
         except:
-            bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces[
+            context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces[
                 "Surface"].name = "Weight.00"+str(Namenum)
 
-        bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].surface_type = 'WEIGHT'  # setzt den typ auf weight paint
-        bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].use_dissolve = True        # fade option wird Aktiv geklickt... das weight paint verschwindet
-        bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].dissolve_speed = 1         # nach 1 Frame
         # dynamic paint output  Vertex group wird erstellt  <--  könnte später ein Bug geben wenn schon weight paint existiert
         bpy.ops.dpaint.output_toggle(output='A')
-        bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].output_name_a = "dp_weight.00"+str(Namenum)
         bpy.ops.dpaint.output_toggle(output='A')
-        bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].brush_collection = bpy.data.collections["Weight.00"+str(Namenum)]
-        # bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(Namenum)].show_preview = False
+        # context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(Namenum)].show_preview = False
 
-        # for i in bpy.context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces:
+        # for i in context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces:
         #    print(i)
 
- #   except:
-        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Schleife fertig!!!!!!!!!!!!!!!!!!!!!!")
-    ################Gruppe fehlt hier--> !!!##############
+        ################Gruppe fehlt hier--> !!!##############
         conRot2.target = bpy.data.objects[name]
         conRot2.use_z = True
         conRot2.use_y = False
@@ -507,10 +511,10 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
         # register in objects flotdata
         print(f"add data to {context.object}")
         print("____________________________________________________________________________________________________________________________________________________________")
-        my_item = context.object.aom_data.add()  # old reference renew
-        my_item.name = obj.name
-        my_item.obj = obj
-        my_item.namenum = Namenum
+
+        active.aom_data.interaction_type = 'FLOAT'
+        active.aom_data.float_parent_id = ocean.aom_data.ocean_id
+        active.aom_data.namenum = Namenum
 
 
 ##############################################################
@@ -518,14 +522,17 @@ def FloatSel():  # fügt dann ein Ei hinzu das zum Brush wird
 # Erzeugt in einem Statischen Objekt einen Brush der die wetmap an
 # und fügt die paintgruppe hinzu
 #############
-def BrushStatic():
+def BrushStatic(context):
     scene = bpy.context.scene
     data = bpy.data
     context = bpy.context
 
     sellistori = bpy.context.selected_objects[:]
-    sellist = []
+    #sellist = []
 
+    sellist = floatablelist(context, sellistori)
+
+    '''
     for obj in sellistori:
         if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
             print(str(obj.name) +
@@ -533,7 +540,7 @@ def BrushStatic():
         else:
             sellist.append(obj)
             print(str(obj.name) + " wurde in die staticliste zugefügt")
-
+    '''
     # print("sellist: " +str(sellist) )
 
     # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
@@ -541,11 +548,13 @@ def BrushStatic():
         # wenn diese Object floated erstmal das floaten entfernen
        # bpy.context.view_layer.objects.active = obj
        # if obj.name in bpy.data.collections["Paint"].objects or obj.name in bpy.data.collections["Wave"].objects:
-        bpy.context.view_layer.objects.active = RemoveInterActSingle(obj)
+        context.view_layer.objects.active = RemoveInterActSingle(context, obj)
+        obj.aom_data.interaction_type = 'STATIC'
+
        # else:
         #    print(str(obj.name) + "wird nicht an Remove single weiter gegeben")
         try:  # gibt es schon einen Dynmaic Paint Brush???
-            bpy.context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME'
+            context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME'
         except:  # wenn nicht
             print(
                 "Exception raised! NO dyn Paint, I'll create now. Obj: " + str(obj.name))
@@ -561,40 +570,22 @@ def BrushStatic():
         #    bpy.ops.object.link_to_collection(collection_index=index, is_new=False, new_collection_name="Wave")
 
 
-def RemoveInterAct():
+def RemoveInterAct(context):
     scene = bpy.context.scene
     data = bpy.data
-    context = bpy.context
 
-    sellistori = bpy.context.selected_objects[:]
-    sellist = []
-
-    for obj in sellistori:
-        if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
-            print(str(obj.name) +
-                  " does not float!!, wird nicht in die Removeliste aufgenommen")
-        else:
-            sellist.append(obj)
-            print(str(obj.name) + " wurde in die Löschliste zugefügt")
-
-    print("sellist: " + str(sellist))
-
+    sellist = floatablelist(context, context.selected_objects)
     # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
-    for a, obj in enumerate(sellist):
-       # print("sellist: " +str(sellist) )
-        # print(str(obj.name) + "steht vor der überprüfung in Remove Interaction, ob mesh, ")
-        # if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
-        #    print(str(obj.name) + " does not float!!")
-        # else:
-        print(str(obj.name) + ": Its interacting, starting removing interaction")
+    for obj in sellist:
+        RemoveInterActSingle(context, obj)
+
+        '''
         bpy.context.view_layer.objects.active = obj
 
-    #    try:
-        bpy.ops.object.constraints_clear()  # !!!!
+        bpy.ops.object.constraints_clear()
         bpy.ops.object.modifier_remove(
             modifier="Dynamic Paint")  # remove dynamic paint
         emptylocation = obj.parent.location
-        parent = obj.parent
         # obj.parent.remove(parent, do_unlink=True)
         obj.parent = None
         obj.location = emptylocation
@@ -608,15 +599,20 @@ def RemoveInterAct():
 
     # remove colletions (2.8)
         if obj.name in bpy.data.collections['Wave'].objects:
-            bpy.ops.collection.objects_remove_active(collection='Wave')
+            bpy.data.collections['Wave'].objects.unlink(obj)
+            # bpy.ops.collection.objects_remove_active(collection='Wave')
         else:
             print(str(obj.name) + "was not in Wave collection")
 
         if obj.name in bpy.data.collections['Paint'].objects:
-            bpy.ops.collection.objects_remove_active(collection='Paint')
+            bpy.data.collections['Paint'].objects.unlink(obj)
+            # bpy.ops.collection.objects_remove_active(collection='Paint')
         else:
             print(str(obj.name) + " was not in Paint collection")
 
+        ocean_id = obj.aom_data.float_parent_id
+        print(f'search id: ')
+        ocean = get_ocean_from_id(context, ocean_id)
         print(str(obj.name) + ' aus wave und paint entfernt, jetzt nur noch den cage')
         if obj.name + ".FloatAnimCage" in bpy.data.objects:
             for col in bpy.data.collections:
@@ -626,53 +622,61 @@ def RemoveInterAct():
                     print(str(obj.name) + "gefunden in " + str(col.name))
                     bpy.data.objects.remove(
                         bpy.data.objects[obj.name + ".FloatAnimCage"], do_unlink=True)
-                    bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
-                    bpy.data.collections.remove(col)
-
+                    ocean.modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
+                    data.collections.remove(col)
         else:
-
             print("es gab kein Float Animation Cage")
-           # except:
-            #    print("Wasn't floating or something went wrong")
 
-            # dynamic paint
+        # aom obj settings
+        obj.aom_data.interaction_type = ''
+        obj.aom_data.float_parent_id = -1
+        obj.aom_data.namenum = -1
+        '''
+
+# remove interaction aber mit nur einem Object
 
 
-def RemoveInterActSingle(obj):  # remove interaction aber mit nur einem Object
-    objinitial = obj
+def RemoveInterActSingle(context, obj):
+    if obj.aom_data.interaction_type == '':
+        return obj
 
-    print("Remove Single Interaction actvated for object " + str(obj.name))
-    bpy.context.view_layer.objects.active = obj
-    # if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
-    #       print("Its not floating!")
-    # bpy.context.selected_objects[a]
-    # AdvOceanMat()  #### setting option muss angepasst werden
-    # else:
-    # bpy.context.selected_objects = sellist
- #    bpy.context.view_layer.objects.active = obj
-
-    #    try:
+    context.view_layer.objects.active = obj
+    bpy.ops.object.constraints_clear()
+    '''
     if 'Copy Location' in obj.constraints:
-        print("Constraint Copy Location will be removed from " + str(obj.name))
         obj.constraints.remove(obj.constraints['Copy Location'])
     if 'Copy Rotation' in obj.constraints:
-        print("Constraint Copy Rotation will be removed from " + str(obj.name))
         obj.constraints.remove(obj.constraints['Copy Rotation'])
-
         bpy.ops.object.constraints_clear()  # !!!!
+    '''
     if "Dynamic Paint" in obj.modifiers:
         bpy.ops.object.modifier_remove(
             modifier="Dynamic Paint")  # remove dynamic paint
+
+    empty = obj.parent
+    emptylocation = empty.location
+    # obj.parent.remove(parent, do_unlink=True)
+    obj.parent = None
+    obj.location = emptylocation
+
+    deletelist = []
+    deletelist.append(empty)
+    bpy.ops.object.delete({"selected_objects": deletelist})
+
  # remove colletions (2.8)
     if obj.name in bpy.data.collections['Wave'].objects:
-        bpy.ops.collection.objects_remove_active(collection='Wave')
+        bpy.data.collections['Wave'].objects.unlink(obj)
+        # bpy.ops.collection.objects_remove_active(collection='Wave')
     else:
         print(str(obj.name) + " was not in Wave collection")
     if obj.name in bpy.data.collections['Paint'].objects:
-        bpy.ops.collection.objects_remove_active(collection='Paint')
+        bpy.data.collections['Paint'].objects.unlink(obj)
+        # bpy.ops.collection.objects_remove_active(collection='Paint')
     else:
         print(str(obj.name) + " was not in Paint collection")
 
+    ocean_id = obj.aom_data.float_parent_id
+    ocean = get_ocean_from_id(context, ocean_id)
     if obj.name + ".FloatAnimCage" in bpy.data.objects:
         for col in bpy.data.collections:
             print("Suche" + str(obj.name) + " in Collection" + str(col.name))
@@ -680,13 +684,17 @@ def RemoveInterActSingle(obj):  # remove interaction aber mit nur einem Object
                 print(str(obj.name) + "gefunden in " + str(col.name))
                 bpy.data.objects.remove(
                     bpy.data.objects[obj.name + ".FloatAnimCage"], do_unlink=True)
-                bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
+                ocean.modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
                 bpy.data.collections.remove(col)
 
     else:
         print("kein Float Animation Cage zum entfenen gefunden")
 
-    return objinitial
+    obj.aom_data.interaction_type = ''
+    obj.aom_data.float_parent_id = -1
+    obj.aom_data.namenum = -1
+
+    return obj
 
     # def BrushCanvas():
 
@@ -698,207 +706,6 @@ def RemoveInterActSingle(obj):  # remove interaction aber mit nur einem Object
 def AdvOceanMat(context, ocean):
     MatHandler = AOMMatHandler(context)
     MatHandler.make_material(ocean)
-
-    '''scene = bpy.context.scene
-    data = bpy.data
-
-    ob = ocean
-    #print(bpy.context.active_object.name + " in AdvOceanMat")
-
-    # cycles engine wird gestartet wenn das noch nicht geschehen ist
-    # scn = bpy.context.scene
-    # if not scn.render.engine == 'CYCLES':
-    #    scn.render.engine = 'CYCLES'
-
-    # material zuweisen aus dem internet
-    # Get material
-    mat = data.materials.get("AdvOceanMat")
-    if mat is None:
-        # create material
-        mat = bpy.data.materials.new(name="AdvOceanMat")
-
-    # Assign it to object
-    if ob.data.materials:
-        # assign to 1st material slot
-        ob.data.materials[0] = mat
-    else:
-      #  no slots
-        ob.data.materials.append(mat)
-
-    context.object.active_material.use_nodes = True
-
-    # Nodes bauen
-    # bpy.data.materials['AdvOceanMat'].node_tree.nodes.active.color   erinnerung an den langen pfad
-    # bpy.data.materials['AdvOceanMat'].node_tree.nodes['Layer Weight.001'].inputs['Blend'].default_value
-    active = bpy.data.materials['AdvOceanMat'].node_tree.nodes.active
-    mat = bpy.data.materials['AdvOceanMat']
-    # macht einen Diffuseshader
-    # mat.node_tree.nodes.new('ShaderNodeBsdfDiffuse')
-    nodes = mat.node_tree.nodes
-
-    links = mat.node_tree.links
-
-    for node in nodes:
-        nodes.remove(node)
-
-    # Ocean
-    node = nodes.new('ShaderNodeBsdfGlossy')  # glossyshader machen
-    node.location = (-1200, 000)
-    nodes["Glossy BSDF"].inputs[1].default_value = 0.06
-
-    # dieser glossy schader muss fast schwarz werden
-    node = nodes.new('ShaderNodeBsdfGlossy')
-    node.location = (-1200, -200)
-    nodes['Glossy BSDF.001'].inputs['Color'].default_value[1] = 0.01
-    nodes['Glossy BSDF.001'].inputs['Color'].default_value[2] = 0.01
-    nodes['Glossy BSDF.001'].inputs['Color'].default_value[0] = 0.01
-    nodes["Glossy BSDF.001"].inputs[1].default_value = 0.06
-
-    node = nodes.new('ShaderNodeLayerWeight')  # layerweight machen
-    node.location = (-1200, 200)
-    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
-    node.location = (-900, 000)
-
-    # link basic OceanMaterial zum ersen Mix shader
-    links.new(nodes['Layer Weight'].outputs['Fresnel'],
-              nodes['Mix Shader'].inputs['Fac'])
-    links.new(nodes['Glossy BSDF'].outputs['BSDF'],
-              nodes['Mix Shader'].inputs['Shader'])
-    links.new(nodes['Glossy BSDF.001'].outputs['BSDF'],
-              nodes['Mix Shader'].inputs[2])
-
-    node = nodes.new('ShaderNodeLayerWeight')  # layerweight machen
-    node.location = (-900, 200)
-    nodes['Layer Weight.001'].inputs['Blend'].default_value = 0.2
-    # bpy.context.area.type = 'NODE_EDITOR'
-    node = nodes.new('ShaderNodeBsdfRefraction')  # mixshader machen
-    node.location = (-900, -150)
-    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
-    node.location = (-700, 000)
-
-    # transparent mixer
-    node = nodes.new('ShaderNodeLayerWeight')  # layerweight machen
-    node.location = (-700, 200)
-    node.inputs['Blend'].default_value = 0.1
-    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
-    node.location = (-500, 000)
-    node = nodes.new('ShaderNodeBsdfTransparent')  # mixshader machen
-    node.location = (-700, -150)
-
-    # link basic OceanMaterial zum ersen Mix shader
-    links.new(nodes['Layer Weight.001'].outputs['Fresnel'],
-              nodes['Mix Shader.001'].inputs['Fac'])
-    links.new(nodes['Mix Shader'].outputs['Shader'],
-              nodes['Mix Shader.001'].inputs['Shader'])
-    links.new(nodes['Refraction BSDF'].outputs['BSDF'],
-              nodes['Mix Shader.001'].inputs[2])
-
-    links.new(nodes['Mix Shader.001'].outputs['Shader'],
-              nodes['Mix Shader.002'].inputs[1])
-    links.new(nodes['Transparent BSDF'].outputs['BSDF'],
-              nodes['Mix Shader.002'].inputs[2])
-    links.new(nodes['Layer Weight.002'].outputs['Fresnel'],
-              nodes['Mix Shader.002'].inputs[0])
-
-    # Rougness value and Ocean color
-
-    node = nodes.new('ShaderNodeRGB')
-    node.location = (-1400, 000)
-    nodes['RGB'].outputs[0].default_value = (1, 1, 1, 1)
-
-    links.new(nodes['RGB'].outputs[0], nodes['Glossy BSDF'].inputs['Color'])
-    links.new(nodes['RGB'].outputs[0],
-              nodes['Refraction BSDF'].inputs['Color'])
-    links.new(nodes['RGB'].outputs[0],
-              nodes['Transparent BSDF'].inputs['Color'])
-
-    node = nodes.new('ShaderNodeValue')
-    node.location = (-1400, 200)
-    nodes['Value'].outputs[0].default_value = 0.01
-    links.new(nodes['Value'].outputs[0], nodes['Glossy BSDF'].inputs[1])
-    links.new(nodes['Value'].outputs[0], nodes['Glossy BSDF.001'].inputs[1])
-    links.new(nodes['Value'].outputs[0], nodes['Refraction BSDF'].inputs[1])
-
-    # Foamfactor
-    ################################################################################################################
-    ################################################################################################################
-    #FoamFac_ancient(context, mat.node_tree)
-    FoamFac_bubbly(context, mat.node_tree)
-
-    ################################################################################################################
-    ################################################################################################################
-
-    # links.new(nodes['Bump'].outputs['Normal'],
-    #          nodes['Principled BSDF'].inputs['Normal'])
-    # links.new(nodes['Mix.005'].outputs['Color'],
-    #          nodes['Bump'].inputs['Height'])
-
-    # node = nodes.new('ShaderNodeRGB') ### mixshader machen
-    # node.location = (-200,-200)
-    # nodes['RGB'].outputs['Color'].default_value[0] = 1
-    # nodes['RGB'].outputs['Color'].default_value[1] = 1
-    # nodes['RGB'].outputs['Color'].default_value[2] = 1
-    # node = nodes.new('ShaderNodeHueSaturation') ### Hue saturation.001
-    # node.location = (000,-200)
-    # node = nodes.new('ShaderNodeBsdfGlossy') ### Glossy shader .002
-    # node.location = (200,-100)
-    # node = nodes.new('ShaderNodeAddShader') ### mixshader machen
-    # node.location = (400,-200)
-
-    # link foam material
-    #links.new(nodes['RGB'].outputs['Color'], nodes['Hue Saturation Value.002'].inputs['Color']) #
-    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Ambient Occlusion'].inputs['Color']) #
-    #links.new(nodes['Hue Saturation Value.002'].outputs['Color'], nodes['Glossy BSDF.002'].inputs['Color']) #
-    #links.new(nodes['Glossy BSDF.002'].outputs['BSDF'], nodes['Add Shader'].inputs[0]) #
-   # links.new(nodes['Ambient Occlusion'].outputs['AO'], nodes['Add Shader'].inputs[1]) #
-
-    ###Finaler Mix in den Material Output#################################
-
-    node = nodes.new('ShaderNodeMixShader')  # mixshader machen
-    node.name = 'MainMix'
-    node.location = (2200, 000)
-
-    # links.new(nodes['Mix.005'].outputs['Color'],
-    #          nodes['Mix Shader.003'].inputs[0])  # Factor des Schaumes
-    # Schaum material in den EndMixer
-    # links.new(nodes['Principled BSDF'].outputs['BSDF'],
-    #          nodes['Mix Shader.003'].inputs[2])
-    # links.new(nodes['Mix Shader.002'].outputs['Shader'],
-    #          nodes['Mix Shader.003'].inputs[1])  # Oceanmateril in den EndMixer
-
-    try:
-        links.new(nodes['MainMix'].outputs['Shader'],
-                  nodes['Material Output'].inputs[0])  # EndMixer in den Surface
-    except:
-        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
-        node.location = (2400, 000)
-        node.target = 'CYCLES'
-        links.new(nodes['MainMix'].outputs['Shader'],
-                  nodes['Material Output'].inputs['Surface'])  # EndMixer in den Surface
-
-    try:
-        links.new(nodes['MainMix'].outputs['Shader'],
-                  nodes['Material Output.001'].inputs[0])  # EndMixer in den Surface
-    except:
-        node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
-        node.location = (2400, -200)
-        node.name = 'Material Output Eevee'
-        node.target = 'EEVEE'
-        links.new(nodes['MainMix'].outputs['Shader'],
-                  nodes['Material Output Eevee'].inputs['Surface'])  # EndMixer in den Surface
-
-    # Displacement connect
-    links.new(nodes['Disp'].outputs[0],
-              nodes['Material Output Eevee'].inputs[0])
-    links.new(nodes['Disp'].outputs[0],
-              nodes['Material Output'].inputs[0])
-
-    # Set eevee transparency
-    REngine = bpy.context.scene.render.engine
-    bpy.context.scene.render.engine = 'BLENDER_EEVEE'
-    # Better 'BLEND'??????????'HASHED'
-    bpy.context.object.active_material.blend_method = 'BLEND'
-    bpy.context.scene.render.engine = REngine'''
 
 
 def add_driver(
@@ -955,10 +762,6 @@ def FoamAnAus():
 
 
 def CageVis(Bool):
-    scene = bpy.context.scene
-    data = bpy.data
-    context = bpy.context
-
     objects = bpy.data.objects
 
     # print("Bool in function: " + str(Bool))
@@ -979,21 +782,6 @@ def deselectall(context):
         ob.select_set(False)
 
 
-'''
-class BE_OT_GenObjFoam(bpy.types.Operator):
-    bl_label = "Object Foam"
-    bl_idname = "gen.obfoam"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        bpy.data.objects['AdvOcean'].modifiers['Ocean'].use_foam
-
-        return{"FINISHED"}
-'''
-
-# !!!!!!!!!RemoveInteraction - Check for interaction
-
-
 class BE_OT_RemBtn(bpy.types.Operator):
     bl_label = "Remove Interaction"
     bl_idname = "rmv.interac"
@@ -1001,7 +789,7 @@ class BE_OT_RemBtn(bpy.types.Operator):
 
     def execute(self, context):
 
-        RemoveInterAct()
+        RemoveInterAct(context)
 
         return{"FINISHED"}
 
@@ -1035,17 +823,20 @@ class BE_OT_CageVisability(bpy.types.Operator):
 class BE_OT_GenOceanButton(bpy.types.Operator):
     bl_label = "Generate Ocean"
     bl_idname = "gen.ocean"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        if not hasattr(context.scene, "PUrP"):
-            initialize_addon(context)
-        ocean = GenOcean(context)
-
-        AdvOceanMat(context, ocean)
         pres = AOMPreset_Handler()
-        pres.set_initsettings(context)
-        pres.set_lively(context)
-        # PreSetMod()
+        if not hasattr(context.scene, "aom_props"):
+            initialize_addon(context)
+            ocean = GenOcean(context)
+            AdvOceanMat(context, ocean)
+            pres.set_initsettings(context)
+
+        else:
+            ocean = GenOcean(context)
+            AdvOceanMat(context, ocean)
+            pres.set_preset(context)
 
         return{"FINISHED"}
 
@@ -1056,8 +847,10 @@ class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        OceAniFrame()
-        FoamAnAus()
+        oceans = get_ocean_from_list(context, context.scene.objects)
+        for oc in oceans:
+            OceAniFrame(context, oc)
+            FoamAnAus()
 
         return{"FINISHED"}
 
@@ -1089,13 +882,24 @@ def get_active_ocean(context):
         return context.object
     # when oceans are in the selected
     elif len(oceans) != 0:
-        return oceans[0]
+        return highest_ocean_id(context, oceans)  # oceans[0]
     # no ocean selected
     else:
         for ob in context.scene.objects:
             if is_ocean(context, ob):
                 return ob
     return None
+
+
+def highest_ocean_id(context, list):
+    ids = []
+    for oc in list:
+        ids.append(oc.aom_data.ocean_id)
+    ids.sort()
+    highestid = ids[len(ids)-1]
+    for oc in list:
+        if oc.aom_data.ocean_id == highestid:
+            return oc
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):
@@ -1112,7 +916,7 @@ class BE_OT_GenOceanMat(bpy.types.Operator):
                 AdvOceanMat(context, oc)
         else:
             # no oceans selected
-            active = bpy.data.objects['AdvOcean']
+            active = get_active_ocean(context)
             if active != None:
                 AdvOceanMat(context, active)
 
@@ -1125,7 +929,7 @@ class BE_OT_StaticOb(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        BrushStatic()
+        BrushStatic(context)
 
         return{"FINISHED"}
 
@@ -1138,7 +942,10 @@ class BE_OT_FloatSelButt(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        FloatSel()
+        # ocean active?
+        ocean = get_active_ocean(context)
+        if ocean != None:
+            FloatSel(context, ocean)
         # BrushCanvas()    ##hier ist der code unsauber: bei vielen objekten werden ganz oft paint und Weight als Gruppe eingetragen .... könnte trotzdem gehen weil es immerwieder überschrieben wird
 
         return{"FINISHED"}
@@ -1152,9 +959,19 @@ class BE_OT_DeleteOcean(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-
-        if is_ocean(context.object):
-            deselectall(context)
+        oceans = oceanlist(context, context.selected_objects)
+        deselectall(context)
+        for ob in oceans:
+            remove_floats(context, ob)
+            ob.select_set(True)
             bpy.ops.object.delete(use_global=True)
 
         return{"FINISHED"}
+
+
+def remove_floats(context, ocean):
+    ocean_id = ocean.aom_data.ocean_id
+
+    for ob in context.scene.objects[:]:
+        if ob.aom_data.float_parent_id == ocean_id:
+            RemoveInterActSingle(context, ob)

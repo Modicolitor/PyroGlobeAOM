@@ -8,15 +8,29 @@ class AOMMatHandler:
         self.context = context
         self.material = self.get_material()
 
-        self.materialname = "AdvOceanMat"
+        #self.materialname = "AdvOceanMat"
 
     def get_material(self):
-        mat = bpy.data.materials.get("AdvOceanMat")
+        newMatName = "AdvOceanMat_" + \
+            self.get_preset_name(self.context.scene.aom_props.MaterialSel)
+        print(f"newmaterialname is {newMatName}")
+        mat = bpy.data.materials.get(newMatName)
         if mat is None:
             # create material
-            mat = bpy.data.materials.new(name="AdvOceanMat")
+            mat = bpy.data.materials.new(name=newMatName)
 
         return mat
+
+    def get_preset_name(self, index):
+        index = int(index)
+        if index == 1:
+            return 'Wet Foam'
+        elif index == 2:
+            return 'Wet Foam2'
+        elif index == 3:
+            return 'Dry Foam'
+        elif index == 4:
+            return 'Legacy'
 
     def del_nodes(self):
         nodes = self.material.node_tree.nodes
