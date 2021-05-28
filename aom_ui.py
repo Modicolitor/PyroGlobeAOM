@@ -25,20 +25,24 @@ class BE_PT_AdvOceanAdd(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+        if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
 
-        if "AdvOcean" in bpy.data.objects:
+            if ocean != None:
+                # if "AdvOcean" in bpy.data.objects:
 
-            subcol = col.column()
-            # subcol.label(text="Ocean Presets")
-            # row = layout.row(align=True)
-            subcol = col.column()
-            subcol.alignment = 'EXPAND'
-            subcol.operator("gen.ocean", text="Add Ocean")  # , icon="IPO_QUAD"
-            # , icon="IPO_CUBIC")
-            subcol.operator("aom.deleteocean", text="Delete Ocean")
-            # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
-        else:
-            subcol.operator("gen.ocean", icon="MOD_WAVE")
+                subcol = col.column()
+                # subcol.label(text="Ocean Presets")
+                # row = layout.row(align=True)
+                subcol = col.column()
+                subcol.alignment = 'EXPAND'
+                # , icon="IPO_QUAD"
+                subcol.operator("gen.ocean", text="Add Ocean")
+                # , icon="IPO_CUBIC")
+                subcol.operator("aom.deleteocean", text="Delete Ocean")
+                # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
+            else:
+                subcol.operator("gen.ocean", icon="MOD_WAVE")
 
 
 class BE_PT_AdvOceanMenu(bpy.types.Panel):
@@ -63,89 +67,76 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+        if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
 
-        if "AdvOcean" in bpy.data.objects:
+            if ocean != None:
+                # if "AdvOcean" in bpy.data.objects:
 
-            subcol = col.column()
-            subcol.label(text="Ocean Presets")
-            # row = layout.row(align=True)
-            subcol = col.column()
-            subcol.alignment = 'EXPAND'
+                subcol = col.column()
+                subcol.label(text="Ocean Presets")
+                # row = layout.row(align=True)
+                subcol = col.column()
+                subcol.alignment = 'EXPAND'
 
-            subcol.prop(context.scene.aom_props, "PresetSel")
-            subcol.operator("aom.set_preset")
+                subcol.prop(context.scene.aom_props, "PresetSel")
+                subcol.operator("aom.set_preset")
 
-            # subcol.operator("set.lov")  # , icon="IPO_QUAD"
-            # subcol.operator("set.mod")  # , icon="IPO_CUBIC")
-            # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
+                # subcol.operator("set.lov")  # , icon="IPO_QUAD"
+                # subcol.operator("set.mod")  # , icon="IPO_CUBIC")
+                # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
 
-            subcol = col.column()
-            # row = layout.row(align=True)
+                subcol = col.column()
+                # row = layout.row(align=True)
 
-            subcol.label(text="Ocean Settings")
+                subcol.label(text="Ocean Settings")
 
-            # layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "resolution")
-            try:
+                # layout.row(align=True)
                 subcol.prop(
-                    bpy.data.objects['AdvOcean'].modifiers['Ocean'], "viewport_resolution")
-            except:
-                pass
-            try:
-                subcol.prop(
-                    bpy.data.objects['AdvOcean'].modifiers['Ocean'], "spectrum")
-            except:
-                pass
-
-            # row = layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "repeat_x")
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "repeat_y")
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "spatial_size")
-
-            # subcol = col.column()
-            # row = layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "wave_alignment")
-            # subcol = col.column()
-            # row = layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "wave_scale")
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "wave_scale_min")
-            # subcol = col.column()
-            # row = layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "wind_velocity", text="Pointiness 1")
-            subcol.prop(
-                bpy.data.objects['AdvOcean'].modifiers['Ocean'], "choppiness", text="Pointiness 2")
-
-            oceanmod = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-            try:
-                if oceanmod.spectrum == 'TEXEL_MARSEN_ARSLOE' or oceanmod.spectrum == 'JONSWAP':
+                    ocean.modifiers['Ocean'], "resolution")
+                try:
                     subcol.prop(
-                        bpy.data.objects['AdvOcean'].modifiers['Ocean'], "fetch_jonswap", text="fetch")
-            except:
-                pass
-          #  col.label("Weather Slider")
-           # col.prop(bpy.context.scene, "WeatherX")
-           # col.operator("upd.weather")
+                        ocean.modifiers['Ocean'], "viewport_resolution")
+                except:
+                    pass
+                try:
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "spectrum")
+                except:
+                    pass
 
-           # subcol = col.column()
-            # row = layout.row(align=True)
+                # row = layout.row(align=True)
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "repeat_x")
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "repeat_y")
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "spatial_size")
 
-            # col.label("Start End Frame")
-          #  subcol = col.column()
-            # row = layout.row(align=True)
+                # subcol = col.column()
+                # row = layout.row(align=True)
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "wave_alignment")
+                # subcol = col.column()
+                # row = layout.row(align=True)
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "wave_scale")
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "wave_scale_min")
+                # subcol = col.column()
+                # row = layout.row(align=True)
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "wind_velocity", text="Pointiness 1")
+                subcol.prop(
+                    ocean.modifiers['Ocean'], "choppiness", text="Pointiness 2")
 
-            # col.operator("gen.obfoam", icon="IPO_CUBIC")
-
-            # col.prop(bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces['Wetmap'], "is_active")
-            # col.prop(bpy.data.objects['AdvOcean'].modifiers['Ocean'], "use_foam")
-            # col.prop(bpy.context.active_object, "FoamBool")
+                oceanmod = ocean.modifiers['Ocean']
+                try:
+                    if oceanmod.spectrum == 'TEXEL_MARSEN_ARSLOE' or oceanmod.spectrum == 'JONSWAP':
+                        subcol.prop(
+                            ocean.modifiers['Ocean'], "fetch_jonswap", text="fetch")
+                except:
+                    pass
 
         else:
             subcol.operator("gen.ocean", icon="MOD_WAVE")
@@ -173,37 +164,42 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+        if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
 
-        if "AdvOcean" in bpy.data.objects:
+            if ocean != None:
 
-            subcol = col.column()
-            # row = layout.row(align=True)
-          #  subcol.label(text="Interacting Objects")
-            # row = layout.row(align=True)
-            subcol.operator("float.sel", icon="MOD_OCEAN")  # zeige button an
+                # if "AdvOcean" in bpy.data.objects:
 
-            # row = layout.row(align=True)
-            subcol.operator("stat.ob", icon="PINNED")
+                subcol = col.column()
+                # row = layout.row(align=True)
+            #  subcol.label(text="Interacting Objects")
+                # row = layout.row(align=True)
+                # zeige button an
+                subcol.operator("float.sel", icon="MOD_OCEAN")
 
-            # row = layout.row(align=True)
-            subcol.operator("rmv.interac", icon="CANCEL")
+                # row = layout.row(align=True)
+                subcol.operator("stat.ob", icon="PINNED")
 
-            # row = layout.row(align=True)
-            subcol.operator("cag.vis", icon="RESTRICT_VIEW_OFF")
+                # row = layout.row(align=True)
+                subcol.operator("rmv.interac", icon="CANCEL")
 
-            # row = layout.row(align=True)
+                # row = layout.row(align=True)
+                subcol.operator("cag.vis", icon="RESTRICT_VIEW_OFF")
 
-            box = subcol.box()
-            box.label(text="Duration of Simulation")
-            box.prop(bpy.context.scene.aom_props, "OceAniStart")
-            box.prop(bpy.context.scene.aom_props, "OceAniEnd")
-            box.label(text="Foam")
-            box.prop(bpy.context.scene, "OceanFoamBool")
-            box.prop(bpy.context.scene, "ObjFoamBool")
+                # row = layout.row(align=True)
 
-            row = layout.row(align=True)
-            box.operator("upd.oceaniframe", text="Update",
-                         icon="FILE_TICK")  # update foam and Frames
+                box = subcol.box()
+                box.label(text="Duration of Simulation")
+                box.prop(bpy.context.scene.aom_props, "OceAniStart")
+                box.prop(bpy.context.scene.aom_props, "OceAniEnd")
+                box.label(text="Foam")
+                box.prop(bpy.context.scene, "OceanFoamBool")
+                box.prop(bpy.context.scene, "ObjFoamBool")
+
+                row = layout.row(align=True)
+                box.operator("upd.oceaniframe", text="Update",
+                             icon="FILE_TICK")  # update foam and Frames
 
 
 class BE_PT_AdvOceanFoam(bpy.types.Panel):
@@ -228,22 +224,25 @@ class BE_PT_AdvOceanFoam(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+        if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
 
-        if "AdvOcean" in bpy.data.objects:
-            # subcol = col.column()
-            # row = layout.row(align=True)
-            subcol.label(text="Object Foam Settings")
-            subcol = col.column()
-            subcol.prop(bpy.data.objects["AdvOcean"].modifiers["Dynamic Paint"]
-                        .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
-            # row = layout.row(align=True)
+            if ocean != None:
+                # if "AdvOcean" in bpy.data.objects:
+                # subcol = col.column()
+                # row = layout.row(align=True)
+                subcol.label(text="Object Foam Settings")
+                subcol = col.column()
+                subcol.prop(ocean.modifiers["Dynamic Paint"]
+                            .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
+                # row = layout.row(align=True)
 
- # !!!!!!            subcol.prop(bpy.data.objects["AdvOcean"].modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
-            subcol.label(text="Ocean Foam Settings")
-            subcol = col.column()
-            # row = layout.row(align=True)
-            subcol.prop(
-                bpy.data.objects["AdvOcean"].modifiers["Ocean"], "foam_coverage", text="Coverage")
+    # !!!!!!            subcol.prop(bpy.data.objects["AdvOcean"].modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
+                subcol.label(text="Ocean Foam Settings")
+                subcol = col.column()
+                # row = layout.row(align=True)
+                subcol.prop(
+                    ocean.modifiers["Ocean"], "foam_coverage", text="Coverage")
 
 
 class BE_PT_AdvOceanWaves(bpy.types.Panel):
@@ -268,19 +267,21 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+        if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
 
-        if "AdvOcean" in bpy.data.objects:
-            # subcol = col.column()
-            # row = layout.row(align=True)
-            subcol = col.column()
-            canvas_settings = bpy.data.objects["AdvOcean"].modifiers["Dynamic Paint"].canvas_settings
-            subcol.prop(
-                canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
-            subcol.prop(
-                canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
-            subcol.prop(
-                canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
-            # row = layout.row(align=True)
+            if ocean != None:
+                # subcol = col.column()
+                # row = layout.row(align=True)
+                subcol = col.column()
+                canvas_settings = ocean.modifiers["Dynamic Paint"].canvas_settings
+                subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
+                subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
+                subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
+                # row = layout.row(align=True)
 
 
 class BE_PT_AdvOceanMat(bpy.types.Panel):
