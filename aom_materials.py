@@ -84,6 +84,7 @@ class AOMMatHandler:
             self.constructor_legacy(node_tree)
 
         self.label_nodes(node_tree)
+        return self.material
 
     def outputnodes(self, node_tree):
         nodes = node_tree.nodes
@@ -374,11 +375,29 @@ class AOMMatHandler:
 
     def foam_fac_ctl(self, node_tree):
         nodes = node_tree.nodes
+        links = node_tree.links
 
         node = nodes.new('ShaderNodeValue')
         node.name = 'LowerOceanFoamCut'
         node.location = (-1600, 3000)
         node.outputs[0].default_value = 0.0
+        # lower OCean foam fine edit
+        node = nodes.new('ShaderNodeMath')
+        node.name = 'LowerOceanFoam_Add'
+        node.location = (-1300, 3000)
+        node.operation = 'ADD'
+        node.inputs[1].default_value = 1.0
+
+        node = nodes.new('ShaderNodeMath')
+        node.name = 'LowerOceanFoam_Log'
+        node.location = (-1000, 3000)
+        node.operation = 'LOGARITHM'
+        node.inputs[1].default_value = 60.0
+
+        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+                  nodes['LowerOceanFoam_Add'].inputs[0])
+        links.new(nodes['LowerOceanFoam_Add'].outputs[0],
+                  nodes['LowerOceanFoam_Log'].inputs[0])
 
         node = nodes.new('ShaderNodeValue')
         node.name = 'FoamBaseStrength'
@@ -619,8 +638,8 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
         node.name = "SubNoise1"
         node.location = (800, 2175)
-        node.blend_type = 'SUBTRACT'
-        node.use_clamp = True
+        node.blend_type = 'ADD'
+        node.use_clamp = False
         node.inputs[0].default_value = 0.6
 
         # RGB mixshader für zweite Noise Texture
@@ -628,14 +647,14 @@ class AOMMatHandler:
         node.name = "SubNoise2"
         node.location = (1000, 2175)
         node.blend_type = 'SUBTRACT'
-        node.use_clamp = True
+        node.use_clamp = False
         node.inputs[0].default_value = 0.6
 
         # link Add notes to Subtract
         links.new(nodes['MixFoamWet'].outputs['Color'],
-                  nodes['SubNoise1'].inputs['Color1'])
-        links.new(nodes['SubNoise1'].outputs['Color'],
                   nodes['SubNoise2'].inputs['Color1'])
+        links.new(nodes['SubNoise1'].outputs['Color'],
+                  nodes['SubNoise2'].inputs['Color2'])
 
         # links.new(nodes['Patchiness'].outputs[0],
         #          nodes['SubNoise1'].inputs[0])
@@ -660,7 +679,7 @@ class AOMMatHandler:
         node.name = 'Hue1'
         node.location = (600, 2275)
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
-        node.inputs[4].default_value = 1
+        node.inputs[4].default_value = 0.2
 
         # noise texture (001)
         node = nodes.new('ShaderNodeTexNoise')
@@ -668,7 +687,7 @@ class AOMMatHandler:
         node.location = (400, 2100)
         node.inputs['Detail'].default_value = 2
         node.inputs['Scale'].default_value = 500
-        node.inputs['Roughness'].default_value = 0.7
+        node.inputs['Roughness'].default_value = 0.2
 
         # node = nodes.new('ShaderNodeTexCoord') ### mixshader machen
         # node.location = (000,150)
@@ -691,9 +710,9 @@ class AOMMatHandler:
         links.new(nodes['Noise2'].outputs['Fac'],
                   nodes['Hue2'].inputs[0])
         links.new(nodes['Hue1'].outputs[0],
-                  nodes['SubNoise1'].inputs['Color2'])
+                  nodes['SubNoise1'].inputs['Color1'])
         links.new(nodes['Hue2'].outputs[0],
-                  nodes['SubNoise2'].inputs['Color2'])
+                  nodes['SubNoise1'].inputs['Color2'])
         links.new(nodes['SubNoise2'].outputs[0],
                   nodes['MPScaleNoise'].inputs[0])
 
@@ -1601,7 +1620,7 @@ class AOMMatHandler:
         links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
         links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
 
-        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+        links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
         links.new(nodes['FoamBaseStrength'].outputs[0],
                   nodes['CRFoam'].inputs[4])
@@ -1611,10 +1630,6 @@ class AOMMatHandler:
         links.new(nodes['ObjectBaseStrength'].outputs[0],
                   nodes['CRWet'].inputs[4])
 
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise2'].inputs[0])
         links.new(nodes['DisplStrength'].outputs[0],
                   nodes['Disp'].inputs[2])
 
@@ -1682,10 +1697,10 @@ class AOMMatHandler:
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
 
         # pathchiness
-        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
+        #links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
         links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
 
-        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+        links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
         links.new(nodes['FoamBaseStrength'].outputs[0],
                   nodes['CRFoam'].inputs[4])
@@ -1695,10 +1710,10 @@ class AOMMatHandler:
         links.new(nodes['ObjectBaseStrength'].outputs[0],
                   nodes['CRWet'].inputs[4])
 
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise2'].inputs[0])
+        # links.new(nodes['Patchiness'].outputs[0],
+        #          nodes['SubNoise1'].inputs[0])
+        # links.new(nodes['Patchiness'].outputs[0],
+        #          nodes['SubNoise2'].inputs[0])
         links.new(nodes['DisplStrength'].outputs[0],
                   nodes['Disp'].inputs[2])
 
@@ -1786,7 +1801,7 @@ class AOMMatHandler:
         links.new(nodes['FoamBump'].outputs[0],
                   nodes['FoamOut'].inputs['Normal'])
 
-        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+        links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
         links.new(nodes['LowerObjectCut'].outputs[0], nodes['CRWet'].inputs[1])
 
@@ -1859,7 +1874,7 @@ class AOMMatHandler:
                   nodes['FoamBump'].inputs[0])
 
         # link foam fac ctl
-        links.new(nodes['LowerOceanFoamCut'].outputs[0],
+        links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
         links.new(nodes['FoamBaseStrength'].outputs[0],
                   nodes['CRFoam'].inputs[4])

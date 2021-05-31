@@ -6,6 +6,11 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     IgnoreMainCut = bpy.props.BoolProperty(
         name="Keep Connector", default=False)
 
+    OceanFoamBool = bpy.props.BoolProperty(
+        name="Keep Connector", default=True)
+    ObjFoamBool = bpy.props.BoolProperty(
+        name="Keep Connector", default=True)
+
     OceAniStart = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
         name="Start Frame",  # was soll im eingabefeld stehen
         default=1,  # start wert

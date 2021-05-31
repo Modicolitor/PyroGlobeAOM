@@ -6,34 +6,35 @@ class AOMPreset_Handler:
         #context = context
         pass
 
-    def set_preset(self, context):
+    def set_preset(self, context, ocean):
         PresetSel = context.scene.aom_props.PresetSel
+        mat = ocean.material_slots[0].material
         if PresetSel == '1':
-            self.set_lovely(context)
+            self.set_lovely(context, ocean, mat)
         elif PresetSel == '2':
-            self.set_lively(context)
+            self.set_lively(context, ocean, mat)
         elif PresetSel == '3':
-            self.set_stormy(context)
+            self.set_stormy(context, ocean, mat)
         elif PresetSel == '4':
-            self.set_shallow_quiet(context)
+            self.set_shallow_quiet(context, ocean, mat)
         elif PresetSel == '5':
-            self.set_shallow_lively(context)
+            self.set_shallow_lively(context, ocean, mat)
         elif PresetSel == '6':
-            self.set_shallow_stormy(context)
+            self.set_shallow_stormy(context, ocean, mat)
         elif PresetSel == '7':
-            self.set_established_lovely(context)
+            self.set_established_lovely(context, ocean, mat)
         elif PresetSel == '8':
-            self.set_established_lively(context)
+            self.set_established_lively(context, ocean, mat)
         elif PresetSel == '9':
-            self.set_established_stormy(context)
+            self.set_established_stormy(context, ocean, mat)
         elif PresetSel == '10':
-            self.set_abstract(context)
+            self.set_abstract(context, ocean, mat)
         elif PresetSel == '11':
-            self.set_abstract2(context)
+            self.set_abstract2(context, ocean, mat)
         elif PresetSel == '12':
-            self.set_abstract_Watt(context)
+            self.set_abstract_Watt(context, ocean, mat)
 
-    def set_initsettings(self, context):
+    def set_initsettings(self, context, Ocean, mat):
 
         # dp
 
@@ -41,14 +42,13 @@ class AOMPreset_Handler:
         waves.wave_damping = 0.02
         waves.wave_smoothness = 0.7
 
-        ###
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-        Ocean.foam_coverage = 0.5
-        Ocean.damping = 0.5
-        Ocean.viewport_resolution = 15
-        if "AdvOceanMat" in bpy.data.materials:
+        oceanmod = Ocean.modifiers["Ocean"]
+        oceanmod.foam_coverage = 0.3
+        oceanmod.damping = 0.5
+        oceanmod.viewport_resolution = 15
+
+        if "AdvOceanMat" in mat.name:
             print('Init Presets')
-            mat = bpy.data.materials['AdvOceanMat']
             nodes = mat.node_tree.nodes
 
             nodes['LowerObjectCut'].outputs[0].default_value = 0.4
@@ -73,8 +73,8 @@ class AOMPreset_Handler:
             nodes['Hue1'].inputs[4].default_value = 0.4
             nodes['Hue2'].inputs[4].default_value = 0.4
 
-    def set_lovely(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_lovely(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
         Ocean.choppiness = 1.00
         Ocean.wave_scale = 0.2
@@ -84,8 +84,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.3
         Ocean.damping = 0.3
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
 
             nodes['WaterBumpStrength'].outputs['Value'].default_value = 0.01
@@ -95,8 +95,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_lively(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_lively(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
         Ocean.wave_scale = 1.0
         Ocean.choppiness = 1.00
@@ -104,19 +104,19 @@ class AOMPreset_Handler:
         Ocean.wave_scale_min = 0.01
         Ocean.wave_alignment = 0.2
         Ocean.damping = 0.3
-        Ocean.foam_coverage = 0.5
+        Ocean.foam_coverage = 0.3
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
-            nodes['Patchiness'].outputs[0].default_value = 0.7
+            nodes['Patchiness'].outputs[0].default_value = 0.4
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_stormy(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_stormy(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 6
@@ -127,8 +127,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.2
         Ocean.damping = 0.5
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.03
             nodes['FoamBaseStrength'].outputs[0].default_value = 15
@@ -136,8 +136,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 1
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_shallow_quiet(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_shallow_quiet(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 0.1
@@ -148,8 +148,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.3
         #Ocean.damping = 0.2
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
@@ -157,8 +157,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_shallow_lively(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_shallow_lively(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'TEXEL_MARSEN_ARSLOE'
 
         Ocean.wave_scale = 0.4
@@ -170,8 +170,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.4
         #Ocean.damping = 0.2
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
@@ -179,8 +179,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_shallow_stormy(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_shallow_stormy(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'TEXEL_MARSEN_ARSLOE'
 
         Ocean.wave_scale = 0.5
@@ -191,8 +191,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.5
         #Ocean.damping = 0.2
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
@@ -200,8 +200,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_established_lovely(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_established_lovely(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 0.2
@@ -212,8 +212,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.0
         Ocean.damping = 0.5
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
@@ -221,8 +221,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_established_lively(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_established_lively(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 0.8
@@ -233,8 +233,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.0
         Ocean.damping = 0.5
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
@@ -242,8 +242,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_established_stormy(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_established_stormy(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 2
@@ -254,8 +254,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.0
         Ocean.damping = 0.64
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
@@ -263,8 +263,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_abstract(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_abstract(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 2
@@ -275,8 +275,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.0
         Ocean.damping = 0.64
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.002
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
@@ -291,8 +291,8 @@ class AOMPreset_Handler:
         # abstract
         # giant
 
-    def set_abstract2(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_abstract2(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 1.6
@@ -303,8 +303,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.2
         Ocean.damping = 0.44
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.002
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
@@ -312,8 +312,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_abstract_Watt(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
+    def set_abstract_Watt(self, context, Ocean, mat):
+        Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 1
@@ -325,8 +325,8 @@ class AOMPreset_Handler:
         Ocean.foam_coverage = 0.2
         Ocean.damping = 1.0
 
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
+        if "AdvOceanMat" in mat.name:
+
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.025
             nodes['FoamBaseStrength'].outputs[0].default_value = 10.0
@@ -335,27 +335,6 @@ class AOMPreset_Handler:
             nodes['DisplStrength'].outputs[0].default_value = 0.32
 
 
-'''
-    def set_abstract2(self, context):
-        Ocean = bpy.data.objects['AdvOcean'].modifiers['Ocean']
-        Ocean.spectrum = 'PHILLIPS'
-
-        Ocean.wave_scale = 2
-        Ocean.wave_alignment = 0.1
-        Ocean.choppiness = 0.1
-        Ocean.wind_velocity = 1
-        Ocean.wave_scale_min = 0.00
-        Ocean.foam_coverage = 0.0
-        Ocean.damping = 0.64
-
-        if "AdvOceanMat" in bpy.data.materials:
-            mat = bpy.data.materials['AdvOceanMat']
-            nodes = mat.node_tree.nodes
-            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.002
-            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
-            nodes['Patchiness'].outputs[0].default_value = 0.0
-            nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
-'''
 # shallow lake
 # shallow lake
 # established large ocean quiet

@@ -50,20 +50,20 @@ Loop animation:
 https://www.youtube.com/watch?v=Xh2Xuo00f0c
 
 
-[] ocean should set there ocean id in there objects
-[] object should save ocean id when floated 
-[] remove single must check for there ocean id when floating 
+[?] ocean should set there ocean id in there objects
+[?] object should save ocean id when floated 
+[?] remove single must check for there ocean id when floating 
 
 [] add selection --> active control to 
 
 
 
 ui:
-[] show material settings of the selected ocean or when none the original ocean ()
+
 
 fixed bugs:
 
 
-[] update oceaniframe operator: object and ocean foam must be ocean individual --
-[] second ocean has les viewport resolution
+
+[+] second ocean has les viewport resolution
 [] improve presets 

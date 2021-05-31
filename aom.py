@@ -705,7 +705,8 @@ def RemoveInterActSingle(context, obj):
 
 def AdvOceanMat(context, ocean):
     MatHandler = AOMMatHandler(context)
-    MatHandler.make_material(ocean)
+    mat = MatHandler.make_material(ocean)
+    return mat
 
 
 def add_driver(
@@ -728,6 +729,7 @@ def add_driver(
     d.expression = d.expression if not negative else "-1 * " + d.expression
 
 
+'''
 # Bool für Foam an aus definieren
 bpy.types.Scene.ObjFoamBool = bpy.props.BoolProperty(  # definiere neue Variable, als integer ...irgendwie
     name="Object Foam",  # was soll im eingabefeld stehen
@@ -744,21 +746,22 @@ bpy.types.Scene.CageVisBool = bpy.props.BoolProperty(  # definiere neue Variable
     # default=True,
     # description="Cremembers Cage visibility";
 )
+'''
 
 
-def FoamAnAus():
-    scene = bpy.context.scene
-    data = bpy.data
-    context = bpy.context
+def FoamAnAus(context, ocean):
+    #scene = bpy.context.scene
+    #data = bpy.data
+    #context = bpy.context
     #    mat=bpy.data.materials['AdvOceanMat']
     #    nodes = mat.node_tree.nodes
     #    links = mat.node_tree.links
 
-    ObjFoamBool = bpy.context.scene.ObjFoamBool
-    OceanFoamBool = bpy.context.scene.OceanFoamBool
+    ObjFoamBool = context.scene.aom_props.ObjFoamBool
+    OceanFoamBool = context.scene.aom_props.OceanFoamBool
 
-    bpy.data.objects['AdvOcean'].modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"].is_active = ObjFoamBool
-    bpy.data.objects['AdvOcean'].modifiers["Ocean"].use_foam = OceanFoamBool
+    ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"].is_active = ObjFoamBool
+    ocean.modifiers["Ocean"].use_foam = OceanFoamBool
 
 
 def CageVis(Bool):
@@ -830,13 +833,14 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
         if not hasattr(context.scene, "aom_props"):
             initialize_addon(context)
             ocean = GenOcean(context)
-            AdvOceanMat(context, ocean)
-            pres.set_initsettings(context)
-
+            mat = AdvOceanMat(context, ocean)
+            pres.set_initsettings(context, ocean, mat)
+            pres.set_preset(context, ocean)
         else:
             ocean = GenOcean(context)
-            AdvOceanMat(context, ocean)
-            pres.set_preset(context)
+            mat = AdvOceanMat(context, ocean)
+            pres.set_initsettings(context, ocean, mat)
+            pres.set_preset(context, ocean)
 
         return{"FINISHED"}
 
@@ -850,7 +854,7 @@ class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
         oceans = get_ocean_from_list(context, context.scene.objects)
         for oc in oceans:
             OceAniFrame(context, oc)
-            FoamAnAus()
+            FoamAnAus(context, oc)
 
         return{"FINISHED"}
 
@@ -861,8 +865,11 @@ class BE_OT_SetPreset(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
+
         pre = AOMPreset_Handler()
-        pre.set_preset(context)
+        oceans = get_ocean_from_list(context, context.scene.objects)
+        for oc in oceans:
+            pre.set_preset(context, oc)
 
         return{"FINISHED"}
 

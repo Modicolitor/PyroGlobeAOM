@@ -191,11 +191,11 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
 
                 box = subcol.box()
                 box.label(text="Duration of Simulation")
-                box.prop(bpy.context.scene.aom_props, "OceAniStart")
-                box.prop(bpy.context.scene.aom_props, "OceAniEnd")
+                box.prop(context.scene.aom_props, "OceAniStart")
+                box.prop(context.scene.aom_props, "OceAniEnd")
                 box.label(text="Foam")
-                box.prop(bpy.context.scene, "OceanFoamBool")
-                box.prop(bpy.context.scene, "ObjFoamBool")
+                box.prop(context.scene.aom_props, "OceanFoamBool")
+                box.prop(context.scene.aom_props, "ObjFoamBool")
 
                 row = layout.row(align=True)
                 box.operator("upd.oceaniframe", text="Update",
