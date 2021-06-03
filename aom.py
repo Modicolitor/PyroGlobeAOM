@@ -1,6 +1,7 @@
 from bpy.props import *
 import bpy
 import mathutils
+import copy
 from .aom_def import is_ocean, is_floatcage
 #from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
@@ -92,24 +93,17 @@ def GenOcean(context):
     ob.modifiers["Ocean"].foam_layer_name = "foam"
 
     # dieser wert bestimmt die Menge an Schaum, Lohnt sich bestimmt auszulagern
-    context.object.modifiers["Ocean"].foam_coverage = 0.6
+    #context.object.modifiers["Ocean"].foam_coverage = 0.6
 
+    start = (context.scene.aom_props.OceAniStart, 1)
+    end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
+        context, context.scene.aom_props.OceAniEnd))
     # Animation
-    ob.modifiers['Ocean'].time = 1
-    context.scene.frame_current = 1
-    ob.modifiers[0].time = 1
-    ob.modifiers[0].keyframe_insert(data_path="time")  # uses current frame
+    set_ocean_keyframes(context, context.object,
+                        ob.modifiers["Ocean"], start, end, True)
 
-    context.scene.frame_current = 250
-    ob.modifiers[0].time = 5
-    ob.modifiers[0].keyframe_insert(data_path="time")  # uses current frame
-    context.scene.frame_current = 250
-    # animation muss eingebaut werden, aber ich kenne den code zum keyframe setzen nicht
-    context.area.type = 'GRAPH_EDITOR'
-    bpy.ops.graph.extrapolation_type(type='LINEAR')
-    context.area.type = 'VIEW_3D'  # umschalten später muss hier 3d view hin
+    #print(get_ocean_keyframes(context, context.object))
 
-    context.scene.frame_current = 1
     #####Dynamic Paint modifier und einstellungen##########
 
     ##dynamic paint#####
@@ -142,6 +136,11 @@ def GenOcean(context):
     canvas['Waves'].brush_collection = bpy.data.collections["Wave"]
 
     return ob
+
+
+def get_animationlengthfromEnd(context, end):
+
+    return end/(2*context.scene.render.fps)
 
 
 def CollectionIndex(ColName):
@@ -190,30 +189,6 @@ bpy.types.Scene.WeatherX = FloatProperty(
     max=1.0,
     description="From Lovely (0) to Stormy (1)")
 
-'''
-##################################################################################
-#####Start and End Frame der Ocean Animation################
-#############################################
-
-
-# Define Start Frame Animat
-bpy.types.Scene.OceAniStart = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
-    name="Start Frame",  # was soll im eingabefeld stehen
-    default=1,  # start wert
-    # min=0,     ## kleinster Wert
-    # max=10,    ## größter Wert
-    description="Animation Start Frame")
-
-
-# Define End Frame Animat
-bpy.types.Scene.OceAniEnd = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
-    name="End Frame",  # was soll im eingabefeld stehen
-    default=250,  # start wert
-    # min=0,     ## kleinster Wert
-    # max=10,    ## größter Wert
-    description="Animation End Frame")
-'''
-
 
 def initialize_addon(context):
     from .aom_properties import AOMPropertyGroup
@@ -228,7 +203,25 @@ def initialize_addon(context):
     context.scene.eevee.use_ssr_refraction = True
 
 
-def OceAniFrame(context, ocean):
+def remove_oceankeyframes(context, ocean):
+    if hasattr(ocean.animation_data, "action"):
+
+        for fcu in ocean.animation_data.action.fcurves[:]:
+            ocean.animation_data.action.fcurves.remove(fcu)
+            #
+            # for keyframe in fcu.keyframe_points:
+            #    fcu.keyframe_points.remove(keyframe)
+
+
+def update_OceAniFrame(context, ocean):
+
+    remove_oceankeyframes(context, ocean)
+    start = (context.scene.aom_props.OceAniStart, 1)
+    end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
+        context, context.scene.aom_props.OceAniEnd))
+    # Animation
+    set_ocean_keyframes(context, context.object,
+                        ocean.modifiers["Ocean"], start, end, True)
 
     canvas = ocean.modifiers['Dynamic Paint'].canvas_settings
     OceAniStart = context.scene.aom_props.OceAniStart
@@ -729,26 +722,6 @@ def add_driver(
     d.expression = d.expression if not negative else "-1 * " + d.expression
 
 
-'''
-# Bool für Foam an aus definieren
-bpy.types.Scene.ObjFoamBool = bpy.props.BoolProperty(  # definiere neue Variable, als integer ...irgendwie
-    name="Object Foam",  # was soll im eingabefeld stehen
-    default=True,
-    description="Controls Ocean and Object Foam")
-
-bpy.types.Scene.OceanFoamBool = bpy.props.BoolProperty(  # definiere neue Variable, als integer ...irgendwie
-    name="Ocean Foam",  # was soll im eingabefeld stehen
-    default=True,
-    description="Controls Ocean and Object Foam")
-
-bpy.types.Scene.CageVisBool = bpy.props.BoolProperty(  # definiere neue Variable, als integer ...irgendwie
-    # name="Cage Visibility",      ### was soll im eingabefeld stehen
-    # default=True,
-    # description="Cremembers Cage visibility";
-)
-'''
-
-
 def FoamAnAus(context, ocean):
     #scene = bpy.context.scene
     #data = bpy.data
@@ -853,7 +826,7 @@ class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
     def execute(self, context):
         oceans = get_ocean_from_list(context, context.scene.objects)
         for oc in oceans:
-            OceAniFrame(context, oc)
+            update_OceAniFrame(context, oc)
             FoamAnAus(context, oc)
 
         return{"FINISHED"}
@@ -907,6 +880,172 @@ def highest_ocean_id(context, list):
     for oc in list:
         if oc.aom_data.ocean_id == highestid:
             return oc
+
+
+def copy_oceanmodprops(oldmod, mod):
+    mod.resolution = oldmod.resolution
+    mod.viewport_resolution = oldmod.viewport_resolution
+    mod.spectrum = oldmod.spectrum
+    mod.repeat_x = oldmod.repeat_x
+    mod.repeat_y = oldmod.repeat_y
+    mod.spatial_size = oldmod.spatial_size
+    mod.wave_alignment = oldmod.wave_alignment
+    mod.wave_scale = oldmod.wave_scale
+    mod.wave_scale_min = oldmod.wave_scale_min
+    mod.wind_velocity = oldmod.wind_velocity
+    mod.choppiness = oldmod.choppiness
+    mod.random_seed = oldmod.random_seed
+    mod.wave_direction = oldmod.wave_direction
+    mod.damping = oldmod.damping
+    mod.size = oldmod.size
+    mod.depth = oldmod.depth
+    mod.use_foam = oldmod.use_foam
+    mod.use_normals = oldmod.use_normals
+    mod.foam_coverage = oldmod.foam_coverage
+    mod.use_spray = oldmod.use_spray
+    mod.spray_layer_name = oldmod.spray_layer_name
+
+
+def get_ocean_keyframes(context, ocean):
+
+    keyframes = []
+    if not hasattr(ocean.animation_data, "action"):
+        return None
+    else:
+        for fcu in ocean.animation_data.action.fcurves:
+            for keyframe in fcu.keyframe_points:
+                keyframes.append(keyframe.co)
+    # print(keyframes)
+    return keyframes
+
+
+def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
+    oriframecurrent = copy.copy(context.scene.frame_current)
+    ###
+
+    # if not hasattr(ocean.animation_data, "action"):
+    context.scene.frame_current = start[0]
+    mod.time = start[1]
+    mod.keyframe_insert(data_path="time")
+
+    context.scene.frame_current = end[0]
+    mod.time = end[1]
+    mod.keyframe_insert(data_path="time")
+
+    for fcu in ocean.animation_data.action.fcurves:
+        for keyframe in fcu.keyframe_points:
+            keyframe.interpolation = 'LINEAR'
+
+    if is_extrapolate:
+        context.area.type = 'GRAPH_EDITOR'
+        bpy.ops.graph.extrapolation_type(type='LINEAR')
+        context.area.type = 'VIEW_3D'
+    context.scene.frame_current = oriframecurrent
+
+
+def loop_ocean(context, ocean):
+    # find original oc
+    update_OceAniFrame(context, ocean)
+
+    for mod in ocean.modifiers:
+        if mod.type == "OCEAN" and mod.name == "Ocean":
+            oldmod = mod
+        else:
+            print("no ocean modifier found in ocean")
+
+    if mod != None:
+        ocean.aom_data.is_loop = True
+        # add second ocean modifier (dynPaint muss druntersein )
+        mod = ocean.modifiers.new(name="OceanLoop", type="OCEAN")
+        # move to second place, could be better
+        bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=1)
+
+        mod.geometry_mode = "DISPLACE"
+        mod.foam_layer_name = 'LoopFoam'
+
+        copy_oceanmodprops(oldmod, mod)
+
+        # get original keyframes set invert keyframes
+        keyframes = get_ocean_keyframes(context, ocean)
+        # 1 (1,1) --> (1,5)
+        # 2 (250,5) --> (250,10)
+        print(f"doppelt 11 : {2 * keyframes[1][1]} ")
+        if keyframes != None:
+            set_ocean_keyframes(
+                context, ocean, mod, (keyframes[0][0], keyframes[1][1]), (keyframes[1][0], 2 * keyframes[1][1]), False)  # stimmt mal 2???
+
+        # set scale
+        wave_scalemax = copy.copy(oldmod.wave_scale)
+        set_keyframes(context, oldmod, "wave_scale",
+                      0, context.scene.aom_props.OceAniStart)
+        set_keyframes(context, oldmod, "wave_scale",
+                      wave_scalemax, context.scene.aom_props.OceAniEnd)
+
+        set_keyframes(context, mod, "wave_scale",
+                      wave_scalemax, context.scene.aom_props.OceAniStart)
+        set_keyframes(context, mod, "wave_scale",
+                      0, context.scene.aom_props.OceAniEnd)
+
+        ###modifiers["Ocean.001"].foam_layer_name = loopfoam
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # test for loop nodes and maybe delete
+
+        # add nodes for looping
+        node_attr = nodes.new('ShaderNodeAttribute')
+        node_attr.location = (-250, 2900)
+        node_attr.name = 'LoopData'
+        node_attr.attribute_name = mod.foam_layer_name
+
+        # add nodes for looping
+        nodeMix = nodes.new('ShaderNodeMixRGB')
+        nodeMix.location = (-000, 2900)
+        nodeMix.name = 'LoopMix'
+
+        nodeVal = nodes.new('ShaderNodeValue')
+        nodeVal.location = (-000, 2900)
+        nodeVal.name = 'LoopVal'
+
+        # set keyframes for in material
+        set_keyframes(context, nodeVal.outputs[0], "default_value",
+                      1, context.scene.aom_props.OceAniStart)
+        set_keyframes(context, nodeVal.outputs[0], "default_value",
+                      0, context.scene.aom_props.OceAniEnd)
+        nodeafter = get_node_after(context, node_tree, "Foam")
+        # link nodes in existing material
+        links.new(nodes['Foam'].outputs[0], nodeMix.inputs[1])
+        links.new(node_attr.outputs[0], nodeMix.inputs[2])
+        links.new(nodeVal.outputs[0], nodeMix.inputs[0])
+        links.new(nodeMix.outputs[0], nodeafter.inputs[0])
+
+        scene = context.scene
+        scene.frame_start = scene.aom_props.OceAniStart
+        scene.frame_end = scene.aom_props.OceAniEnd
+
+
+def set_keyframes(context, path, target,  value, frame):
+    oriframe = copy.copy(context.scene.frame_current)
+    context.scene.frame_current = frame
+    setattr(path, target, value)
+
+    path.keyframe_insert(data_path=target)
+    context.scene.frame_current = oriframe
+
+
+def get_node_after(context, node_tree, name):
+    for link in node_tree.links:
+        if link.from_node.name == name:
+            return link.to_node
+
+
+def remove_loop(context, ocean):
+    # test for loop signals
+
+    # delete loop signals
+
+    pass
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):
@@ -974,6 +1113,37 @@ class BE_OT_DeleteOcean(bpy.types.Operator):
             bpy.ops.object.delete(use_global=True)
 
         return{"FINISHED"}
+
+
+class BE_OT_LoopOcean(bpy.types.Operator):
+    bl_label = "Loop Ocean Animation"
+    bl_idname = "aom.loop"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+
+        for ob in oceans:
+            remove_loop(context, ob)
+            loop_ocean(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_LoopOceanRemove(bpy.types.Operator):
+    bl_label = "Remove Loop"
+    bl_idname = "aom.removeloop"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+
+        for ob in oceans:
+            remove_loop(context, ob)
+
+        return{"FINISHED"}
+
+#ocean = get_active_ocean(context)
 
 
 def remove_floats(context, ocean):

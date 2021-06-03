@@ -450,3 +450,40 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
             # row = layout.row(align=True)
 
     # Generate OCean  Button
+
+
+class BE_PT_AdvOceanSpecial(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_label = "Ocean Specials"
+    bl_category = "Adv-Ocean"
+
+    # schreibe auf den Bildschirm
+
+    def draw(self, context):
+
+        if hasattr(context.scene, "aom_props"):
+            layout = self.layout
+
+            layout.use_property_split = True
+            layout.use_property_decorate = False  # No animation.
+
+            flow = layout.grid_flow(row_major=True, columns=0,
+                                    even_columns=False, even_rows=False, align=True)
+            col = flow.column()
+
+            subcol = col.column()
+
+            if hasattr(context.scene, "aom_props"):
+                subcol.operator("aom.loop", icon="MATERIAL")
+                subcol.operator("aom.removeloop", icon="MATERIAL")
+
+            # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
+            # got a valid ocean
+
+            #subcol.label(text="Water Material Settings")
+
+            #  box = row.box()
+            # row = layout.row(align=True)
+
+    # Generate OCean  Button

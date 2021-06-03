@@ -17,9 +17,12 @@ from .aom_ui import BE_PT_AdvOceanInteract
 from .aom_ui import BE_PT_AdvOceanFoam
 from .aom_ui import BE_PT_AdvOceanWaves
 from .aom_ui import BE_PT_AdvOceanMat
+from .aom_ui import BE_PT_AdvOceanSpecial
 from .aom import BE_OT_FloatSelButt
 from .aom import BE_OT_StaticOb
 from .aom import BE_OT_GenOceanMat
+from .aom import BE_OT_LoopOceanRemove
+from .aom import BE_OT_LoopOcean
 #from .aom import BE_OT_SetStorm
 #from .aom import BE_OT_SetMod
 #from .aom import BE_OT_SetLov
@@ -64,9 +67,12 @@ classes = (BE_PT_AdvOceanAdd,
            BE_PT_AdvOceanFoam,
            BE_PT_AdvOceanWaves,
            BE_PT_AdvOceanMat,
+           BE_PT_AdvOceanSpecial,
            BE_OT_FloatSelButt,
            BE_OT_StaticOb,
            BE_OT_GenOceanMat,
+           BE_OT_LoopOcean,
+           BE_OT_LoopOceanRemove,
            # BE_OT_SetStorm,
            # BE_OT_SetMod,
            # BE_OT_SetLov,

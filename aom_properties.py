@@ -65,6 +65,8 @@ class AOMObjProperties(bpy.types.PropertyGroup):
     interaction_type = bpy.props.StringProperty(default='')
     float_parent_id = bpy.props.IntProperty(default=-1)
     namenum = bpy.props.IntProperty(default=-1)
+    is_loop = bpy.props.BoolProperty(
+        name="Is Looping", default=False)
 
 
 '''

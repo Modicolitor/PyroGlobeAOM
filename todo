@@ -65,5 +65,11 @@ fixed bugs:
 
 
 
-[+] second ocean has les viewport resolution
+
 [] improve presets 
+
+[] loop ocean in foam an/aus frames
+[] remove loop option
+
+
+[] changing material should adapt preset setting 

@@ -15,3 +15,7 @@ def is_ocean_material(context, mat):
     if 'AdvOceanMat' in mat.name:
         return True
     return False
+
+
+def is_loop(context, ocean):
+    return ocean.aom_data.is_loop
