@@ -171,12 +171,17 @@ def get_ocean_id(context):
     for ob in context.scene.objects:
         if is_ocean(context, ob):
             l.append(ob.aom_data.ocean_id)
-    l.sort()
+    l.sort()  # bug in python 3. update
+    # print(l)
     if len(l) == 0:
         return 0
     else:
-        print(f'largest id is {l[len(l)-1]}')
-        return l[len(l)-1]+1
+        #largest = -1
+        # for i in l:
+        #    if i > largest:
+        #        largest = i
+        #print(f'largest id is {l[len(l)-1]}')
+        return l[len(l)-1]+1  # largest + 1
 
 
 def get_ocean_from_id(context, ocean_id):
