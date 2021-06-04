@@ -95,9 +95,8 @@ def GenOcean(context):
     # dieser wert bestimmt die Menge an Schaum, Lohnt sich bestimmt auszulagern
     #context.object.modifiers["Ocean"].foam_coverage = 0.6
 
-    start = (context.scene.aom_props.OceAniStart, 1)
-    end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
-        context, context.scene.aom_props.OceAniEnd))
+    start, end = get_time_animation_keys(context)
+
     # Animation
     set_ocean_keyframes(context, context.object,
                         ob.modifiers["Ocean"], start, end, True)
@@ -138,9 +137,16 @@ def GenOcean(context):
     return ob
 
 
-def get_animationlengthfromEnd(context, end):
+def get_time_animation_keys(context):
+    # *2  is the bjoern faktor
+    f = context.scene.aom_props.OceAniSpeed / (2*context.scene.render.fps)
+    start = context.scene.aom_props.OceAniStart
+    end = context.scene.aom_props.OceAniEnd
 
-    return end/(2*context.scene.render.fps)
+    time = (end-start)*f
+    startkey = (start, time)
+    endkey = (end, 2*time)
+    return startkey, endkey
 
 
 def CollectionIndex(ColName):
@@ -216,9 +222,10 @@ def remove_oceankeyframes(context, ocean):
 def update_OceAniFrame(context, ocean):
 
     remove_oceankeyframes(context, ocean)
-    start = (context.scene.aom_props.OceAniStart, 1)
-    end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
-        context, context.scene.aom_props.OceAniEnd))
+    start, end = get_time_animation_keys(context)
+    #start = (context.scene.aom_props.OceAniStart, 1)
+    # end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
+    #    context, context.scene.aom_props.OceAniEnd))
     # Animation
     set_ocean_keyframes(context, context.object,
                         ocean.modifiers["Ocean"], start, end, True)
@@ -945,6 +952,7 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
 
 def loop_ocean(context, ocean):
     # find original oc
+    remove_loop(context, ocean)
     update_OceAniFrame(context, ocean)
 
     for mod in ocean.modifiers:
@@ -966,25 +974,28 @@ def loop_ocean(context, ocean):
         copy_oceanmodprops(oldmod, mod)
 
         # get original keyframes set invert keyframes
-        keyframes = get_ocean_keyframes(context, ocean)
-        # 1 (1,1) --> (1,5)
-        # 2 (250,5) --> (250,10)
-        print(f"doppelt 11 : {2 * keyframes[1][1]} ")
-        if keyframes != None:
-            set_ocean_keyframes(
-                context, ocean, mod, (keyframes[0][0], keyframes[1][1]), (keyframes[1][0], 2 * keyframes[1][1]), False)  # stimmt mal 2???
+        #keyframes = get_ocean_keyframes(context, ocean)
+        start, end = get_time_animation_keys(context)
+
+        loopstart = (start[0], 0)
+        loopend = (end[0], start[1])
+        # 1 (1,0) <-- (1,5)
+        # 2 (250,5) <-- (250,10)
+        #print(f"doppelt 11 : {2 * keyframes[1][1]} ")
+        # if keyframes != None:
+        set_ocean_keyframes(context, ocean, mod, loopstart, loopend, False)
 
         # set scale
         wave_scalemax = copy.copy(oldmod.wave_scale)
         set_keyframes(context, oldmod, "wave_scale",
-                      0, context.scene.aom_props.OceAniStart)
+                      wave_scalemax, context.scene.aom_props.OceAniStart)
         set_keyframes(context, oldmod, "wave_scale",
-                      wave_scalemax, context.scene.aom_props.OceAniEnd)
+                      0, context.scene.aom_props.OceAniEnd)
 
         set_keyframes(context, mod, "wave_scale",
-                      wave_scalemax, context.scene.aom_props.OceAniStart)
+                      0, context.scene.aom_props.OceAniStart)
         set_keyframes(context, mod, "wave_scale",
-                      0, context.scene.aom_props.OceAniEnd)
+                      wave_scalemax, context.scene.aom_props.OceAniEnd)
 
         ###modifiers["Ocean.001"].foam_layer_name = loopfoam
         mat = ocean.material_slots[0].material
@@ -992,7 +1003,7 @@ def loop_ocean(context, ocean):
         nodes = node_tree.nodes
         links = node_tree.links
         # test for loop nodes and maybe delete
-
+        remove_loop_nodes(context, node_tree)
         # add nodes for looping
         node_attr = nodes.new('ShaderNodeAttribute')
         node_attr.location = (-250, 2900)
@@ -1002,7 +1013,7 @@ def loop_ocean(context, ocean):
         # add nodes for looping
         nodeMix = nodes.new('ShaderNodeMixRGB')
         nodeMix.location = (-000, 2900)
-        nodeMix.name = 'LoopMix'
+        nodeMix.name = 'LoopOut'
 
         nodeVal = nodes.new('ShaderNodeValue')
         nodeVal.location = (-000, 2900)
@@ -1010,15 +1021,18 @@ def loop_ocean(context, ocean):
 
         # set keyframes for in material
         set_keyframes(context, nodeVal.outputs[0], "default_value",
-                      1, context.scene.aom_props.OceAniStart)
+                      0, context.scene.aom_props.OceAniStart)
         set_keyframes(context, nodeVal.outputs[0], "default_value",
-                      0, context.scene.aom_props.OceAniEnd)
+                      1, context.scene.aom_props.OceAniEnd)
         nodeafter = get_node_after(context, node_tree, "Foam")
         # link nodes in existing material
         links.new(nodes['Foam'].outputs[0], nodeMix.inputs[1])
         links.new(node_attr.outputs[0], nodeMix.inputs[2])
         links.new(nodeVal.outputs[0], nodeMix.inputs[0])
         links.new(nodeMix.outputs[0], nodeafter.inputs[0])
+
+        make_keyframes_linear(context, ocean)
+        make_keyframes_linear(context, mat)
 
         scene = context.scene
         scene.frame_start = scene.aom_props.OceAniStart
@@ -1031,7 +1045,15 @@ def set_keyframes(context, path, target,  value, frame):
     setattr(path, target, value)
 
     path.keyframe_insert(data_path=target)
+
     context.scene.frame_current = oriframe
+
+
+def make_keyframes_linear(context, ob):
+    if hasattr(ob.animation_data, "action"):
+        for fc in ob.animation_data.action.fcurves:
+            for key in fc.keyframe_points:
+                key.interpolation = 'LINEAR'
 
 
 def get_node_after(context, node_tree, name):
@@ -1040,12 +1062,61 @@ def get_node_after(context, node_tree, name):
             return link.to_node
 
 
+def remove_loop_nodes(context, node_tree):
+    nodes = node_tree.nodes
+    links = node_tree.links
+    if "LoopOut" in nodes:
+        after = get_node_after(context, node_tree, "LoopOut")
+        links.new(nodes['Foam'].outputs[0], after.inputs[0])
+        for node in nodes:
+            if "Loop" in node.name:
+                nodes.remove(node)
+
+
 def remove_loop(context, ocean):
-    # test for loop signals
+    if ocean.aom_data.is_loop:
+        ocean.aom_data.is_loop = False
 
-    # delete loop signals
+        # delete node setup
+        remove_loop_nodes(context, ocean.material_slots[0].material.node_tree)
 
-    pass
+        if "OceanLoop" in ocean.modifiers:
+            mod = ocean.modifiers["OceanLoop"]
+            ocean.modifiers.remove(mod)
+
+        # delete scale keyframes
+        keys = get_keyframes_data_path(
+            context, ocean, 'modifiers["Ocean"].wave_scale')
+        wave_scale = get_largest_keyvalue(context, keys)
+
+        mod = ocean.modifiers['Ocean']
+        for key in keys:
+            mod.keyframe_delete(data_path="wave_scale",
+                                index=-1, frame=key.co[0])
+        mod.wave_scale = wave_scale
+
+
+def get_keyframes_data_path(context, object, data_path):
+
+    if hasattr(object.animation_data, "action"):
+        keys = []
+        action = object.animation_data.action
+        for fc in action.fcurves:
+            if fc.data_path == data_path:
+                for key in fc.keyframe_points:
+                    keys.append(key)
+    return keys
+
+
+def get_largest_keyvalue(context, keys):
+    if len(keys) == 0:
+        return 0
+    else:
+        val = -9000000000000
+        for key in keys:
+            if key.co[1] > val:
+                val = key.co[1]
+        return val
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):

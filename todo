@@ -73,3 +73,5 @@ fixed bugs:
 
 
 [] changing material should adapt preset setting 
+
+[] remove node setup in make loop before making it

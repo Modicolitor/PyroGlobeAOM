@@ -11,6 +11,9 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     ObjFoamBool = bpy.props.BoolProperty(
         name="Keep Connector", default=True)
 
+    OceAniSpeed = bpy.props.FloatProperty(
+        name="Keep Connector", default=1)
+
     OceAniStart = bpy.props.IntProperty(  # definiere neue Variable, als integer ...irgendwie
         name="Start Frame",  # was soll im eingabefeld stehen
         default=1,  # start wert

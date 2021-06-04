@@ -193,6 +193,7 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 box.label(text="Duration of Simulation")
                 box.prop(context.scene.aom_props, "OceAniStart")
                 box.prop(context.scene.aom_props, "OceAniEnd")
+                box.prop(context.scene.aom_props, "OceAniSpeed", text="Speed")
                 box.label(text="Foam")
                 box.prop(context.scene.aom_props, "OceanFoamBool")
                 box.prop(context.scene.aom_props, "ObjFoamBool")
