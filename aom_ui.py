@@ -476,8 +476,12 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
             subcol = col.column()
 
             if hasattr(context.scene, "aom_props"):
+                subcol.label(text='Loop')
                 subcol.operator("aom.loop", icon="MATERIAL")
                 subcol.operator("aom.removeloop", icon="MATERIAL")
+                subcol.label(text='Spray')
+                subcol.operator("aom.spray", icon="MATERIAL")
+                subcol.operator("aom.remove_spray", icon="MATERIAL")
 
             # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
             # got a valid ocean

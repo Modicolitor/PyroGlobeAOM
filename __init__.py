@@ -34,6 +34,8 @@ from .aom import BE_OT_RemBtn
 #from .aom import BE_OT_GenObjFoam
 from .aom import BE_OT_DeleteOcean
 from .aom import BE_OT_SetPreset
+from .aom import BE_OT_OceanSpray
+from .aom import BE_OT_RemoveOceanSpray
 
 #from .modalops import PP_OT_PlanarZScaleMenu
 
@@ -86,8 +88,8 @@ classes = (BE_PT_AdvOceanAdd,
            AOMPropertyGroup,
            AOMObjProperties,
            BE_OT_SetPreset,
-
-           # FloatdataItem
+           BE_OT_OceanSpray,
+           BE_OT_RemoveOceanSpray,
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

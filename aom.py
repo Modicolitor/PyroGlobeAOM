@@ -6,6 +6,7 @@ from .aom_def import is_ocean, is_floatcage
 #from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
 from .aom_presets import AOMPreset_Handler
+from .aom_geonodes import AOMGeoNodesHandler
 
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
@@ -957,7 +958,7 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
 
 def loop_ocean(context, ocean):
     # find original oc
-    remove_loop(context, ocean)
+    #remove_loop(context, ocean)
     update_OceAniFrame(context, ocean)
 
     for mod in ocean.modifiers:
@@ -1220,6 +1221,37 @@ class BE_OT_LoopOceanRemove(bpy.types.Operator):
         return{"FINISHED"}
 
 #ocean = get_active_ocean(context)
+
+
+class BE_OT_OceanSpray(bpy.types.Operator):
+    bl_label = "Add Spray"
+    bl_idname = "aom.spray"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        GN = AOMGeoNodesHandler(context)
+
+        for ob in oceans:
+            GN.remove_spray(context, ob)
+            GN.new_spray(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_RemoveOceanSpray(bpy.types.Operator):
+    bl_label = "Remove Spray"
+    bl_idname = "aom.remove_spray"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        GN = AOMGeoNodesHandler(context)
+
+        for ob in oceans:
+            GN.remove_spray(context, ob)
+
+        return{"FINISHED"}
 
 
 def remove_floats(context, ocean):
