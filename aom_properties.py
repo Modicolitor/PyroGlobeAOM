@@ -28,7 +28,8 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
         # min=0,     ## kleinster Wert
         # max=10,    ## größter Wert
         description="Animation End Frame")
-    LastNamNum = bpy.props.IntProperty(default=-1)
+
+    LastNamNum: bpy.props.IntProperty(default=-1)
 
     MaterialSel: bpy.props.EnumProperty(
         name='Material Selector',

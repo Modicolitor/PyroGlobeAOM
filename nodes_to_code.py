@@ -1,3 +1,8 @@
+# todo
+
+# [] nodegroups
+# [] test material node trees
+# [] clean up get value section to bl_idname
 
 
 import bpy
@@ -68,9 +73,11 @@ def get_putput(a, inp):
 def nodes_to_nodecode(group):
     nodes = group.nodes
     links = group.links
+    # sort nodes left to right
     nodes = sort_nodes_list(nodes)
 
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    gen_maininputs(group)
     for node in nodes:
         print('')
         print(f'node = nodes.new("{node.bl_idname}" )')
@@ -79,40 +86,131 @@ def nodes_to_nodecode(group):
             f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
 
         if node.bl_idname == 'NodeGroupInput':
-            for out in node.outputs:
-                if out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
-                    # code geht so nicht!!!
-                    print(f'node.outputs.new("{out.bl_idname}", "{out.name}")')
+            pass
+            # for out in node.outputs:
+            # f out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
+            # code geht so nicht!!!
+            #print(f'node.outputs.new("{out.bl_idname}", "{out.name}")')
 
-        elif node.bl_idname == 'NodeGroupOutput':
-            for out in node.inputs:
-                if out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
-                    print(f'node.inputs.new("{out.bl_idname}", "{out.name}")')
+            # elif node.bl_idname == 'NodeGroupOutput':
+            # for out in node.inputs:
+            #    if out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
+            #       print(f'node.inputs.new("{out.bl_idname}", "{out.name}")')
+
+            '''
+            nodes["Point Scale"].input_type
+            data_type 
+            operation 
+
+            nodes["Attribute Vector Math"].input_type_b nodes["Attribute Vector Math"].input_type_a
+            nodes["Point Distribute"].distribute_method
+
+            nodes["Attribute Mix"].input_type_factor
+            blend_type 
+            nodes["Attribute Map Range"].interpolation_type
+            nodes["Math.001"].use_clamp
+            '''
         else:
             for a, inp in enumerate(node.inputs):
                 value = get_putput(a, inp)
                 if value != '':
                     print(f'node.inputs[{a}].default_value = {value}')
+                special_operations(node)
 
             for a, inp in enumerate(node.outputs):
                 value = get_putput(a, inp)
                 if value != '':
                     print(f'node.outputs[{a}].default_value = {value}')
 
-    gen_links(links)
+    gen_links(group, nodes, links)
 
 
-def gen_links(links):
+def special_operations(node):
+
+    if hasattr(node, "instance_type"):
+        print(f'node.instance_type = "{node.instance_type}"')
+    elif hasattr(node, "input_type"):
+        print(f'node.input_type = "{node.input_type}"')
+    elif hasattr(node, "data_type"):
+        print(f'node.data_type = "{node.data_type}"')
+    elif hasattr(node, "operation"):
+        print(f'node.operation = "{node.operation}"')
+    elif hasattr(node, "input_type_a"):
+        print(f'node.input_type_a = "{node.input_type_a}"')
+    elif hasattr(node, "input_type_b"):
+        print(f'node.input_type_b = "{node.input_type_b}"')
+
+    elif hasattr(node, "distribute_method"):
+        print(f'node.distribute_method = "{node.distribute_method}"')
+    elif hasattr(node, "input_type_factor"):
+        print(f'node.input_type_factor = "{node.input_type_factor}"')
+    elif hasattr(node, "blend_type"):
+        print(f'node.blend_type = {node.blend_type}')
+    elif hasattr(node, "interpolation_type"):
+        print(f'node.interpolation_type = "{node.interpolation_type}"')
+    elif hasattr(node, "use_clamp"):
+        print(f'node.use_clamp = "{node.use_clamp}"')
+
+
+def get_sorted_InputLinks(nodes, links):
+    inplinks = []
     for l in links:
-        # links.new(nodes['Group Input'].outputs[0],
-        #          nodes['Voronoi Texture'].inputs[0])
+        if 'NodeGroupInput' in l.from_node.bl_idname:
+            inplinks.append(l)
+
+    # get input
+    innode = get_inputnode(nodes)
+
+    sortedlinks = []
+    for out in innode.outputs:
+        if out.bl_idname != "NodeSocketVirtual":
+            for l in inplinks:
+                if l.from_socket == out:
+                    sortedlinks.append(l)
+
+    return sortedlinks
+
+
+def get_inputnode(nodes):
+    for node in nodes:
+        if node.bl_idname == 'NodeGroupInput':
+            innode = node
+            break
+    return innode
+
+
+def get_putput_index(node, socket):
+    for i, out in enumerate(node.outputs):
+        if out.name == socket.name:
+            index = i
+            break
+    return index
+
+
+def gen_maininputs(group):
+    for inp in group.inputs:
+        print(f"node_group.inputs.new('{inp.bl_socket_idname}','{inp.name}')")
+    group.inputs
+
+
+def gen_links(group, nodes, links):
+
+    inplinks = get_sorted_InputLinks(nodes, links)
+
+    # make new input sockets
+
+    for i, l in enumerate(inplinks):
         print(
-            f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
+            f"links.new( nodes['{l.from_node.name}'].outputs['{get_putput_index(l.from_node, l.from_socket)}'],  nodes['{l.to_node.name}'].inputs['{get_putput_index(l.to_node, l.to_socket)}'])")
+
+    # set- input names
+
+    for l in links:
+        if 'NodeGroupInput' not in l.from_node.bl_idname:
+            print(
+                f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
 
 
 group = bpy.data.node_groups['OceanSpray']
-
-nodes = group.nodes
-links = group.links
 
 nodes_to_nodecode(group)
