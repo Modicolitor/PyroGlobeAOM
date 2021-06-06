@@ -40,18 +40,26 @@ class AOMGeoNodesHandler:
         for cole in oricols:
             print(cole)
             if cole.name != col.name:
+
                 for cob in cole.objects:
                     if ob.name == cob.name:
                         #print("unline ob {ob.name} col {col} ")
                         cole.objects.unlink(ob)
 
+    def add_collection_to_modinp(self, col, mod, modinput):
+
+        mod[modinput.identifier] = col
+
     def new_spray(self, context, ocean):
+        ocean.modifiers["Ocean"].use_spray = True
+        ocean.modifiers["Ocean"].spray_layer_name = "spray"
+
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
         mod.name = "Spray"
         nodegroup.name = "Spray"
         #self.move_mod_one_up(ocean, mod)
-        self.make_spray_nodes(mod.node_group)
+        self.make_spray_nodes(mod, mod.node_group)
 
         # collection
         # gibts schon den Brushordner
@@ -68,24 +76,37 @@ class AOMGeoNodesHandler:
 
         self.ob_to_collection(context, collection, context.object)
 
-        context.layer_collection.children['Spray'].exclude = True
+        #context.layer_collection.children['Spray'].exclude = True
+
+        # it will be only one but more flexible
+        for inp in mod.node_group.inputs:
+            if inp.bl_socket_idname == 'NodeSocketCollection':
+                self.add_collection_to_modinp(collection, mod, inp)
+
         #context.view_layer.active_layer_collection = collection
         #collection.exclude = True
         #self.AdvCollection.children[collection.name].exclude = True
 
-    def make_spray_nodes(self, node_group):
+    def make_spray_nodes(self, mod, node_group):
         self.remove_nodes(node_group)
         nodes = node_group.nodes
         links = node_group.links
 
-        node_group.inputs.new('NodeSocketFloat', 'Density Max')
-        node_group.inputs.new('NodeSocketFloat', 'Contrast')
-        node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
-        node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
-        node_group.inputs.new('NodeSocketFloat', 'OverallParticleScale')
-        node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
-        node_group.inputs.new('NodeSocketCollection',
-                              'SprayPartikleCollection')
+        inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
+        inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
+        inp.default_value = 30.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'Contrast')
+        inp.default_value = 0.25
+        inp = node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
+        inp.default_value = 0.8
+        inp = node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
+        inp.default_value = 0.01
+        inp = node_group.inputs.new('NodeSocketFloat', 'OverallParticleScale')
+        inp.default_value = 0.06
+        inp = node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new(
+            'NodeSocketCollection', 'SprayPartikleCollection')
 
         node = nodes.new("NodeGroupInput")
         node.name = "Group Input"
@@ -94,24 +115,24 @@ class AOMGeoNodesHandler:
         node = nodes.new("ShaderNodeMath")
         node.name = "Math"
         node.location = (-984, 374)
-        node.inputs[0].default_value = 0
+        node.inputs[0].default_value = 0.5
         node.operation = "ADD"
-        node.inputs[1].default_value = 1
+        node.inputs[1].default_value = 1.0
         node.operation = "ADD"
-        node.inputs[2].default_value = 0
+        node.inputs[2].default_value = 0.0
         node.operation = "ADD"
-        node.outputs[0].default_value = 0
+        node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.001"
         node.location = (-782, 368)
-        node.inputs[0].default_value = 0
+        node.inputs[0].default_value = 0.5
         node.operation = "LOGARITHM"
-        node.inputs[1].default_value = 51
+        node.inputs[1].default_value = 51.4
         node.operation = "LOGARITHM"
-        node.inputs[2].default_value = 0
+        node.inputs[2].default_value = 0.0
         node.operation = "LOGARITHM"
-        node.outputs[0].default_value = 0
+        node.outputs[0].default_value = 0.0
 
         node = nodes.new("GeometryNodeAttributeMapRange")
         node.name = "Attribute Map Range"
@@ -121,15 +142,15 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.inputs[2].default_value = "foamLim"
         node.data_type = "FLOAT"
-        node.inputs[3].default_value = 0
+        node.inputs[3].default_value = 0.25
         node.data_type = "FLOAT"
-        node.inputs[4].default_value = 1
+        node.inputs[4].default_value = 1.0
         node.data_type = "FLOAT"
-        node.inputs[5].default_value = 0
+        node.inputs[5].default_value = 0.0
         node.data_type = "FLOAT"
-        node.inputs[6].default_value = 1
+        node.inputs[6].default_value = 1.0
         node.data_type = "FLOAT"
-        node.inputs[7].default_value = 4
+        node.inputs[7].default_value = 4.0
         node.data_type = "FLOAT"
         node.inputs[8].default_value = (0.0, 0.0, 0.0,)
         node.data_type = "FLOAT"
@@ -150,11 +171,11 @@ class AOMGeoNodesHandler:
         node.input_type_a = "ATTRIBUTE"
         node.inputs[1].default_value = ""
         node.input_type_a = "ATTRIBUTE"
-        node.inputs[2].default_value = 0
+        node.inputs[2].default_value = 0.5
         node.input_type_a = "ATTRIBUTE"
         node.inputs[3].default_value = "foamLim"
         node.input_type_a = "ATTRIBUTE"
-        node.inputs[4].default_value = 0
+        node.inputs[4].default_value = 0.0
         node.input_type_a = "ATTRIBUTE"
         node.inputs[5].default_value = (0.0, 0.0, 0.0,)
         node.input_type_a = "ATTRIBUTE"
@@ -162,7 +183,7 @@ class AOMGeoNodesHandler:
         node.input_type_a = "ATTRIBUTE"
         node.inputs[7].default_value = "dp_wetmap"
         node.input_type_a = "ATTRIBUTE"
-        node.inputs[8].default_value = 0
+        node.inputs[8].default_value = 0.0
         node.input_type_a = "ATTRIBUTE"
         node.inputs[9].default_value = (0.0, 0.0, 0.0,)
         node.input_type_a = "ATTRIBUTE"
@@ -172,28 +193,24 @@ class AOMGeoNodesHandler:
         node.input_type_a = "ATTRIBUTE"
 
         node = nodes.new("NodeReroute")
-        node.name = "Reroute.001"
-        node.location = (-120, -139)
-
-        node = nodes.new("NodeReroute")
         node.name = "Reroute.005"
         node.location = (-7, 29)
-        node.inputs[0].default_value = 0
-        node.outputs[0].default_value = 0
+        node.inputs[0].default_value = 0.0
+        node.outputs[0].default_value = 0.0
 
         node = nodes.new("NodeReroute")
         node.name = "Reroute.006"
         node.location = (4, 97)
-        node.inputs[0].default_value = 0
-        node.outputs[0].default_value = 0
+        node.inputs[0].default_value = 0.0
+        node.outputs[0].default_value = 0.0
 
         node = nodes.new("GeometryNodePointDistribute")
         node.name = "Point Distribute"
         node.location = (76, 264)
         node.distribute_method = "RANDOM"
-        node.inputs[1].default_value = 0
+        node.inputs[1].default_value = 0.0
         node.distribute_method = "RANDOM"
-        node.inputs[2].default_value = 30
+        node.inputs[2].default_value = 30.0
         node.distribute_method = "RANDOM"
         node.inputs[3].default_value = "foamLim"
         node.distribute_method = "RANDOM"
@@ -212,42 +229,16 @@ class AOMGeoNodesHandler:
         node.operation = "ADD"
         node.inputs[4].default_value = (0.0, 0.0, 0.0,)
         node.operation = "ADD"
-        node.inputs[5].default_value = 0
+        node.inputs[5].default_value = 0.0
         node.operation = "ADD"
         node.inputs[6].default_value = ""
         node.operation = "ADD"
         node.inputs[7].default_value = (0.0, 0.0, 0.0,)
         node.operation = "ADD"
-        node.inputs[8].default_value = 0
+        node.inputs[8].default_value = 0.0
         node.operation = "ADD"
         node.inputs[9].default_value = "position"
         node.operation = "ADD"
-
-        node = nodes.new("NodeReroute")
-        node.name = "Reroute.004"
-        node.location = (301, 6)
-        node.inputs[0].default_value = 0
-        node.outputs[0].default_value = 0
-
-        node = nodes.new("NodeReroute")
-        node.name = "Reroute.003"
-        node.location = (321, -8)
-        node.inputs[0].default_value = 0
-        node.outputs[0].default_value = 0
-
-        node = nodes.new("NodeReroute")
-        node.name = "Reroute.002"
-        node.location = (475, -71)
-        node.inputs[0].default_value = 0
-        node.outputs[0].default_value = 0
-
-        node = nodes.new("ShaderNodeCombineXYZ")
-        node.name = "Combine XYZ"
-        node.location = (497, 3)
-        node.inputs[0].default_value = 0
-        node.inputs[1].default_value = 0
-        node.inputs[2].default_value = 0
-        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
 
         node = nodes.new("GeometryNodeAttributeRandomize")
         node.name = "Attribute Randomize"
@@ -259,9 +250,9 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.inputs[3].default_value = (1.0, 1.0, 1.0,)
         node.data_type = "FLOAT"
-        node.inputs[4].default_value = 0
+        node.inputs[4].default_value = 0.01
         node.data_type = "FLOAT"
-        node.inputs[5].default_value = 0
+        node.inputs[5].default_value = 0.8
         node.data_type = "FLOAT"
         node.inputs[6].default_value = 0
         node.data_type = "FLOAT"
@@ -273,18 +264,18 @@ class AOMGeoNodesHandler:
         node = nodes.new("GeometryNodePointScale")
         node.name = "Point Scale"
         node.location = (726, 230)
-        node.input_type = "VECTOR"
+        node.input_type = "FLOAT"
         node.inputs[1].default_value = "scale"
-        node.input_type = "VECTOR"
+        node.input_type = "FLOAT"
         node.inputs[2].default_value = (
             0.029999999329447746, 0.029999999329447746, 0.029999999329447746,)
-        node.input_type = "VECTOR"
-        node.inputs[3].default_value = 1
-        node.input_type = "VECTOR"
+        node.input_type = "FLOAT"
+        node.inputs[3].default_value = 1.0
+        node.input_type = "FLOAT"
 
         node = nodes.new("GeometryNodePointInstance")
         node.name = "Point Instance"
-        node.location = (919, 235)
+        node.location = (923, 179)
         node.instance_type = "COLLECTION"
         node.inputs[1].default_value = None
         node.instance_type = "COLLECTION"
@@ -292,10 +283,6 @@ class AOMGeoNodesHandler:
         node.instance_type = "COLLECTION"
         node.inputs[3].default_value = 0
         node.instance_type = "COLLECTION"
-
-        node = nodes.new("NodeReroute")
-        node.name = "Reroute"
-        node.location = (969, -128)
 
         node = nodes.new("GeometryNodeJoinGeometry")
         node.name = "Join Geometry"
@@ -305,18 +292,18 @@ class AOMGeoNodesHandler:
         node.name = "Group Output"
         node.location = (1324, 176)
         links.new(nodes['Group Input'].outputs[0],
-                  nodes['Reroute.001'].inputs[0])
+                  nodes['Join Geometry'].inputs[0])
         links.new(nodes['Group Input'].outputs[0],
                   nodes['Attribute Map Range'].inputs[0])
         links.new(nodes['Group Input'].outputs[1],
                   nodes['Reroute.005'].inputs[0])
         links.new(nodes['Group Input'].outputs[2],  nodes['Math'].inputs[0])
         links.new(nodes['Group Input'].outputs[3],
-                  nodes['Reroute.004'].inputs[0])
+                  nodes['Attribute Randomize'].inputs[3])
         links.new(nodes['Group Input'].outputs[4],
-                  nodes['Reroute.003'].inputs[0])
+                  nodes['Attribute Randomize'].inputs[2])
         links.new(nodes['Group Input'].outputs[5],
-                  nodes['Reroute.002'].inputs[0])
+                  nodes['Point Scale'].inputs[1])
         links.new(nodes['Group Input'].outputs[6],
                   nodes['Attribute Mix'].inputs[1])
         links.new(nodes['Group Input'].outputs[7],
@@ -335,32 +322,22 @@ class AOMGeoNodesHandler:
                   nodes['Point Scale'].inputs['Geometry'])
         links.new(nodes['Reroute.006'].outputs['Output'],
                   nodes['Point Distribute'].inputs['Density Max'])
-        links.new(nodes['Reroute.004'].outputs['Output'],
-                  nodes['Attribute Randomize'].inputs['Max'])
-        links.new(nodes['Reroute.003'].outputs['Output'],
-                  nodes['Attribute Randomize'].inputs['Min'])
-        links.new(nodes['Reroute.002'].outputs['Output'],
-                  nodes['Combine XYZ'].inputs['X'])
-        links.new(nodes['Reroute.002'].outputs['Output'],
-                  nodes['Combine XYZ'].inputs['Y'])
-        links.new(nodes['Reroute.002'].outputs['Output'],
-                  nodes['Combine XYZ'].inputs['Z'])
-        links.new(nodes['Combine XYZ'].outputs['Vector'],
-                  nodes['Point Scale'].inputs['Factor'])
         links.new(nodes['Reroute.005'].outputs['Output'],
                   nodes['Reroute.006'].inputs['Input'])
         links.new(nodes['Attribute Map Range'].outputs['Geometry'],
                   nodes['Attribute Mix'].inputs['Geometry'])
-        links.new(nodes['Reroute'].outputs['Output'],
-                  nodes['Join Geometry'].inputs['Geometry'])
-        links.new(nodes['Reroute.001'].outputs['Output'],
-                  nodes['Reroute'].inputs['Input'])
         links.new(nodes['Math'].outputs['Value'],
                   nodes['Math.001'].inputs['Value'])
         links.new(nodes['Math.001'].outputs['Value'],
                   nodes['Attribute Map Range'].inputs['From Min'])
         links.new(nodes['Attribute Mix'].outputs['Geometry'],
                   nodes['Point Distribute'].inputs['Geometry'])
+        mod['Input_5'] = 17.0
+        mod['Input_17'] = 1.17
+        mod['Input_7'] = 1.56
+        mod['Input_9'] = 0.17
+        mod['Input_13'] = 0.06
+        mod['Input_19'] = 0.5
 
     def remove_spray(self, context, ocean):
         if "Spray" in ocean.modifiers:

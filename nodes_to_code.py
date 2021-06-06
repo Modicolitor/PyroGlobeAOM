@@ -27,7 +27,7 @@ def get_value(ob):
     if type(ob) is int:
         return ob
     elif type(ob) is float:
-        return int(ob)
+        return round(ob, 2)
     elif type(ob) is str:
         return '"' + ob + '"'
     elif str(type(ob)) == "<class 'bool'>":
@@ -40,6 +40,9 @@ def get_value(ob):
     elif str(type(ob)) == "<class 'NoneType'>":
         return ""
     elif "bpy_types.Object" in str(type(ob)):
+        return ''
+        # hack for collections
+    elif hasattr(ob, "children"):
         return ''
 
     elif str(type(ob)) == "<class 'bpy.types.NodeSocketVector'>" or str(type(ob)) == "<class 'bpy_prop_array'>" or str(type(ob)) == "<class 'Vector'>":
@@ -70,7 +73,15 @@ def get_putput(a, inp):
             print(f'#has no value at {a} with {inp} ')
 
 
+def get_mod(context, group):
+    for mod in context.object.modifiers:
+        if mod.type == 'NODES':
+            if mod.node_group == group:
+                return mod
+
+
 def nodes_to_nodecode(group):
+    context = bpy.context
     nodes = group.nodes
     links = group.links
     # sort nodes left to right
@@ -87,29 +98,7 @@ def nodes_to_nodecode(group):
 
         if node.bl_idname == 'NodeGroupInput':
             pass
-            # for out in node.outputs:
-            # f out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
-            # code geht so nicht!!!
-            #print(f'node.outputs.new("{out.bl_idname}", "{out.name}")')
 
-            # elif node.bl_idname == 'NodeGroupOutput':
-            # for out in node.inputs:
-            #    if out.bl_idname != "NodeSocketVirtual" or out.bl_idname == "Geometry":
-            #       print(f'node.inputs.new("{out.bl_idname}", "{out.name}")')
-
-            '''
-            nodes["Point Scale"].input_type
-            data_type 
-            operation 
-
-            nodes["Attribute Vector Math"].input_type_b nodes["Attribute Vector Math"].input_type_a
-            nodes["Point Distribute"].distribute_method
-
-            nodes["Attribute Mix"].input_type_factor
-            blend_type 
-            nodes["Attribute Map Range"].interpolation_type
-            nodes["Math.001"].use_clamp
-            '''
         else:
             for a, inp in enumerate(node.inputs):
                 value = get_putput(a, inp)
@@ -123,6 +112,8 @@ def nodes_to_nodecode(group):
                     print(f'node.outputs[{a}].default_value = {value}')
 
     gen_links(group, nodes, links)
+    mod = get_mod(context, group)
+    set_current_maininputs(mod)
 
 
 def special_operations(node):
@@ -197,8 +188,28 @@ def gen_maininputs(group):
     for inp in group.inputs:
         if inp.bl_socket_idname != 'NodeSocketGeometry':
             print(
-                f"node_group.inputs.new('{inp.bl_socket_idname}','{inp.name}')")
+                f"inp = node_group.inputs.new('{inp.bl_socket_idname}','{inp.name}')")
+            if hasattr(inp, "default_value"):
+                if get_value(inp.default_value) != '':
+                    print(
+                        f"inp.default_value = {get_value(inp.default_value)}")
+            elif hasattr(inp, "min_value"):
+                print(f"inp.min_value = {inp.max_value}")
+            elif hasattr(inp, "max_value"):
+                print(f"inp.max_value = {inp.max_value}")
+
     # group.inputs
+
+
+def set_current_maininputs(mod):
+    for inp in mod.node_group.inputs:
+        try:
+            if get_value(mod[inp.identifier]):
+                print(
+                    f"mod['{inp.identifier}'] = {get_value(mod[inp.identifier])}")
+        except:
+            #print(f"Mööp {inp.name} ")
+            pass
 
 
 def gen_links(group, nodes, links):
