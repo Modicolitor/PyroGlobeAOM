@@ -1230,7 +1230,8 @@ class BE_OT_OceanSpray(bpy.types.Operator):
 
     def execute(self, context):
         oceans = oceanlist(context, context.selected_objects)
-        GN = AOMGeoNodesHandler(context)
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
 
         for ob in oceans:
             GN.remove_spray(context, ob)

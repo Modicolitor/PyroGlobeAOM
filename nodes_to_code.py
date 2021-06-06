@@ -179,18 +179,26 @@ def get_inputnode(nodes):
     return innode
 
 
-def get_putput_index(node, socket):
-    for i, out in enumerate(node.outputs):
-        if out.name == socket.name:
-            index = i
-            break
+def get_putput_index(node, socket, inout):
+    if inout == 'OUT':
+        for i, out in enumerate(node.outputs):
+            if out.name == socket.name:
+                index = i
+                break
+    elif inout == 'IN':
+        for i, out in enumerate(node.inputs):
+            if out.name == socket.name:
+                index = i
+                break
     return index
 
 
 def gen_maininputs(group):
     for inp in group.inputs:
-        print(f"node_group.inputs.new('{inp.bl_socket_idname}','{inp.name}')")
-    group.inputs
+        if inp.bl_socket_idname != 'NodeSocketGeometry':
+            print(
+                f"node_group.inputs.new('{inp.bl_socket_idname}','{inp.name}')")
+    # group.inputs
 
 
 def gen_links(group, nodes, links):
@@ -201,7 +209,7 @@ def gen_links(group, nodes, links):
 
     for i, l in enumerate(inplinks):
         print(
-            f"links.new( nodes['{l.from_node.name}'].outputs['{get_putput_index(l.from_node, l.from_socket)}'],  nodes['{l.to_node.name}'].inputs['{get_putput_index(l.to_node, l.to_socket)}'])")
+            f"links.new( nodes['{l.from_node.name}'].outputs[{get_putput_index(l.from_node, l.from_socket, 'OUT')}],  nodes['{l.to_node.name}'].inputs[{get_putput_index(l.to_node, l.to_socket, 'IN')}])")
 
     # set- input names
 

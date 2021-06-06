@@ -2,8 +2,9 @@ import bpy
 
 
 class AOMGeoNodesHandler:
-    def __init__(self, context):
+    def __init__(self, context, advcol):
         self.context = context
+        self.AdvCollection = advcol
 
     def new_geonodes_mod(self, ocean):
         mod = ocean.modifiers.new(name="GeoNode", type="NODES")
@@ -23,6 +24,27 @@ class AOMGeoNodesHandler:
         else:
             bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=0)
 
+    # links ob to target col and removes from original col
+    def ob_to_collection(self, context, col, ob):
+        # find ori col
+        allcol = bpy.data.collections
+        oricols = []
+        for cole in allcol:
+            for cob in cole.objects:
+                if ob.name == cob.name:
+                    oricols.append(cole)
+
+        print(f"{col.name}")
+        col.objects.link(ob)
+
+        for cole in oricols:
+            print(cole)
+            if cole.name != col.name:
+                for cob in cole.objects:
+                    if ob.name == cob.name:
+                        #print("unline ob {ob.name} col {col} ")
+                        cole.objects.unlink(ob)
+
     def new_spray(self, context, ocean):
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
@@ -31,12 +53,31 @@ class AOMGeoNodesHandler:
         #self.move_mod_one_up(ocean, mod)
         self.make_spray_nodes(mod.node_group)
 
+        # collection
+        # gibts schon den Brushordner
+        if bpy.data.collections.find('Spray') < 0:
+            collection = bpy.data.collections.new(
+                name='Spray')  # makes collection
+            self.AdvCollection.children.link(
+                collection)
+        else:
+            collection = bpy.data.collections['Spray']
+
+        bpy.ops.mesh.primitive_ico_sphere_add(
+            subdivisions=1, radius=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
+
+        self.ob_to_collection(context, collection, context.object)
+
+        context.layer_collection.children['Spray'].exclude = True
+        #context.view_layer.active_layer_collection = collection
+        #collection.exclude = True
+        #self.AdvCollection.children[collection.name].exclude = True
+
     def make_spray_nodes(self, node_group):
         self.remove_nodes(node_group)
         nodes = node_group.nodes
         links = node_group.links
 
-        node_group.inputs.new('NodeSocketGeometry', 'Geometry')
         node_group.inputs.new('NodeSocketFloat', 'Density Max')
         node_group.inputs.new('NodeSocketFloat', 'Contrast')
         node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
@@ -48,7 +89,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeGroupInput")
         node.name = "Group Input"
-        node.location = (-1294, 184)
+        node.location = (-1160, 129)
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math"
@@ -263,24 +304,23 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput")
         node.name = "Group Output"
         node.location = (1324, 176)
-        links.new(nodes['Group Input'].outputs['Geometry'],
-                  nodes['Reroute.001'].inputs['Input'])
-        links.new(nodes['Group Input'].outputs['Geometry'],
-                  nodes['Attribute Map Range'].inputs['Geometry'])
-        links.new(nodes['Group Input'].outputs['Density Max'],
-                  nodes['Reroute.005'].inputs['Input'])
-        links.new(nodes['Group Input'].outputs['Contrast'],
-                  nodes['Math'].inputs['Value'])
-        links.new(nodes['Group Input'].outputs['MaxParticleScale'],
-                  nodes['Reroute.004'].inputs['Input'])
-        links.new(nodes['Group Input'].outputs['MinParticleScale'],
-                  nodes['Reroute.003'].inputs['Input'])
-        links.new(nodes['Group Input'].outputs['OverallParticleScale'],
-                  nodes['Reroute.002'].inputs['Input'])
-        links.new(nodes['Group Input'].outputs['ObjectSpray'],
-                  nodes['Attribute Mix'].inputs['Factor'])
-        links.new(nodes['Group Input'].outputs['SprayPartikleCollection'],
-                  nodes['Point Instance'].inputs['Collection'])
+        links.new(nodes['Group Input'].outputs[0],
+                  nodes['Reroute.001'].inputs[0])
+        links.new(nodes['Group Input'].outputs[0],
+                  nodes['Attribute Map Range'].inputs[0])
+        links.new(nodes['Group Input'].outputs[1],
+                  nodes['Reroute.005'].inputs[0])
+        links.new(nodes['Group Input'].outputs[2],  nodes['Math'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Reroute.004'].inputs[0])
+        links.new(nodes['Group Input'].outputs[4],
+                  nodes['Reroute.003'].inputs[0])
+        links.new(nodes['Group Input'].outputs[5],
+                  nodes['Reroute.002'].inputs[0])
+        links.new(nodes['Group Input'].outputs[6],
+                  nodes['Attribute Mix'].inputs[1])
+        links.new(nodes['Group Input'].outputs[7],
+                  nodes['Point Instance'].inputs[2])
         links.new(nodes['Point Instance'].outputs['Geometry'],
                   nodes['Join Geometry'].inputs['Geometry'])
         links.new(nodes['Attribute Vector Math'].outputs['Geometry'],
