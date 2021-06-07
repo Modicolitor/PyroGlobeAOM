@@ -42,8 +42,16 @@ presets
 GeoNodes Features: 
 [] Waves 
 [] Waves Break particles 
-[] Spray 
 
+[++] Spray 
+    [] kick to show the particles directly after add without need to change a value 
+    [] add experimental tag
+
+
+[++]nodes to code
+# [] nodegroups (rekursivly)
+# [] test material node trees
+# [] clean up get value section to bl_idname
 
 Loop animation: 
 [] of selected ocean
@@ -67,9 +75,6 @@ fixed bugs:
 
 
 [] improve presets 
-
-[] loop ocean in foam an/aus frames
-[] remove loop option
 
 
 [] changing material should adapt preset setting 
