@@ -325,3 +325,304 @@ class AOMGeoNodesHandler:
     def remove_spray(self, context, ocean):
         if "Spray" in ocean.modifiers:
             ocean.modifiers.remove(ocean.modifiers['Spray'])
+
+    def new_ripples(self, context, ocean):
+        ocean.modifiers["Ocean"].use_spray = True
+        ocean.modifiers["Ocean"].spray_layer_name = "spray"
+
+        # make mod and name
+        mod, nodegroup = self.new_geonodes_mod(ocean)
+        mod.name = "Spray"
+        nodegroup.name = "Spray"
+        # self.move_mod_one_up(ocean, mod)
+        self.make_rippels_nodes(mod, mod.node_group)
+
+        # driver
+
+    def make_rippels_nodes(self, mod, node_group):
+        self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+
+        inp = node_group.inputs.new('NodeSocketFloat', 'Wavelength')
+        inp.default_value = 0.25
+        inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'Falloff')
+        inp.default_value = 15.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
+        inp.default_value = 10.0
+        inp = node_group.inputs.new('NodeSocketObject', 'Object')
+
+        node = nodes.new("NodeGroupInput")
+        node.name = "Group Input"
+        node.location = (-1865, 256)
+
+        node = nodes.new("GeometryNodeObjectInfo")
+        node.name = "Object Info"
+        node.location = (-1655, 373)
+        node.inputs[0].default_value = None
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeAttributeProximity")
+        node.name = "Attribute Proximity"
+        node.location = (-1262, 375)
+        node.inputs[2].default_value = "dst"
+        node.inputs[3].default_value = ""
+
+        node = nodes.new("ShaderNodeValue")
+        node.name = "Value"
+        node.location = (-1011, -248)
+        node.outputs[0].default_value = -7.0
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Scaledistance.001"
+        node.location = (-945, 401)
+        node.operation = "SUBTRACT"
+        node.input_type_a = "FLOAT"
+        node.input_type_b = "ATTRIBUTE"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 20.5
+        node.inputs[3].default_value = "dst"
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "Falloff"
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Scaledistance.002"
+        node.location = (-789, 396)
+        node.operation = "GREATER_THAN"
+        node.input_type_a = "FLOAT"
+        node.input_type_b = "ATTRIBUTE"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = "Falloff"
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "FalloffMIx"
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math"
+        node.location = (-672, -191)
+        node.operation = "DIVIDE"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeAttributeMix")
+        node.name = "Attribute Mix.002"
+        node.location = (-636, 411)
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "FLOAT"
+        node.input_type_factor = "ATTRIBUTE"
+        node.blend_type = "MIX"
+        node.inputs[1].default_value = "FalloffMIx"
+        node.inputs[2].default_value = 0.5
+        node.inputs[3].default_value = "Falloff"
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[7].default_value = ""
+        node.inputs[8].default_value = 0.0
+        node.inputs[9].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[10].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[11].default_value = "Falloff"
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute"
+        node.location = (-533, -60)
+        node.inputs[0].default_value = 0.0
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.001"
+        node.location = (-425, -234)
+        node.inputs[0].default_value = 0.0
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Scaledistance"
+        node.location = (-253, 300)
+        node.operation = "DIVIDE"
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "FLOAT"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = ""
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "dst"
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.002"
+        node.location = (-105, -51)
+        node.inputs[0].default_value = 0.0
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Offset"
+        node.location = (-93, 300)
+        node.operation = "ADD"
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "FLOAT"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = ""
+        node.inputs[4].default_value = 80.3
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "dst"
+
+        node = nodes.new("ShaderNodeMapRange")
+        node.name = "Map Range"
+        node.location = (61, 3)
+        node.interpolation_type = "LINEAR"
+        node.inputs[0].default_value = 29.3
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 1.0
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0.01
+        node.inputs[5].default_value = 4.0
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Attribute Math.001"
+        node.location = (66, 300)
+        node.operation = "SINE"
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "ATTRIBUTE"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = ""
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "dst"
+
+        node = nodes.new("GeometryNodeAttributeMix")
+        node.name = "Attribute Mix.001"
+        node.location = (226, 300)
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "ATTRIBUTE"
+        node.input_type_factor = "FLOAT"
+        node.blend_type = "MULTIPLY"
+        node.inputs[1].default_value = ""
+        node.inputs[2].default_value = 1.0
+        node.inputs[3].default_value = "dst"
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[7].default_value = "Falloff"
+        node.inputs[8].default_value = 0.0
+        node.inputs[9].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[10].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[11].default_value = "dst"
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Attribute Math"
+        node.location = (406, 300)
+        node.operation = "MULTIPLY"
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "FLOAT"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = ""
+        node.inputs[4].default_value = 0.4
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "dst"
+
+        node = nodes.new("GeometryNodeAttributeCombineXYZ")
+        node.name = "Attribute Combine XYZ"
+        node.location = (586, 300)
+        node.inputs[1].default_value = "position"
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = "position"
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = "dst"
+        node.inputs[6].default_value = 1.0
+        node.inputs[7].default_value = "height"
+
+        node = nodes.new("GeometryNodeAttributeMix")
+        node.name = "Attribute Mix"
+        node.location = (746, 300)
+        node.input_type_a = "ATTRIBUTE"
+        node.input_type_b = "ATTRIBUTE"
+        node.input_type_factor = "FLOAT"
+        node.blend_type = "ADD"
+        node.inputs[1].default_value = ""
+        node.inputs[2].default_value = 1.0
+        node.inputs[3].default_value = "position"
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[7].default_value = "height"
+        node.inputs[8].default_value = 0.0
+        node.inputs[9].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[10].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[11].default_value = "position"
+
+        node = nodes.new("NodeGroupOutput")
+        node.name = "Group Output"
+        node.location = (1179, 299)
+        links.new(nodes['Group Input'].outputs[0],
+                  nodes['Attribute Proximity'].inputs[0])
+        links.new(nodes['Group Input'].outputs[1],  nodes['Reroute'].inputs[0])
+        links.new(nodes['Group Input'].outputs[2],
+                  nodes['Reroute.002'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Scaledistance.001'].inputs[1])
+        links.new(nodes['Group Input'].outputs[4],  nodes['Math'].inputs[0])
+        links.new(nodes['Group Input'].outputs[5],
+                  nodes['Object Info'].inputs[0])
+        links.new(nodes['Object Info'].outputs['Geometry'],
+                  nodes['Attribute Proximity'].inputs['Target'])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['Scaledistance'].inputs['B'])
+        links.new(nodes['Attribute Mix'].outputs['Geometry'],
+                  nodes['Group Output'].inputs['Geometry'])
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['Offset'].inputs['B'])
+        links.new(nodes['Attribute Proximity'].outputs['Geometry'],
+                  nodes['Scaledistance.001'].inputs['Geometry'])
+        links.new(nodes['Scaledistance.001'].outputs['Geometry'],
+                  nodes['Scaledistance.002'].inputs['Geometry'])
+        links.new(nodes['Offset'].outputs['Geometry'],
+                  nodes['Attribute Math.001'].inputs['Geometry'])
+        links.new(nodes['Attribute Combine XYZ'].outputs['Geometry'],
+                  nodes['Attribute Mix'].inputs['Geometry'])
+        links.new(nodes['Attribute Mix.001'].outputs['Geometry'],
+                  nodes['Attribute Math'].inputs['Geometry'])
+        links.new(nodes['Attribute Math.001'].outputs['Geometry'],
+                  nodes['Attribute Mix.001'].inputs['Geometry'])
+        links.new(nodes['Attribute Math'].outputs['Geometry'],
+                  nodes['Attribute Combine XYZ'].inputs['Geometry'])
+        links.new(nodes['Scaledistance'].outputs['Geometry'],
+                  nodes['Offset'].inputs['Geometry'])
+        links.new(nodes['Map Range'].outputs['Result'],
+                  nodes['Attribute Math'].inputs['B'])
+        links.new(nodes['Reroute.002'].outputs['Output'],
+                  nodes['Map Range'].inputs['Value'])
+        links.new(nodes['Value'].outputs['Value'],
+                  nodes['Math'].inputs['Value'])
+        links.new(nodes['Math'].outputs['Value'],
+                  nodes['Reroute.001'].inputs['Input'])
+        links.new(nodes['Scaledistance.002'].outputs['Geometry'],
+                  nodes['Attribute Mix.002'].inputs['Geometry'])
+        links.new(nodes['Attribute Mix.002'].outputs['Geometry'],
+                  nodes['Scaledistance'].inputs['Geometry'])
+        mod['Input_5'] = 0.27
+        mod['Input_9'] = 1.0
+        mod['Input_11'] = 15.0
+        mod['Input_7'] = 10.0
+
+    def remove_ripples(self, context, ocean):
+        if "Spray" in ocean.modifiers:
+            ocean.modifiers.remove(ocean.modifiers['Ripples'])

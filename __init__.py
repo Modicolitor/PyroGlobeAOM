@@ -36,7 +36,8 @@ from .aom import BE_OT_DeleteOcean
 from .aom import BE_OT_SetPreset
 from .aom import BE_OT_OceanSpray
 from .aom import BE_OT_RemoveOceanSpray
-
+from .aom import BE_OT_OceanRippels
+from .aom import BE_OT_RemoveOceanRippels
 #from .modalops import PP_OT_PlanarZScaleMenu
 
 
@@ -90,6 +91,8 @@ classes = (BE_PT_AdvOceanAdd,
            BE_OT_SetPreset,
            BE_OT_OceanSpray,
            BE_OT_RemoveOceanSpray,
+           BE_OT_OceanRippels,
+           BE_OT_RemoveOceanRippels,
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

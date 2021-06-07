@@ -483,6 +483,10 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                 subcol.operator("aom.spray", icon="MATERIAL")
                 subcol.operator("aom.remove_spray", icon="MATERIAL")
 
+                subcol.label(text='Ripples')
+                subcol.operator("aom.ripples", icon="MATERIAL")
+                subcol.operator("aom.remove_ripples", icon="MATERIAL")
+
             # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
             # got a valid ocean
 

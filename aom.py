@@ -523,11 +523,20 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         active.aom_data.namenum = Namenum
 
 
+def remove_floats(context, ocean):
+    ocean_id = ocean.aom_data.ocean_id
+
+    for ob in context.scene.objects[:]:
+        if ob.aom_data.float_parent_id == ocean_id:
+            RemoveInterActSingle(context, ob)
+
 ##############################################################
 # erzeugt Schaum um statische obejkten
 # Erzeugt in einem Statischen Objekt einen Brush der die wetmap an
 # und fügt die paintgruppe hinzu
 #############
+
+
 def BrushStatic(context):
     scene = bpy.context.scene
     data = bpy.data
@@ -1255,9 +1264,34 @@ class BE_OT_RemoveOceanSpray(bpy.types.Operator):
         return{"FINISHED"}
 
 
-def remove_floats(context, ocean):
-    ocean_id = ocean.aom_data.ocean_id
+class BE_OT_OceanRippels(bpy.types.Operator):
+    bl_label = "Add Spray"
+    bl_idname = "aom.ripples"
+    bl_options = {"REGISTER", "UNDO"}
 
-    for ob in context.scene.objects[:]:
-        if ob.aom_data.float_parent_id == ocean_id:
-            RemoveInterActSingle(context, ob)
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
+
+        for ob in oceans:
+            GN.remove_ripples(context, ob)
+            GN.new_ripples(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_RemoveOceanRippels(bpy.types.Operator):
+    bl_label = "Remove Spray"
+    bl_idname = "aom.remove_ripples"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        GN = AOMGeoNodesHandler(context)
+
+        for ob in oceans:
+            if ob.modifiers.active.name == 'Ripples':
+                GN.remove_ripples(context, ob)
+
+        return{"FINISHED"}
