@@ -80,7 +80,7 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
                 subcol.alignment = 'EXPAND'
 
                 subcol.prop(context.scene.aom_props, "PresetSel")
-                subcol.operator("aom.set_preset")
+                subcol.operator("aom.set_preset", icon='LINENUMBERS_ON')
 
                 # subcol.operator("set.lov")  # , icon="IPO_QUAD"
                 # subcol.operator("set.mod")  # , icon="IPO_CUBIC")
@@ -475,24 +475,54 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
 
             subcol = col.column()
 
-            if hasattr(context.scene, "aom_props"):
+            ocean = get_active_ocean(context)
+            if ocean != None:
+                mods = ocean.modifiers
+
                 subcol.label(text='Loop')
-                subcol.operator("aom.loop", icon="MATERIAL")
-                subcol.operator("aom.removeloop", icon="MATERIAL")
+                subcol.operator("aom.loop", icon="CON_FOLLOWPATH")
+                if "OceanLoop" in mods:
+                    subcol.operator("aom.removeloop", icon="CON_FOLLOWPATH")
+
+                subcol = col.column()
                 subcol.label(text='Spray')
-                subcol.operator("aom.spray", icon="MATERIAL")
-                subcol.operator("aom.remove_spray", icon="MATERIAL")
+                subcol.operator("aom.spray", icon="MOD_FLUIDSIM")
+                if "Spray" in mods:
+                    subcol.operator("aom.remove_spray", icon="MOD_FLUIDSIM")
+                    subcol.label(
+                        text='Look in the modifiers tap for settings. Instanced object in "Spray" collection.', icon='QUESTION')
+                    subcol.label(
+                        text='Probably you need to change a value to kick the instancing.')
+
+                subcol = col.column()
+                subcol = subcol.box()
 
                 subcol.label(text='Ripples')
-                subcol.operator("aom.ripples", icon="MATERIAL")
-                subcol.operator("aom.remove_ripples", icon="MATERIAL")
+                subcol.operator("aom.ripples", icon="MOD_INSTANCE")
+                boo, mod = in_mods("Ripples", mods)
+                if boo:
+                    subcol.operator("aom.remove_ripples", icon="MOD_INSTANCE")
+                    subcol.label(
+                        text='Look in the modifiers tap for settings.', icon='QUESTION')
+                    if mod['Input_13'] == None:
+                        subcol.label(
+                            text='Set an object in the  "Ripples" modifier!', icon='ERROR')
 
             # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
             # got a valid ocean
 
-            #subcol.label(text="Water Material Settings")
+            # subcol.label(text="Water Material Settings")
 
             #  box = row.box()
             # row = layout.row(align=True)
 
     # Generate OCean  Button
+
+# searches for name parts in mods
+
+
+def in_mods(str, mods):
+    for mod in mods:
+        if str in mod.name:
+            return True, mod
+    return False
