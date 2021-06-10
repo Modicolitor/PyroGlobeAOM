@@ -2,7 +2,7 @@ import bpy
 from .aom import get_active_ocean
 from .aom_def import is_ocean_material
 
-
+'''
 class BE_PT_AdvOceanAdd(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -32,9 +32,6 @@ class BE_PT_AdvOceanAdd(bpy.types.Panel):
                 # if "AdvOcean" in bpy.data.objects:
 
                 subcol = col.column()
-                # subcol.label(text="Ocean Presets")
-                # row = layout.row(align=True)
-                subcol = col.column()
                 subcol.alignment = 'EXPAND'
                 # , icon="IPO_QUAD"
                 subcol.operator("gen.ocean", text="Add Ocean")
@@ -42,7 +39,7 @@ class BE_PT_AdvOceanAdd(bpy.types.Panel):
                 subcol.operator("aom.deleteocean", text="Delete Ocean")
                 # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
             else:
-                subcol.operator("gen.ocean", icon="MOD_WAVE")
+                subcol.operator("gen.ocean", icon="MOD_WAVE")'''
 
 
 class BE_PT_AdvOceanMenu(bpy.types.Panel):
@@ -68,9 +65,18 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
         if hasattr(context.scene, "aom_props"):
+
             ocean = get_active_ocean(context)
 
-            if ocean != None:
+            if ocean == None:
+                subcol.operator("gen.ocean", icon="MOD_WAVE",
+                                text="Add Ocean")
+
+            else:
+                subcol.operator("gen.ocean", text="Add Ocean")
+                # , icon="IPO_CUBIC")
+                subcol.operator("aom.deleteocean", text="Delete Ocean")
+                # subcol.operator("set.storm")  # , icon="IPO_CUBIC")
                 # if "AdvOcean" in bpy.data.objects:
 
                 subcol = col.column()
@@ -138,6 +144,19 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
                 except:
                     pass
 
+                box = subcol.box()
+                box.label(text="Duration of Simulation")
+                box.prop(context.scene.aom_props, "OceAniStart")
+                box.prop(context.scene.aom_props, "OceAniEnd")
+                box.prop(context.scene.aom_props, "OceAniSpeed", text="Speed")
+                box.label(text="Foam")
+                box.prop(context.scene.aom_props, "OceanFoamBool")
+                box.prop(context.scene.aom_props, "ObjFoamBool")
+
+                row = layout.row(align=True)
+                box.operator("upd.oceaniframe", text="Update",
+                             icon="FILE_TICK")  # update foam and Frames
+
         else:
             subcol.operator("gen.ocean", icon="MOD_WAVE")
 
@@ -147,8 +166,11 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
     bl_region_type = "UI"
     bl_label = "Ocean Object Interaction"
     bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
 
-    # schreibe auf den Bildschirm
+    @classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
 
     def draw(self, context):
         layout = self.layout
@@ -189,27 +211,17 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
 
                 # row = layout.row(align=True)
 
-                box = subcol.box()
-                box.label(text="Duration of Simulation")
-                box.prop(context.scene.aom_props, "OceAniStart")
-                box.prop(context.scene.aom_props, "OceAniEnd")
-                box.prop(context.scene.aom_props, "OceAniSpeed", text="Speed")
-                box.label(text="Foam")
-                box.prop(context.scene.aom_props, "OceanFoamBool")
-                box.prop(context.scene.aom_props, "ObjFoamBool")
-
-                row = layout.row(align=True)
-                box.operator("upd.oceaniframe", text="Update",
-                             icon="FILE_TICK")  # update foam and Frames
-
 
 class BE_PT_AdvOceanFoam(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_label = "Ocean Foam Settings"
     bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
 
-    # schreibe auf den Bildschirm
+    @classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
 
     def draw(self, context):
         layout = self.layout
@@ -251,8 +263,11 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
     bl_region_type = "UI"
     bl_label = "Ocean Wave Settings"
     bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
 
-    # schreibe auf den Bildschirm
+    @classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
 
     def draw(self, context):
         layout = self.layout
@@ -290,8 +305,11 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
     bl_region_type = "UI"
     bl_label = "Ocean Material Settings"
     bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
 
-    # schreibe auf den Bildschirm
+    @classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
 
     def draw(self, context):
 
@@ -458,8 +476,11 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
     bl_region_type = "UI"
     bl_label = "Ocean Specials"
     bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
 
-    # schreibe auf den Bildschirm
+    @classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
 
     def draw(self, context):
 
@@ -479,12 +500,14 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
             if ocean != None:
                 mods = ocean.modifiers
 
+                subcol = subcol.box()
                 subcol.label(text='Loop')
                 subcol.operator("aom.loop", icon="CON_FOLLOWPATH")
                 if "OceanLoop" in mods:
                     subcol.operator("aom.removeloop", icon="CON_FOLLOWPATH")
 
                 subcol = col.column()
+                subcol = subcol.box()
                 subcol.label(text='Spray')
                 subcol.operator("aom.spray", icon="MOD_FLUIDSIM")
                 if "Spray" in mods:
@@ -492,7 +515,7 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                     subcol.label(
                         text='Look in the modifiers tap for settings. Instanced object in "Spray" collection.', icon='QUESTION')
                     subcol.label(
-                        text='Probably you need to change a value to kick the instancing.')
+                        text='Probably you need to change a value to kick the instancing.', icon='ERROR')
 
                 subcol = col.column()
                 subcol = subcol.box()
@@ -524,5 +547,6 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
 def in_mods(str, mods):
     for mod in mods:
         if str in mod.name:
-            return True, mod
-    return False
+            a = True
+            return a, mod
+    return False, None

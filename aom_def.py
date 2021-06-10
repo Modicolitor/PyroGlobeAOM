@@ -1,7 +1,7 @@
 def is_ocean(context, ob):
-    # if "AdvOcean" in ob.name:
-    #    return True
-    return ob.aom_data.is_ocean
+    if hasattr(ob, "aom_data"):
+        return ob.aom_data.is_ocean
+    return False
 
 
 def is_floatcage(context, ob):

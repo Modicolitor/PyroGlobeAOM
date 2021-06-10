@@ -11,7 +11,7 @@ import bpy
 #from .aom_properties import FloatdataItem
 from .aom_properties import AOMPropertyGroup
 from .aom_properties import AOMObjProperties
-from .aom_ui import BE_PT_AdvOceanAdd
+#from .aom_ui import BE_PT_AdvOceanAdd
 from .aom_ui import BE_PT_AdvOceanMenu
 from .aom_ui import BE_PT_AdvOceanInteract
 from .aom_ui import BE_PT_AdvOceanFoam
@@ -64,8 +64,7 @@ bl_info = {  # für export als addon
 # Centerobj Pointer
 
 
-classes = (BE_PT_AdvOceanAdd,
-           BE_PT_AdvOceanMenu,
+classes = (BE_PT_AdvOceanMenu,
            BE_PT_AdvOceanInteract,
            BE_PT_AdvOceanFoam,
            BE_PT_AdvOceanWaves,
