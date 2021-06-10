@@ -7,7 +7,6 @@ class AOMMatHandler:
     def __init__(self, context):
         self.context = context
         self.material = self.get_material()
-
         #self.materialname = "AdvOceanMat"
 
     def get_material(self):
@@ -40,7 +39,7 @@ class AOMMatHandler:
     def make_material(self, ob):
 
         self.handle_materialslots(ob)
-
+        #self.material = self.get_material()
         self.material.use_screen_refraction = True
         self.material.use_sss_translucency = True
 

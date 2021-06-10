@@ -863,8 +863,9 @@ class BE_OT_SetPreset(bpy.types.Operator):
 
         pre = AOMPreset_Handler()
         oceans = get_ocean_from_list(context, context.scene.objects)
-        for oc in oceans:
-            pre.set_preset(context, oc)
+        oc = get_active_ocean(context)
+        # for oc in oceans:
+        pre.set_preset(context, oc)
 
         return{"FINISHED"}
 
