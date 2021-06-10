@@ -271,7 +271,6 @@ class AOMGeoNodesHandler:
 
         links.new(nodes['Group Input'].outputs[2],
                   nodes['Reroute.005'].inputs[0])
-        links.new(nodes['Group Input'].outputs[3],  nodes['Math'].inputs[0])
 
         links.new(nodes['Group Input'].outputs[8],
                   nodes['Point Instance'].inputs[2])
@@ -314,6 +313,7 @@ class AOMGeoNodesHandler:
                   nodes['Attribute Mix'].inputs[2])
         links.new(nodes['Group Input'].outputs[1],
                   nodes['Attribute Vector Math.001'].inputs[5])
+        links.new(nodes['Group Input'].outputs[3],  nodes['Math'].inputs[1])
 
         node_group.inputs[7].min_value = 0
         node_group.inputs[7].max_value = 1
@@ -326,16 +326,19 @@ class AOMGeoNodesHandler:
         if "Spray" in ocean.modifiers:
             ocean.modifiers.remove(ocean.modifiers['Spray'])
 
-    def new_ripples(self, context, ocean):
-        ocean.modifiers["Ocean"].use_spray = True
-        ocean.modifiers["Ocean"].spray_layer_name = "spray"
-
+    def new_ripples(self, context, ocean, ob):
+        if ocean == None:
+            return None
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
-        mod.name = "Spray"
-        nodegroup.name = "Spray"
-        # self.move_mod_one_up(ocean, mod)
+        mod.name = "Ripples"
+        nodegroup.name = "Ripples"
+        self.move_mod_one_up(ocean, mod)
         self.make_rippels_nodes(mod, mod.node_group)
+        if ob != None:
+            mod['Input_13'] = ob
+
+            ob.aom_data.ripple_parent = ocean
 
         # driver
 
@@ -361,7 +364,9 @@ class AOMGeoNodesHandler:
         node = nodes.new("GeometryNodeObjectInfo")
         node.name = "Object Info"
         node.location = (-1655, 373)
+        node.transform_space = 'RELATIVE'
         node.inputs[0].default_value = None
+
         node.outputs[0].default_value = (0.0, 0.0, 0.0,)
         node.outputs[1].default_value = (0.0, 0.0, 0.0,)
         node.outputs[2].default_value = (0.0, 0.0, 0.0,)
@@ -484,6 +489,7 @@ class AOMGeoNodesHandler:
         node.name = "Map Range"
         node.location = (61, 3)
         node.interpolation_type = "LINEAR"
+        node.clamp = False
         node.inputs[0].default_value = 29.3
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 1.0
@@ -542,6 +548,7 @@ class AOMGeoNodesHandler:
         node = nodes.new("GeometryNodeAttributeCombineXYZ")
         node.name = "Attribute Combine XYZ"
         node.location = (586, 300)
+        node.input_type_z = "ATTRIBUTE"
         node.inputs[1].default_value = "position"
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = "position"
@@ -577,19 +584,15 @@ class AOMGeoNodesHandler:
         links.new(nodes['Group Input'].outputs[1],  nodes['Reroute'].inputs[0])
         links.new(nodes['Group Input'].outputs[2],
                   nodes['Reroute.002'].inputs[0])
-        links.new(nodes['Group Input'].outputs[3],
-                  nodes['Scaledistance.001'].inputs[1])
-        links.new(nodes['Group Input'].outputs[4],  nodes['Math'].inputs[0])
+
         links.new(nodes['Group Input'].outputs[5],
                   nodes['Object Info'].inputs[0])
         links.new(nodes['Object Info'].outputs['Geometry'],
                   nodes['Attribute Proximity'].inputs['Target'])
-        links.new(nodes['Reroute'].outputs['Output'],
-                  nodes['Scaledistance'].inputs['B'])
+
         links.new(nodes['Attribute Mix'].outputs['Geometry'],
                   nodes['Group Output'].inputs['Geometry'])
-        links.new(nodes['Reroute.001'].outputs['Output'],
-                  nodes['Offset'].inputs['B'])
+
         links.new(nodes['Attribute Proximity'].outputs['Geometry'],
                   nodes['Scaledistance.001'].inputs['Geometry'])
         links.new(nodes['Scaledistance.001'].outputs['Geometry'],
@@ -619,10 +622,72 @@ class AOMGeoNodesHandler:
         links.new(nodes['Attribute Mix.002'].outputs['Geometry'],
                   nodes['Scaledistance'].inputs['Geometry'])
         mod['Input_5'] = 0.27
-        mod['Input_9'] = 1.0
+        mod['Input_9'] = 20
         mod['Input_11'] = 15.0
-        mod['Input_7'] = 10.0
+        mod['Input_7'] = 3.0
 
-    def remove_ripples(self, context, ocean):
-        if "Spray" in ocean.modifiers:
-            ocean.modifiers.remove(ocean.modifiers['Ripples'])
+        ###########correcting script #
+
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['Offset'].inputs[4])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['Scaledistance'].inputs[4])
+
+        links.new(nodes['Map Range'].outputs['Result'],
+                  nodes['Attribute Math'].inputs[4])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Scaledistance.001'].inputs[2])
+
+        links.new(nodes['Group Input'].outputs[4],  nodes['Math'].inputs[1])
+
+        source = nodes['Value'].outputs[0]
+        target = bpy.context.scene
+        prop = 'default_value'
+        data_path = "frame_current"
+        id_type = 'SCENE'
+        driver = self.add_driver(source, target, prop,
+                                 data_path, -1, func="-", id_type=id_type)
+
+    def remove_ripples(self, context, ocean, ob):
+        # object selected
+        if ob != None:
+            for mod in ocean.modifiers[:]:
+                if 'Ripples' in mod.name:
+                    if ob == mod['Input_13']:
+                        ocean.modifiers.remove(mod)
+                        ob.aom_data.ripple_parent = None
+                    else:
+                        print(
+                            f"{mod.name} is called Ripples but doesn't have the right object.")
+        # ocean selected
+        else:
+            for mod in reversed(ocean.modifiers[:]):
+                if 'Ripples' in mod.name:
+                    ob = mod['Input_13']
+                    if ob != None:
+                        ob.aom_data.ripple_parent = None
+
+                    ocean.modifiers.remove(mod)
+                    break
+
+    def add_driver(
+        self, source, target, prop, dataPath,
+        index=-1, negative=False, func='', id_type=''
+    ):
+        ''' Add driver to source prop (at index), driven by target dataPath '''
+
+        if index != -1:
+            d = source.driver_add(prop, index).driver
+        else:
+            d = source.driver_add(prop).driver
+
+        v = d.variables.new()
+        v.name = prop
+        v.targets[0].id_type = id_type
+        v.targets[0].id = target
+        v.targets[0].data_path = dataPath
+
+        d.expression = func + "(" + v.name + ")" if func else v.name
+        d.expression = d.expression if not negative else "-1 * " + d.expression
+
+        return d

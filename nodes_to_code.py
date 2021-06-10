@@ -142,8 +142,18 @@ def special_operations(node):
         print(f'node.interpolation_type = "{node.interpolation_type}"')
     if hasattr(node, "use_clamp"):
         print(f'node.use_clamp = {node.use_clamp}')
+    if hasattr(node, "clamp"):
+        print(f'node.clamp = {node.clamp}')
     if hasattr(node, "use_whole_collection"):
         print(f'node.use_whole_collection = {node.use_whole_collection}')
+    if hasattr(node, "input_type_x"):
+        print(f'node.input_type_x = {node.input_type_x}')
+    if hasattr(node, "input_type_y"):
+        print(f'node.input_type_y = {node.input_type_y}')
+    if hasattr(node, "input_type_z"):
+        print(f'node.input_type_z = {node.input_type_z}')
+    if hasattr(node, "transform_space"):
+        print(f'node.transform_space = {node.transform_space}')
 
 
 def get_sorted_InputLinks(nodes, links):

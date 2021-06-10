@@ -71,6 +71,7 @@ class AOMObjProperties(bpy.types.PropertyGroup):
     namenum: bpy.props.IntProperty(default=-1)
     is_loop: bpy.props.BoolProperty(
         name="Is Looping", default=False)
+    ripple_parent = bpy.props.PointerProperty(default=None)
 
 
 '''

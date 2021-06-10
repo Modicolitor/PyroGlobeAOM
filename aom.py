@@ -1229,8 +1229,6 @@ class BE_OT_LoopOceanRemove(bpy.types.Operator):
 
         return{"FINISHED"}
 
-#ocean = get_active_ocean(context)
-
 
 class BE_OT_OceanSpray(bpy.types.Operator):
     bl_label = "Add Spray"
@@ -1265,8 +1263,53 @@ class BE_OT_RemoveOceanSpray(bpy.types.Operator):
 
 
 class BE_OT_OceanRippels(bpy.types.Operator):
-    bl_label = "Add Spray"
+    bl_label = "Add Ripples"
     bl_idname = "aom.ripples"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
+
+        # selection plan
+        # nichts selektiert --> empty ripples mod to single active ocean
+        # nur object --> std active ocean
+        # one ocean one object
+        # many oceans selected and many objects --> every ob gets mod in every ocean
+        #
+
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+            print(f"got active {oceans}")
+        obs = floatablelist(context, context.selected_objects)
+
+        for oc in oceans:
+            print(f"oc.name {oc.name}")
+            if len(obs) != 0:
+                for ob in obs:
+                    #GN.remove_ripples(context, ob)
+                    GN.new_ripples(context, oc, ob)
+            else:
+                GN.new_ripples(context, oc, None)
+
+        return{"FINISHED"}
+
+
+def get_all_scene_oceans(context):
+    lis = []
+    for ob in context.scene.objects:
+        if is_ocean(context, ob):
+            lis.append(ob)
+    return lis
+
+
+class BE_OT_RemoveOceanRippels(bpy.types.Operator):
+    '''Removes Ripples Modifier. If several Ripples are present the active or the last modifier in the stack will be remove. If an object is selected that is used for Ripples, this Ripple is removed in all oceans. If objects and oceans are selected, removing will be limited to the ripples that concern both groups. If nothing is selected it looks in the last applied for the last ripple modifier.'''
+    bl_label = "Remove Ripples"
+    bl_idname = "aom.remove_ripples"
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
@@ -1274,24 +1317,29 @@ class BE_OT_OceanRippels(bpy.types.Operator):
         advcol = bpy.data.collections[MColName]
         GN = AOMGeoNodesHandler(context, advcol)
 
-        for ob in oceans:
-            GN.remove_ripples(context, ob)
-            GN.new_ripples(context, ob)
+        # with or without ocean
+        # with or without ob
+        obs = floatablelist(context, context.selected_objects)
 
-        return{"FINISHED"}
-
-
-class BE_OT_RemoveOceanRippels(bpy.types.Operator):
-    bl_label = "Remove Spray"
-    bl_idname = "aom.remove_ripples"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
         oceans = oceanlist(context, context.selected_objects)
-        GN = AOMGeoNodesHandler(context)
-
-        for ob in oceans:
-            if ob.modifiers.active.name == 'Ripples':
-                GN.remove_ripples(context, ob)
-
+        # pure object path
+        if len(oceans) == 0:
+            if len(obs) != 0:
+                oceans = get_all_scene_oceans(context)
+                for oc in oceans:
+                    for ob in obs:
+                        GN.remove_ripples(context, oc, ob)
+            else:
+                # nothing selected
+                print("nothing")
+                oc = get_active_ocean(context)
+                GN.remove_ripples(context, oc, None)
+        else:
+            # viele oceane
+            for ocean in oceans:
+                if len(obs) != 0:
+                    for ob in obs:
+                        GN.remove_ripples(context, ocean, ob)
+                else:
+                    GN.remove_ripples(context, ocean, None)
         return{"FINISHED"}

@@ -80,3 +80,10 @@ fixed bugs:
 [] changing material should adapt preset setting 
 
 [] remove node setup in make loop before making it
+
+[] ui of special
+
+[] apply preset applied auch to non selected
+
+[] label when no object in input of mod
+[] label look in the modifiers tab for option
