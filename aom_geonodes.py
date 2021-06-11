@@ -17,11 +17,18 @@ class AOMGeoNodesHandler:
         for n in nodes:
             nodes.remove(n)
 
+    def get_mod_index(self, ocean, mod):
+        mods = ocean.modifiers
+        for a, mid in enumerate(mods):
+            if mod == mid:
+                return a
+        return -1
+
     def get_DP_mod_index(self, ocean):
         mods = ocean.modifiers
         for a, mod in enumerate(mods):
-            print(a)
-            print(mod.name)
+            # print(a)
+            # print(mod.name)
             if "Dynamic Paint" in mod.name:
                 return a
         # wenn nicht ACHTUUNG
@@ -29,12 +36,23 @@ class AOMGeoNodesHandler:
         return len(mods)-1
 
     def move_above_DP(self, ocean, mod):
+
+        m = self.get_mod_index(ocean, mod)
         n = self.get_DP_mod_index(ocean)
         print(f'DP detected {n}')
         if n >= 1:
             print(f'1möp {n}')
             print(mod.name)
-            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n)
+            print(f'm {m}')
+            print(f'n{n}')
+            while m > n:
+                print(mod.name)
+                bpy.ops.object.modifier_move_up(modifier=mod.name)
+                m = self.get_mod_index(ocean, mod)
+                n = self.get_DP_mod_index(ocean)
+                #bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n)
+                print(f'm {m}')
+                print(f'n{n}')
         else:
             print('2möp  1')
             bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=1)
@@ -42,7 +60,8 @@ class AOMGeoNodesHandler:
     def move_mod_one_up(self, ocean, mod):
         n = len(ocean.modifiers)
         if n-2 >= 0:
-            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n-2)
+            bpy.ops.object.modifier_move_up(modifier=mod.name)
+            #bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n-2)
         else:
             bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=0)
 
@@ -349,6 +368,7 @@ class AOMGeoNodesHandler:
             ocean.modifiers.remove(ocean.modifiers['Spray'])
 
     def new_ripples(self, context, ocean, ob):
+        context.view_layer.objects.active = ocean
         if ocean == None:
             return None
         # make mod and name
@@ -361,6 +381,8 @@ class AOMGeoNodesHandler:
         if ob != None:
             mod['Input_13'] = ob
             ob.aom_data.ripple_parent = ocean
+
+        ocean.modifiers.active = mod
 
         self.move_above_DP(ocean, mod)
 
