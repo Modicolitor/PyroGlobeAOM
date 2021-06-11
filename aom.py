@@ -781,6 +781,7 @@ def deselectall(context):
 
 
 class BE_OT_RemBtn(bpy.types.Operator):
+    '''Removes float and static interaction of the selected object(s).'''
     bl_label = "Remove Interaction"
     bl_idname = "rmv.interac"
     bl_options = {"REGISTER", "UNDO"}
@@ -795,6 +796,7 @@ class BE_OT_RemBtn(bpy.types.Operator):
 
 
 class BE_OT_CageVisability(bpy.types.Operator):
+    '''Toggles the Cage Visibility'''
     bl_label = "Cage Visibility"
     bl_idname = "cag.vis"
     bl_options = {"REGISTER", "UNDO"}
@@ -819,6 +821,7 @@ class BE_OT_CageVisability(bpy.types.Operator):
 
 
 class BE_OT_GenOceanButton(bpy.types.Operator):
+    '''Adds an Ocean  to the scene.'''
     bl_label = "Generate Ocean"
     bl_idname = "gen.ocean"
     bl_options = {"REGISTER", "UNDO"}
@@ -841,6 +844,7 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
 
 
 class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
+    '''Updates all simlation ranges and animation speed.'''
     bl_label = "Update"
     bl_idname = "upd.oceaniframe"
     bl_options = {"REGISTER", "UNDO"}
@@ -855,6 +859,7 @@ class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
 
 
 class BE_OT_SetPreset(bpy.types.Operator):
+    '''Applys the preset from the dropdown to the selected ocean(s).'''
     bl_label = "Apply Preset"
     bl_idname = "aom.set_preset"
     bl_options = {"REGISTER", "UNDO"}
@@ -1136,6 +1141,7 @@ def get_largest_keyvalue(context, keys):
 
 
 class BE_OT_GenOceanMat(bpy.types.Operator):
+    '''Generates the material set in the dropdown on the selected ocean(s).'''
     bl_label = "Generate Ocean Material"
     bl_idname = "gen.ocmat"
     bl_options = {"REGISTER", "UNDO"}
@@ -1157,6 +1163,7 @@ class BE_OT_GenOceanMat(bpy.types.Operator):
 
 
 class BE_OT_StaticOb(bpy.types.Operator):
+    '''Gives the selected object(s) the ability to interact with all oceans, produce waves and foam. The ocean will not influence the object(s).'''
     bl_label = "Static Object(s)"
     bl_idname = "stat.ob"
     bl_options = {"REGISTER", "UNDO"}
@@ -1170,6 +1177,7 @@ class BE_OT_StaticOb(bpy.types.Operator):
 
 
 class BE_OT_FloatSelButt(bpy.types.Operator):
+    '''Gives the selected object(s) the ability to float on the a defined ocean. Floating will only work on one ocean at a time only (the selected or the last set).'''
     bl_label = "Float Object(s)"
     bl_idname = "float.sel"
     bl_options = {"REGISTER", "UNDO"}
@@ -1187,6 +1195,7 @@ class BE_OT_FloatSelButt(bpy.types.Operator):
 
 
 class BE_OT_DeleteOcean(bpy.types.Operator):
+    '''Deletes the selected ocean(s).'''
     bl_label = "Float Object(s)"
     bl_idname = "aom.deleteocean"
     bl_options = {"REGISTER", "UNDO"}
@@ -1203,6 +1212,7 @@ class BE_OT_DeleteOcean(bpy.types.Operator):
 
 
 class BE_OT_LoopOcean(bpy.types.Operator):
+    '''Loops the ocean in the simulation range. Object interations will not be included.'''
     bl_label = "Loop Ocean Animation"
     bl_idname = "aom.loop"
     bl_options = {"REGISTER", "UNDO"}
@@ -1218,6 +1228,7 @@ class BE_OT_LoopOcean(bpy.types.Operator):
 
 
 class BE_OT_LoopOceanRemove(bpy.types.Operator):
+    '''Removes the Loop from the ocean.'''
     bl_label = "Remove Loop"
     bl_idname = "aom.removeloop"
     bl_options = {"REGISTER", "UNDO"}
@@ -1232,6 +1243,7 @@ class BE_OT_LoopOceanRemove(bpy.types.Operator):
 
 
 class BE_OT_OceanSpray(bpy.types.Operator):
+    '''Add (experimental) Spray particle to the selected ocean via geometrie nodes. Please find the controls in the modifier tab. You might need to change at least one value to see an effect (kick it!!)'''
     bl_label = "Add Spray"
     bl_idname = "aom.spray"
     bl_options = {"REGISTER", "UNDO"}
@@ -1249,6 +1261,7 @@ class BE_OT_OceanSpray(bpy.types.Operator):
 
 
 class BE_OT_RemoveOceanSpray(bpy.types.Operator):
+    '''Removes the spray modifier from the selected ocean(s).'''
     bl_label = "Remove Spray"
     bl_idname = "aom.remove_spray"
     bl_options = {"REGISTER", "UNDO"}
@@ -1264,6 +1277,7 @@ class BE_OT_RemoveOceanSpray(bpy.types.Operator):
 
 
 class BE_OT_OceanRippels(bpy.types.Operator):
+    '''Makes objects produce ripples (declining sinus around the object). Have the object and the ocean selected to determine the target ocean.'''
     bl_label = "Add Ripples"
     bl_idname = "aom.ripples"
     bl_options = {"REGISTER", "UNDO"}

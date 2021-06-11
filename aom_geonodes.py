@@ -20,17 +20,24 @@ class AOMGeoNodesHandler:
     def get_DP_mod_index(self, ocean):
         mods = ocean.modifiers
         for a, mod in enumerate(mods):
+            print(a)
+            print(mod.name)
             if "Dynamic Paint" in mod.name:
                 return a
         # wenn nicht ACHTUUNG
-        return len(mods)
+        print('way out')
+        return len(mods)-1
 
     def move_above_DP(self, ocean, mod):
-        n = self.get_DP_mod_index(self, mod)
-        if n-1 >= 0:
-            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n-1)
+        n = self.get_DP_mod_index(ocean)
+        print(f'DP detected {n}')
+        if n >= 1:
+            print(f'1möp {n}')
+            print(mod.name)
+            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=n)
         else:
-            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=0)
+            print('2möp  1')
+            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=1)
 
     def move_mod_one_up(self, ocean, mod):
         n = len(ocean.modifiers)
@@ -349,11 +356,13 @@ class AOMGeoNodesHandler:
         mod.name = "Ripples"
         nodegroup.name = "Ripples"
         #self.move_mod_one_up(ocean, mod)
-        self.move_above_DP(ocean, mod)
+
         self.make_rippels_nodes(mod, mod.node_group)
         if ob != None:
             mod['Input_13'] = ob
             ob.aom_data.ripple_parent = ocean
+
+        self.move_above_DP(ocean, mod)
 
         # driver
 

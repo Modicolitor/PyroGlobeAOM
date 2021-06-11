@@ -527,6 +527,10 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                     subcol.operator("aom.remove_ripples", icon="MOD_INSTANCE")
                     subcol.label(
                         text='Look in the modifiers tap for settings.', icon='QUESTION')
+                    # ripple options
+
+                    subcol.prop
+
                     if mod['Input_13'] == None:
                         subcol.label(
                             text='Set an object in the  "Ripples" modifier!', icon='ERROR')
