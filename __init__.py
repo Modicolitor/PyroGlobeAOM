@@ -14,7 +14,7 @@ from .aom_properties import AOMObjProperties
 #from .aom_ui import BE_PT_AdvOceanAdd
 from .aom_ui import BE_PT_AdvOceanMenu
 from .aom_ui import BE_PT_AdvOceanInteract
-from .aom_ui import BE_PT_AdvOceanFoam
+#from .aom_ui import BE_PT_AdvOceanFoam
 from .aom_ui import BE_PT_AdvOceanWaves
 from .aom_ui import BE_PT_AdvOceanMat
 from .aom_ui import BE_PT_AdvOceanSpecial
@@ -66,7 +66,7 @@ bl_info = {  # für export als addon
 
 classes = (BE_PT_AdvOceanMenu,
            BE_PT_AdvOceanInteract,
-           BE_PT_AdvOceanFoam,
+           # BE_PT_AdvOceanFoam,
            BE_PT_AdvOceanWaves,
            BE_PT_AdvOceanMat,
            BE_PT_AdvOceanSpecial,

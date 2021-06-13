@@ -82,10 +82,10 @@ fixed bugs:
 [] remove node setup in make loop before making it
 
 [] ui of special
-    [] remove only 
+    [] settings
 
     [] label when no object in input of mod
     [] label look in the modifiers tab for option
 
 
-[] Tooltips
+[+] Tooltips

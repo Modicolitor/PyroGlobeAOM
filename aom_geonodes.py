@@ -379,7 +379,7 @@ class AOMGeoNodesHandler:
 
         self.make_rippels_nodes(mod, mod.node_group)
         if ob != None:
-            mod['Input_13'] = ob
+            mod['Input_15'] = ob
             ob.aom_data.ripple_parent = ocean
 
         ocean.modifiers.active = mod
@@ -397,8 +397,10 @@ class AOMGeoNodesHandler:
         inp.default_value = 0.25
         inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat', 'Falloff')
-        inp.default_value = 15.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'OuterFalloff')
+        inp.default_value = 20.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'InnerCut')
+        inp.default_value = 25.0
         inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
         inp.default_value = 10.0
         inp = node_group.inputs.new('NodeSocketObject', 'Object')
@@ -410,12 +412,15 @@ class AOMGeoNodesHandler:
         node = nodes.new("GeometryNodeObjectInfo")
         node.name = "Object Info"
         node.location = (-1655, 373)
-        node.transform_space = 'RELATIVE'
+        node.transform_space = "RELATIVE"
         node.inputs[0].default_value = None
-
         node.outputs[0].default_value = (0.0, 0.0, 0.0,)
         node.outputs[1].default_value = (0.0, 0.0, 0.0,)
         node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.003"
+        node.location = (-1268, 493)
 
         node = nodes.new("GeometryNodeAttributeProximity")
         node.name = "Attribute Proximity"
@@ -423,14 +428,23 @@ class AOMGeoNodesHandler:
         node.inputs[2].default_value = "dst"
         node.inputs[3].default_value = ""
 
-        node = nodes.new("ShaderNodeValue")
-        node.name = "Value"
-        node.location = (-1011, -248)
-        node.outputs[0].default_value = -7.0
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Scaledistance.004"
+        node.location = (-1097, 659)
+        node.operation = "SUBTRACT"
+        node.input_type_a = "FLOAT"
+        node.input_type_b = "ATTRIBUTE"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 20.0
+        node.inputs[3].default_value = "dst"
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "Falloffinner"
 
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Scaledistance.001"
-        node.location = (-945, 401)
+        node.location = (-1084, 400)
         node.operation = "SUBTRACT"
         node.input_type_a = "FLOAT"
         node.input_type_b = "ATTRIBUTE"
@@ -442,9 +456,28 @@ class AOMGeoNodesHandler:
         node.inputs[6].default_value = 0.0
         node.inputs[7].default_value = "Falloff"
 
+        node = nodes.new("ShaderNodeValue")
+        node.name = "Value"
+        node.location = (-1011, -248)
+        node.outputs[0].default_value = -125.0
+
+        node = nodes.new("GeometryNodeAttributeMath")
+        node.name = "Scaledistance.003"
+        node.location = (-930, 661)
+        node.operation = "GREATER_THAN"
+        node.input_type_a = "FLOAT"
+        node.input_type_b = "ATTRIBUTE"
+        node.inputs[1].default_value = "dst"
+        node.inputs[2].default_value = 20.0
+        node.inputs[3].default_value = "Falloffinner"
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = ""
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = "InnerFalloffMIx"
+
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Scaledistance.002"
-        node.location = (-789, 396)
+        node.location = (-928, 395)
         node.operation = "GREATER_THAN"
         node.input_type_a = "FLOAT"
         node.input_type_b = "ATTRIBUTE"
@@ -456,19 +489,9 @@ class AOMGeoNodesHandler:
         node.inputs[6].default_value = 0.0
         node.inputs[7].default_value = "FalloffMIx"
 
-        node = nodes.new("ShaderNodeMath")
-        node.name = "Math"
-        node.location = (-672, -191)
-        node.operation = "DIVIDE"
-        node.use_clamp = False
-        node.inputs[0].default_value = 0.5
-        node.inputs[1].default_value = 0.5
-        node.inputs[2].default_value = 0.0
-        node.outputs[0].default_value = 0.0
-
         node = nodes.new("GeometryNodeAttributeMix")
         node.name = "Attribute Mix.002"
-        node.location = (-636, 411)
+        node.location = (-775, 410)
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "FLOAT"
         node.input_type_factor = "ATTRIBUTE"
@@ -485,6 +508,35 @@ class AOMGeoNodesHandler:
         node.inputs[10].default_value = (0.5, 0.5, 0.5, 1.0,)
         node.inputs[11].default_value = "Falloff"
 
+        node = nodes.new("GeometryNodeAttributeMix")
+        node.name = "Attribute Mix.003"
+        node.location = (-773, 682)
+        node.input_type_a = "FLOAT"
+        node.input_type_b = "ATTRIBUTE"
+        node.input_type_factor = "ATTRIBUTE"
+        node.blend_type = "MIX"
+        node.inputs[1].default_value = "InnerFalloffMIx"
+        node.inputs[2].default_value = 0.5
+        node.inputs[3].default_value = "Falloff"
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[7].default_value = "Falloff"
+        node.inputs[8].default_value = 0.0
+        node.inputs[9].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[10].default_value = (0.5, 0.5, 0.5, 1.0,)
+        node.inputs[11].default_value = "Falloff"
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math"
+        node.location = (-672, -191)
+        node.operation = "DIVIDE"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = 0.0
+
         node = nodes.new("NodeReroute")
         node.name = "Reroute"
         node.location = (-533, -60)
@@ -499,7 +551,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Scaledistance"
-        node.location = (-253, 300)
+        node.location = (-164, 300)
         node.operation = "DIVIDE"
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "FLOAT"
@@ -519,7 +571,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Offset"
-        node.location = (-93, 300)
+        node.location = (-4, 300)
         node.operation = "ADD"
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "FLOAT"
@@ -546,7 +598,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Attribute Math.001"
-        node.location = (66, 300)
+        node.location = (154, 300)
         node.operation = "SINE"
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "ATTRIBUTE"
@@ -560,7 +612,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMix")
         node.name = "Attribute Mix.001"
-        node.location = (226, 300)
+        node.location = (314, 300)
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "ATTRIBUTE"
         node.input_type_factor = "FLOAT"
@@ -579,7 +631,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMath")
         node.name = "Attribute Math"
-        node.location = (406, 300)
+        node.location = (494, 300)
         node.operation = "MULTIPLY"
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "FLOAT"
@@ -593,7 +645,9 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeCombineXYZ")
         node.name = "Attribute Combine XYZ"
-        node.location = (586, 300)
+        node.location = (674, 300)
+        node.input_type_x = "FLOAT"
+        node.input_type_y = "FLOAT"
         node.input_type_z = "ATTRIBUTE"
         node.inputs[1].default_value = "position"
         node.inputs[2].default_value = 0.0
@@ -605,7 +659,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeAttributeMix")
         node.name = "Attribute Mix"
-        node.location = (746, 300)
+        node.location = (834, 300)
         node.input_type_a = "ATTRIBUTE"
         node.input_type_b = "ATTRIBUTE"
         node.input_type_factor = "FLOAT"
@@ -624,21 +678,21 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeGroupOutput")
         node.name = "Group Output"
-        node.location = (1179, 299)
+        node.location = (1267, 299)
         links.new(nodes['Group Input'].outputs[0],
                   nodes['Attribute Proximity'].inputs[0])
         links.new(nodes['Group Input'].outputs[1],  nodes['Reroute'].inputs[0])
         links.new(nodes['Group Input'].outputs[2],
                   nodes['Reroute.002'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Scaledistance.001'].inputs[1])
 
-        links.new(nodes['Group Input'].outputs[5],
+        links.new(nodes['Group Input'].outputs[6],
                   nodes['Object Info'].inputs[0])
         links.new(nodes['Object Info'].outputs['Geometry'],
                   nodes['Attribute Proximity'].inputs['Target'])
-
         links.new(nodes['Attribute Mix'].outputs['Geometry'],
                   nodes['Group Output'].inputs['Geometry'])
-
         links.new(nodes['Attribute Proximity'].outputs['Geometry'],
                   nodes['Scaledistance.001'].inputs['Geometry'])
         links.new(nodes['Scaledistance.001'].outputs['Geometry'],
@@ -665,12 +719,27 @@ class AOMGeoNodesHandler:
                   nodes['Reroute.001'].inputs['Input'])
         links.new(nodes['Scaledistance.002'].outputs['Geometry'],
                   nodes['Attribute Mix.002'].inputs['Geometry'])
-        links.new(nodes['Attribute Mix.002'].outputs['Geometry'],
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['Offset'].inputs['B'])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['Scaledistance'].inputs['B'])
+        links.new(nodes['Map Range'].outputs['Result'],
+                  nodes['Attribute Math'].inputs['B'])
+        links.new(nodes['Reroute.003'].outputs['Output'],
+                  nodes['Scaledistance.004'].inputs['Geometry'])
+        links.new(nodes['Scaledistance.003'].outputs['Geometry'],
+                  nodes['Attribute Mix.003'].inputs['Geometry'])
+        links.new(nodes['Attribute Mix.003'].outputs['Geometry'],
                   nodes['Scaledistance'].inputs['Geometry'])
-        mod['Input_5'] = 0.27
-        mod['Input_9'] = 20
-        mod['Input_11'] = 15.0
+        links.new(nodes['Attribute Mix.002'].outputs['Geometry'],
+                  nodes['Reroute.003'].inputs['Input'])
+        links.new(nodes['Scaledistance.004'].outputs['Geometry'],
+                  nodes['Scaledistance.003'].inputs['Geometry'])
+        mod['Input_5'] = 0.31
         mod['Input_7'] = 3.0
+        mod['Input_9'] = 20.0
+        mod['Input_15'] = 20.0
+        mod['Input_11'] = 25.0
 
         ###########correcting script #
 
@@ -684,7 +753,10 @@ class AOMGeoNodesHandler:
         links.new(nodes['Group Input'].outputs[3],
                   nodes['Scaledistance.001'].inputs[2])
 
-        links.new(nodes['Group Input'].outputs[4],  nodes['Math'].inputs[1])
+        links.new(nodes['Group Input'].outputs[5],
+                  nodes['Math'].inputs[1])  # 4 is inner, 5 is speed
+        links.new(nodes['Group Input'].outputs[4],
+                  nodes['Scaledistance.003'].inputs[2])
 
         source = nodes['Value'].outputs[0]
         target = bpy.context.scene
@@ -699,7 +771,7 @@ class AOMGeoNodesHandler:
         if ob != None:
             for mod in ocean.modifiers[:]:
                 if 'Ripples' in mod.name:
-                    if ob == mod['Input_13']:
+                    if ob == mod['Input_15']:
                         ocean.modifiers.remove(mod)
                         ob.aom_data.ripple_parent = None
                     else:
@@ -709,7 +781,7 @@ class AOMGeoNodesHandler:
         else:
             for mod in reversed(ocean.modifiers[:]):
                 if 'Ripples' in mod.name:
-                    ob = mod['Input_13']
+                    ob = mod['Input_15']
                     if ob != None:
                         ob.aom_data.ripple_parent = None
 

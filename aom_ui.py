@@ -212,6 +212,7 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 # row = layout.row(align=True)
 
 
+'''
 class BE_PT_AdvOceanFoam(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -255,7 +256,7 @@ class BE_PT_AdvOceanFoam(bpy.types.Panel):
                 subcol = col.column()
                 # row = layout.row(align=True)
                 subcol.prop(
-                    ocean.modifiers["Ocean"], "foam_coverage", text="Coverage")
+                    ocean.modifiers["Ocean"], "foam_coverage", text="Coverage")'''
 
 
 class BE_PT_AdvOceanWaves(bpy.types.Panel):
@@ -336,7 +337,10 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
             # got a valid ocean
             if ocean != None:
                 mat = ocean.material_slots[0].material
+                is_advanced = context.scene.aom_props.AdvMaterialOptions
                 if is_ocean_material(context, mat):
+                    subcol.prop(context.scene.aom_props,
+                                'AdvMaterialOptions', text='Advanced Options')
                     nodes = mat.node_tree.nodes
                     subcol.label(text="Water Material Settings")
                     try:
@@ -379,7 +383,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
                     try:
                         subcol.prop(nodes['WaterBumpStrength'].outputs[0],
-                                    'default_value', text='Bump Strength')
+                                    'default_value', text='Fake Wave Strength')
                     except:
                         pass
 
@@ -404,44 +408,48 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Transmission')
                     except:
                         pass
+                    subcol.prop(ocean.modifiers["Ocean"], 'foam_coverage')
+                    subcol.prop(ocean.modifiers["Dynamic Paint"]
+                                .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Object Foam Fade")
+                    if is_advanced:
+                        subcol.label(text="Ocean Foam Finetune")
+                        try:
+                            subcol.prop(nodes['FoamBaseStrength'].outputs[0],
+                                        'default_value', text='Base Strength')
+                        except:
+                            pass
 
-                    subcol.label(text="Ocean Foam Finetune")
-                    try:
-                        subcol.prop(nodes['FoamBaseStrength'].outputs[0],
-                                    'default_value', text='Base Strength')
-                    except:
-                        pass
+                        try:
+                            subcol.prop(nodes['LowerOceanFoamCut'].outputs[0],  # LowerFoamCut, FoamBasestrength, LowerObjFoamCut, ObjectFoam Basestrength,
+                                        'default_value', text='Low Cut')
+                        except:
+                            pass
 
-                    try:
-                        subcol.prop(nodes['LowerOceanFoamCut'].outputs[0],  # LowerFoamCut, FoamBasestrength, LowerObjFoamCut, ObjectFoam Basestrength,
-                                    'default_value', text='Low Cut')
-                    except:
-                        pass
+                        subcol.label(text="Object Foam Finetune")
+                        try:
+                            subcol.prop(nodes['ObjectBaseStrength'].outputs[0],
+                                        'default_value', text='Base Strength')
+                        except:
+                            pass
 
-                    subcol.label(text="Object Foam Finetune")
-                    try:
-                        subcol.prop(nodes['ObjectBaseStrength'].outputs[0],
-                                    'default_value', text='Base Strength')
-                    except:
-                        pass
-
-                    try:
-                        subcol.prop(nodes['LowerObjectCut'].outputs[0],
-                                    'default_value', text='Low Cut')
-                    except:
-                        pass
-                    subcol.label(text="Foam Patches")
+                        try:
+                            subcol.prop(nodes['LowerObjectCut'].outputs[0],
+                                        'default_value', text='Low Cut')
+                        except:
+                            pass
+                        subcol.label(text="Foam Patches")
                     try:
                         subcol.prop(nodes['Patchiness'].outputs[0],
                                     'default_value', text='Patchiness')
                     except:
                         pass
-                    try:
-                        subcol.prop(nodes['NoiseScale'].outputs[0],
-                                    'default_value', text='Noise Scale')
-                    except:
-                        pass
-                    subcol.label(text="Bubbles")
+                    if is_advanced:
+                        try:
+                            subcol.prop(nodes['NoiseScale'].outputs[0],
+                                        'default_value', text='Noise Scale')
+                        except:
+                            pass
+                    # subcol.label(text="Bubbles")
                     try:
                         subcol.prop(nodes['ScaleBub'].outputs[0],
                                     'default_value', text='Bubblesize')
@@ -510,8 +518,11 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                 subcol = subcol.box()
                 subcol.label(text='Spray')
                 subcol.operator("aom.spray", icon="MOD_FLUIDSIM")
-                if "Spray" in mods:
+
+                boo, mod = in_mods("Spray", mods)
+                if boo:
                     subcol.operator("aom.remove_spray", icon="MOD_FLUIDSIM")
+
                     subcol.label(
                         text='Look in the modifiers tap for settings. Instanced object in "Spray" collection.', icon='QUESTION')
                     subcol.label(
@@ -522,30 +533,30 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
 
                 subcol.label(text='Ripples')
                 subcol.operator("aom.ripples", icon="MOD_INSTANCE")
-                boo, mod = in_mods("Ripples", mods)
+                boo, mod = in_mods_multi("Ripples", mods)
                 if boo:
                     subcol.operator("aom.remove_ripples", icon="MOD_INSTANCE")
                     subcol.label(
                         text='Look in the modifiers tap for settings.', icon='QUESTION')
                     # ripple options
 
-                    subcol.prop
+                    # subcol.prop()
 
                     if mod['Input_13'] == None:
                         subcol.label(
                             text='Set an object in the  "Ripples" modifier!', icon='ERROR')
 
-            # if "AdvOcean" in bpy.data.objects and bpy.data.objects['AdvOcean'].material_slots:
-            # got a valid ocean
+            #
 
-            # subcol.label(text="Water Material Settings")
 
-            #  box = row.box()
-            # row = layout.row(align=True)
-
-    # Generate OCean  Button
-
-# searches for name parts in mods
+def in_mods_multi(str, mods):
+    if str in mods.active.name:
+        return True, mods.active
+    for mod in mods:
+        if str in mod.name:
+            a = True
+            return a, mod
+    return False, None
 
 
 def in_mods(str, mods):

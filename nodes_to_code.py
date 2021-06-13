@@ -147,13 +147,13 @@ def special_operations(node):
     if hasattr(node, "use_whole_collection"):
         print(f'node.use_whole_collection = {node.use_whole_collection}')
     if hasattr(node, "input_type_x"):
-        print(f'node.input_type_x = {node.input_type_x}')
+        print(f'node.input_type_x = "{node.input_type_x}"')
     if hasattr(node, "input_type_y"):
-        print(f'node.input_type_y = {node.input_type_y}')
+        print(f'node.input_type_y = "{node.input_type_y}"')
     if hasattr(node, "input_type_z"):
-        print(f'node.input_type_z = {node.input_type_z}')
+        print(f'node.input_type_z = "{node.input_type_z}"')
     if hasattr(node, "transform_space"):
-        print(f'node.transform_space = {node.transform_space}')
+        print(f'node.transform_space = "{node.transform_space}"')
 
 
 def get_sorted_InputLinks(nodes, links):
@@ -258,6 +258,6 @@ def gen_links(group, nodes, links):
                 f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
 
 
-group = bpy.data.node_groups['OceanSpray']
+group = bpy.data.node_groups['Ripples']
 
 nodes_to_nodecode(group)
