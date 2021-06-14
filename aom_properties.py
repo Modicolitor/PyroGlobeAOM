@@ -38,9 +38,9 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
         name='Material Selector',
         description='Show available Materials',
         default='1',
-        items=[('1', 'Wet Foam', ''),
-               ('2', 'Wet Foam2', ''),
-               ('3', 'Dry Foam', ''),
+        items=[('1', 'Ocean 3.0', ''),
+               ('2', 'Ocean 2.9', ''),
+               ('3', 'Legacy Improved', ''),
                ('4', 'Legacy', ''),
                ])
 

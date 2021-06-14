@@ -58,7 +58,7 @@ class AOMPreset_Handler:
             nodes['Value'].outputs[0].default_value = 0.01  # rougness water =
             nodes['RGB'].outputs[0].default_value = (1, 1, 1, 1)
             nodes['WaterBumpTexScale'].outputs[0].default_value = 30
-            nodes['WaterBumpStrength'].outputs[0].default_value = 0.02
+            nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
 
             nodes['FoamSubsurf'].outputs[0].default_value = 0.2
             nodes['FoamRoughness'].outputs[0].default_value = 0.2
@@ -70,8 +70,8 @@ class AOMPreset_Handler:
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.0
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
             nodes['Patchiness'].outputs[0].default_value = 0.2
-            nodes['Hue1'].inputs[4].default_value = 0.4
-            nodes['Hue2'].inputs[4].default_value = 0.4
+            nodes['MRNoise1'].inputs[4].default_value = 0.4
+            nodes['MRNoise2'].inputs[4].default_value = 0.4
 
     def set_lovely(self, context, Ocean, mat):
         Ocean = Ocean.modifiers["Ocean"]
@@ -124,16 +124,16 @@ class AOMPreset_Handler:
         Ocean.choppiness = 0.3
         Ocean.wind_velocity = 9
         Ocean.wave_scale_min = 0.01
-        Ocean.foam_coverage = 0.2
+        Ocean.foam_coverage = 0.5
         Ocean.damping = 0.5
 
         if "AdvOceanMat" in mat.name:
 
             nodes = mat.node_tree.nodes
-            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.03
-            nodes['FoamBaseStrength'].outputs[0].default_value = 15
-            nodes['Patchiness'].outputs[0].default_value = 0.3
-            nodes['WaterBumpStrength'].outputs[0].default_value = 1
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1
+            nodes['Patchiness'].outputs[0].default_value = 0.5
+            nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
     def set_shallow_quiet(self, context, Ocean, mat):

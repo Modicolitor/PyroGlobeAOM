@@ -721,6 +721,8 @@ def RemoveInterActSingle(context, obj):
 def AdvOceanMat(context, ocean):
     MatHandler = AOMMatHandler(context)
     mat = MatHandler.make_material(ocean)
+
+    MatHandler.find_mat_to_adjust_for_preset(context, ocean)
     return mat
 
 
@@ -867,10 +869,13 @@ class BE_OT_SetPreset(bpy.types.Operator):
     def execute(self, context):
 
         pre = AOMPreset_Handler()
-        oceans = get_ocean_from_list(context, context.scene.objects)
+        MatHandler = AOMMatHandler(context)
+        #oceans = get_ocean_from_list(context, context.scene.objects)
         oc = get_active_ocean(context)
         # for oc in oceans:
         pre.set_preset(context, oc)
+
+        MatHandler.find_mat_to_adjust_for_preset(context, oc)
 
         return{"FINISHED"}
 

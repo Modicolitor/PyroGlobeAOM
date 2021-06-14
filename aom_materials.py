@@ -23,11 +23,11 @@ class AOMMatHandler:
     def get_preset_name(self, index):
         index = int(index)
         if index == 1:
-            return 'Wet Foam'
+            return 'Ocean 3.0'
         elif index == 2:
-            return 'Wet Foam2'
+            return 'Ocean 2.9'
         elif index == 3:
-            return 'Dry Foam'
+            return 'Legacy Improved'
         elif index == 4:
             return 'Legacy'
 
@@ -36,9 +36,9 @@ class AOMMatHandler:
         for node in nodes:
             nodes.remove(node)
 
-    def make_material(self, ob):
+    def make_material(self, oc):
 
-        self.handle_materialslots(ob)
+        self.handle_materialslots(oc)
         #self.material = self.get_material()
         self.material.use_screen_refraction = True
         self.material.use_sss_translucency = True
@@ -83,6 +83,7 @@ class AOMMatHandler:
             self.constructor_legacy(node_tree)
 
         self.label_nodes(node_tree)
+        self.find_mat_to_adjust_for_preset(self.context, oc)
         return self.material
 
     def outputnodes(self, node_tree):
@@ -273,12 +274,12 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeValue')
         node.name = "WaterBumpTexScale"
         node.location = (-2700, -300)
-        node.outputs[0].default_value = 250
+        node.outputs[0].default_value = 30
 
         node = nodes.new('ShaderNodeValue')
         node.name = "WaterBumpStrength"
         node.location = (-2700, -500)
-        node.outputs[0].default_value = 0.02
+        node.outputs[0].default_value = 0.1
 
         node = nodes.new('ShaderNodeMapping')
         node.name = "WaterMap"
@@ -675,7 +676,7 @@ class AOMMatHandler:
         # Hue Saturation 000 für noise texture2
 
         node = nodes.new('ShaderNodeMapRange')
-        node.name = 'Hue1'
+        node.name = 'MRNoise1'
         node.location = (600, 2275)
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
         node.inputs[4].default_value = 0.2
@@ -693,9 +694,9 @@ class AOMMatHandler:
         # Hue Saturation 001 für noise texture2
 
         node = nodes.new('ShaderNodeMapRange')
-        node.name = 'Hue2'
+        node.name = 'MRNoise2'
         node.location = (600, 2100)
-        node.inputs[4].default_value = 1
+        node.inputs[4].default_value = 0.4
 
         node = nodes.new('ShaderNodeMapRange')
         node.name = 'MPScaleNoise'
@@ -705,12 +706,12 @@ class AOMMatHandler:
         node.inputs[4].default_value = 1.0
 
         links.new(nodes['Noise1'].outputs['Fac'],
-                  nodes['Hue1'].inputs[0])
+                  nodes['MRNoise1'].inputs[0])
         links.new(nodes['Noise2'].outputs['Fac'],
-                  nodes['Hue2'].inputs[0])
-        links.new(nodes['Hue1'].outputs[0],
+                  nodes['MRNoise2'].inputs[0])
+        links.new(nodes['MRNoise1'].outputs[0],
                   nodes['SubNoise1'].inputs['Color1'])
-        links.new(nodes['Hue2'].outputs[0],
+        links.new(nodes['MRNoise2'].outputs[0],
                   nodes['SubNoise1'].inputs['Color2'])
         links.new(nodes['SubNoise2'].outputs[0],
                   nodes['MPScaleNoise'].inputs[0])
@@ -1121,7 +1122,7 @@ class AOMMatHandler:
         node.location = (600, 1075)
         node.name = "MRNoise1"
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
-        node.inputs[4].default_value = 0.8
+        node.inputs[4].default_value = 0.2
         #node.inputs['Saturation'].default_value = 0.0
 
         # noise texture (000)
@@ -1143,7 +1144,7 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeMapRange')
         node.location = (600, 900)
         node.name = "MRNoise2"
-        node.inputs[4].default_value = 1.0
+        node.inputs[4].default_value = 0.4
         #node.inputs['Saturation'].default_value = 0.0
 
         links.new(nodes['Texture Coordinate'].outputs[0],
@@ -1686,6 +1687,7 @@ class AOMMatHandler:
 
         nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.2
 
+    # new name Ocean 2.9
     def constructor_wet2(self, node_tree):
         print('legacy')
         nodes = node_tree.nodes
@@ -1696,7 +1698,7 @@ class AOMMatHandler:
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
 
         # pathchiness
-        #links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
         links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
 
         links.new(nodes['LowerOceanFoam_Log'].outputs[0],
@@ -1767,8 +1769,6 @@ class AOMMatHandler:
                   nodes['MultiNoiseScale'].inputs[0])
         links.new(nodes['MultiNoiseScale'].outputs[0],
                   nodes['Noise2'].inputs['Scale'])
-
-        nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.2
 
     def constructor_legacy(self, node_tree):
         print('legacy')
@@ -1925,3 +1925,90 @@ class AOMMatHandler:
 
         for node in nodes:
             node.label = node.name
+
+    # adjusts material settings depending on the currently set preset on material creation
+
+    def find_mat_to_adjust_for_preset(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        if "Ocean 3.0" in mat.name:
+            self.Ocean30_adjust_to_preset(context, ocean)
+        elif "Ocean 2.9" in mat.name:
+            self.Ocean29_adjust_to_preset(context, ocean)
+        elif "Legacy Improved" in mat.name:
+            self.Legacy_improve_adjust_to_preset(context, ocean)
+        elif "Legacy" in mat.name:
+            self.Legacy_adjust_to_preset(context, ocean)
+
+    def Ocean30_adjust_to_preset(self, context, ocean):
+        Ocean = ocean.modifiers["Ocean"]
+
+        node_tree = ocean.material_slots[0].material.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        Preset = context.scene.aom_props.PresetSel
+
+        if Preset == '1':
+            nodes['Patchiness'].outputs[0].default_value = 0.4
+            Ocean.foam_coverage = -0.1
+        elif Preset == '2':
+            nodes['Patchiness'].outputs[0].default_value = 0.4
+            Ocean.foam_coverage = 0.2
+        elif Preset == '3':
+            nodes['Patchiness'].outputs[0].default_value = 0.4
+            Ocean.foam_coverage = 0.3
+
+    def Ocean29_adjust_to_preset(self, context, ocean):
+        Ocean = ocean.modifiers["Ocean"]
+        node_tree = ocean.material_slots[0].material.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        Preset = context.scene.aom_props.PresetSel
+
+        if Preset == '1':
+            nodes['Patchiness'].outputs[0].default_value = 0.5
+            Ocean.foam_coverage = 0.0
+        elif Preset == '2':
+            nodes['Patchiness'].outputs[0].default_value = 0.2
+            Ocean.foam_coverage = 0.0
+        elif Preset == '3':
+            nodes['Patchiness'].outputs[0].default_value = 0.5
+            Ocean.foam_coverage = 0.4
+
+    def Legacy_improve_adjust_to_preset(self, context, ocean):
+        Ocean = ocean.modifiers["Ocean"]
+        node_tree = ocean.material_slots[0].material.node_tree
+
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        Preset = context.scene.aom_props.PresetSel
+
+        if Preset == '1':
+            nodes['Patchiness'].outputs[0].default_value = 0.5
+            Ocean.foam_coverage = 0.0
+        elif Preset == '2':
+            nodes['Patchiness'].outputs[0].default_value = 0.3
+            Ocean.foam_coverage = 0.3
+        elif Preset == '3':
+            nodes['Patchiness'].outputs[0].default_value = 0.4
+            Ocean.foam_coverage = 0.4
+
+    def Legacy_adjust_to_preset(self, context, ocean):
+        Ocean = ocean.modifiers["Ocean"]
+        node_tree = ocean.material_slots[0].material.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        Preset = context.scene.aom_props.PresetSel
+
+        if Preset == '1':
+            nodes['Patchiness'].outputs[0].default_value = 0.7
+            Ocean.foam_coverage = -0.2
+        elif Preset == '2':
+            nodes['Patchiness'].outputs[0].default_value = 0.4
+            Ocean.foam_coverage = 0.1
+        elif Preset == '3':
+            nodes['Patchiness'].outputs[0].default_value = 0.2
+            Ocean.foam_coverage = 0.3
