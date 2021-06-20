@@ -1,51 +1,14 @@
-is_cage
-is_float
-is_static 
-
-
-[+] is_ocean  (only by name)
-
-get_ocean from selection
-
-
-
-
-ocean_data: [{obj: weight.002}]
 
 
 bugs and test: 
 
-[] is manually changed material chagned when new ocean is added?
-
-
-changes to Multiple: if only one ocean ==> old behavior (needs name independency) otherwise add selected objects to the active ocean 
-[] Float 
-[] Static 
-[] Remove interaction 
-
-[] remaping to other ocean (check float/static change system), option for float on several objects 
-
-[] UI show selectec when there are more oceans 
-
-
-
-[] update material 
-
-[] move foam with attribute: foam textures must move a bit with the waves (aligment). Put driver to get value from alignment
-    --> siehe Materialstudie moving foam
-
 presets
-[] update and new presets 
-
-
 
 GeoNodes Features: 
 [] Waves 
-[] Waves Break particles 
+    [] Waves Break particles 
 
-[++] Spray 
-    [] kick to show the particles directly after add without need to change a value 
-    [] add experimental tag
+[] Remove Water Bool 
 
 
 [++]nodes to code
@@ -53,16 +16,10 @@ GeoNodes Features:
 # [] test material node trees
 # [] clean up get value section to bl_idname
 
-Loop animation: 
-[] of selected ocean
+[+] Loop animation: 
+
 https://www.youtube.com/watch?v=Xh2Xuo00f0c
 
-
-[?] ocean should set there ocean id in there objects
-[?] object should save ocean id when floated 
-[?] remove single must check for there ocean id when floating 
-
-[] add selection --> active control to 
 
 
 
@@ -71,21 +28,13 @@ ui:
 
 fixed bugs:
 
+[] ocean check ui bug
+
+[] error remove interaction on static objects
 
 
 
-[] improve presets 
 
-
-[] changing material should adapt preset setting 
 
 [] remove node setup in make loop before making it
 
-[] ui of special
-    [] settings
-
-    [] label when no object in input of mod
-    [] label look in the modifiers tab for option
-
-
-[+] Tooltips

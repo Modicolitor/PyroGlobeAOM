@@ -421,6 +421,8 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         cage = context.object
         cage.name = name + ".FloatAnimCage"
         cage.aom_data.is_floatcage = True
+        cage.display_type = 'WIRE'
+
         if dx > dy:
             print(obj.name + "x")
             dy = 1.0*dy
@@ -669,10 +671,11 @@ def RemoveInterActSingle(context, obj):
             modifier="Dynamic Paint")  # remove dynamic paint
 
     empty = obj.parent
-    emptylocation = empty.location
+    if empty != None:
+        emptylocation = empty.location
     # obj.parent.remove(parent, do_unlink=True)
-    obj.parent = None
-    obj.location = emptylocation
+        obj.parent = None
+        obj.location = emptylocation
 
     deletelist = []
     deletelist.append(empty)
