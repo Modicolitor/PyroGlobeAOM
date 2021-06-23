@@ -64,6 +64,8 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
 
        # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
     #    row = layout.row(align=True)
+
+        ocean = get_active_ocean(context)
         if hasattr(context.scene, "aom_props"):
 
             ocean = get_active_ocean(context)
@@ -95,54 +97,56 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
                 subcol = col.column()
                 # row = layout.row(align=True)
 
-                subcol.label(text="Ocean Settings")
+                if 'Ocean' in ocean.modifiers:
 
-                # layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "resolution")
-                try:
+                    subcol.label(text="Ocean Settings")
+
+                    # layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "viewport_resolution")
-                except:
-                    pass
-                try:
-                    subcol.prop(
-                        ocean.modifiers['Ocean'], "spectrum")
-                except:
-                    pass
-
-                # row = layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "repeat_x")
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "repeat_y")
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "spatial_size")
-
-                # subcol = col.column()
-                # row = layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "wave_alignment")
-                # subcol = col.column()
-                # row = layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "wave_scale")
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "wave_scale_min")
-                # subcol = col.column()
-                # row = layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "wind_velocity", text="Pointiness 1")
-                subcol.prop(
-                    ocean.modifiers['Ocean'], "choppiness", text="Pointiness 2")
-
-                oceanmod = ocean.modifiers['Ocean']
-                try:
-                    if oceanmod.spectrum == 'TEXEL_MARSEN_ARSLOE' or oceanmod.spectrum == 'JONSWAP':
+                        ocean.modifiers['Ocean'], "resolution")
+                    try:
                         subcol.prop(
-                            ocean.modifiers['Ocean'], "fetch_jonswap", text="fetch")
-                except:
-                    pass
+                            ocean.modifiers['Ocean'], "viewport_resolution")
+                    except:
+                        pass
+                    try:
+                        subcol.prop(
+                            ocean.modifiers['Ocean'], "spectrum")
+                    except:
+                        pass
+
+                    # row = layout.row(align=True)
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "repeat_x")
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "repeat_y")
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "spatial_size")
+
+                    # subcol = col.column()
+                    # row = layout.row(align=True)
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "wave_alignment")
+                    # subcol = col.column()
+                    # row = layout.row(align=True)
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "wave_scale")
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "wave_scale_min")
+                    # subcol = col.column()
+                    # row = layout.row(align=True)
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "wind_velocity", text="Pointiness 1")
+                    subcol.prop(
+                        ocean.modifiers['Ocean'], "choppiness", text="Pointiness 2")
+
+                    oceanmod = ocean.modifiers['Ocean']
+                    try:
+                        if oceanmod.spectrum == 'TEXEL_MARSEN_ARSLOE' or oceanmod.spectrum == 'JONSWAP':
+                            subcol.prop(
+                                ocean.modifiers['Ocean'], "fetch_jonswap", text="fetch")
+                    except:
+                        pass
 
                 box = subcol.box()
                 box.label(text="Duration of Simulation")
@@ -157,6 +161,8 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
                 box.operator("upd.oceaniframe", text="Update",
                              icon="FILE_TICK")  # update foam and Frames
 
+        # elif ocean != None:
+        #    subcol.operator("initialize.aom", icon="MOD_WAVE", text="Initialize")
         else:
             subcol.operator("gen.ocean", icon="MOD_WAVE")
 
@@ -408,9 +414,11 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Transmission')
                     except:
                         pass
-                    subcol.prop(ocean.modifiers["Ocean"], 'foam_coverage')
-                    subcol.prop(ocean.modifiers["Dynamic Paint"]
-                                .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Object Foam Fade")
+                    if 'Ocean' in ocean.modifiers:
+                        subcol.prop(ocean.modifiers["Ocean"], 'foam_coverage')
+                    if 'Dynamic Paint' in ocean.modifiers:
+                        subcol.prop(ocean.modifiers["Dynamic Paint"]
+                                    .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Object Foam Fade")
                     if is_advanced:
                         subcol.label(text="Ocean Foam Finetune")
                         try:

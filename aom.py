@@ -7,6 +7,8 @@ from .aom_def import is_ocean, is_floatcage
 from .aom_materials import AOMMatHandler
 from .aom_presets import AOMPreset_Handler
 from .aom_geonodes import AOMGeoNodesHandler
+from .aom_properties import AOMPropertyGroup
+from .aom_properties import AOMObjProperties
 
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
@@ -203,8 +205,7 @@ bpy.types.Scene.WeatherX = FloatProperty(
 
 
 def initialize_addon(context):
-    from .aom_properties import AOMPropertyGroup
-    from .aom_properties import AOMObjProperties
+
     bpy.types.Scene.aom_props = bpy.props.PointerProperty(
         type=AOMPropertyGroup)
 
@@ -673,7 +674,6 @@ def RemoveInterActSingle(context, obj):
     empty = obj.parent
     if empty != None:
         emptylocation = empty.location
-    # obj.parent.remove(parent, do_unlink=True)
         obj.parent = None
         obj.location = emptylocation
 
@@ -1167,6 +1167,17 @@ class BE_OT_GenOceanMat(bpy.types.Operator):
             if active != None:
                 AdvOceanMat(context, active)
 
+        return{"FINISHED"}
+
+
+class BE_OT_InitializeAOM(bpy.types.Operator):
+    '''Generates the material set in the dropdown on the selected ocean(s).'''
+    bl_label = "Initialize "
+    bl_idname = "initialize.aom"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        initialize_addon(context)
         return{"FINISHED"}
 
 
