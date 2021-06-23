@@ -6,18 +6,24 @@ class AOMMatHandler:
 
     def __init__(self, context):
         self.context = context
-        self.material = self.get_material()
+
         #self.materialname = "AdvOceanMat"
 
     def get_material(self):
         newMatName = "AdvOceanMat_" + \
             self.get_preset_name(self.context.scene.aom_props.MaterialSel)
-        print(f"newmaterialname is {newMatName}")
+        #print(f"newmaterialname is {newMatName}")
         mat = bpy.data.materials.get(newMatName)
         if mat is None:
             # create material
             mat = bpy.data.materials.new(name=newMatName)
 
+        return mat
+
+    def get_cagematerial(self):
+        mat = bpy.data.materials.get("aom_cage_material")
+        if mat is None:
+            mat = bpy.data.materials.new(name="aom_cage_material")
         return mat
 
     def get_preset_name(self, index):
@@ -37,7 +43,7 @@ class AOMMatHandler:
             nodes.remove(node)
 
     def make_material(self, oc):
-
+        self.material = self.get_material()
         self.handle_materialslots(oc)
         #self.material = self.get_material()
         self.material.use_screen_refraction = True
@@ -85,6 +91,67 @@ class AOMMatHandler:
         self.label_nodes(node_tree)
         self.find_mat_to_adjust_for_preset(self.context, oc)
         return self.material
+
+    def make_cagematerial(self, ob):
+
+        self.material = self.get_cagematerial()
+        self.handle_materialslots(ob)
+        node_tree = self.material.node_tree
+        #self.material.name = "aom_cage_material"
+        self.material.blend_method = 'CLIP'
+        #self.material.use_screen_refraction = True
+        #self.material.use_sss_translucency = True
+        self.del_nodes()
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        node = nodes.new("ShaderNodeBsdfTransparent")
+        node.name = "Transparent BSDF"
+        node.location = (-331, 280)
+        node.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0,)
+        # has no value at 0 with <bpy_struct, NodeSocketShader("BSDF") at 0x00000290749492A8>
+
+        node = nodes.new("ShaderNodeEmission")
+        node.name = "Emission"
+        node.location = (-329, 164)
+        node.inputs[0].default_value = (1.0, 1.0, 1.0, 1.0,)
+        node.inputs[1].default_value = 1.0
+        # has no value at 0 with <bpy_struct, NodeSocketShader("Emission") at 0x000002903BD15D18>
+
+        node = nodes.new("ShaderNodeWireframe")
+        node.name = "Wireframe"
+        node.location = (-324, 429)
+        node.inputs[0].default_value = 0.01
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMixShader")
+        node.name = "Mix Shader"
+        node.location = (-4, 305)
+        node.inputs[0].default_value = 0.5
+        # has no value at 1 with <bpy_struct, NodeSocketShader("Shader") at 0x000002900E6EB4D8>
+        #node.inputs[1].default_value = None
+        # has no value at 2 with <bpy_struct, NodeSocketShader("Shader") at 0x000002900E6EB6C8>
+        #node.inputs[2].default_value = None
+        # has no value at 0 with <bpy_struct, NodeSocketShader("Shader") at 0x000002900E6EAF08>
+        #node.outputs[0].default_value = None
+
+        node = nodes.new("ShaderNodeOutputMaterial")
+        node.name = "Material Output"
+        node.location = (300, 300)
+        # has no value at 0 with <bpy_struct, NodeSocketShader("Surface") at 0x000002900DDCF2F8>
+        #node.inputs[0].default_value = None
+        # has no value at 1 with <bpy_struct, NodeSocketShader("Volume") at 0x000002900DDCED28>
+        #node.inputs[1].default_value = None
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+
+        links.new(nodes['Transparent BSDF'].outputs[0],
+                  nodes['Mix Shader'].inputs[1])
+        links.new(nodes['Wireframe'].outputs[0],
+                  nodes['Mix Shader'].inputs[0])
+        links.new(nodes['Emission'].outputs[0],
+                  nodes['Mix Shader'].inputs[2])
+        links.new(nodes['Mix Shader'].outputs[0],
+                  nodes['Material Output'].inputs[0])
 
     def outputnodes(self, node_tree):
         nodes = node_tree.nodes

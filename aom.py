@@ -119,6 +119,7 @@ def GenOcean(context):
     canvas["Surface"].name = "Waves"
     canvas["Waves"].surface_type = 'WAVE'
     canvas["Waves"].use_antialiasing = True
+    canvas["Waves"].wave_speed = 0.4
 
     bpy.ops.dpaint.surface_slot_add()
     ob.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Surface"].name = "Wetmap"
@@ -423,6 +424,9 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         cage.name = name + ".FloatAnimCage"
         cage.aom_data.is_floatcage = True
         cage.display_type = 'WIRE'
+        cage.hide_render = True
+        MatHandler = AOMMatHandler(context)
+        mat = MatHandler.make_cagematerial(cage)
 
         if dx > dy:
             print(obj.name + "x")
@@ -455,7 +459,7 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
         context.object.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
         bpy.ops.dpaint.type_toggle(type='BRUSH')
-        bpy.data.objects[name].hide_render = True
+        #bpy.data.objects[name].hide_render = True
 
         # jedesobject bekommt seine eigene Collection
 
@@ -597,59 +601,6 @@ def RemoveInterAct(context):
     for obj in sellist:
         RemoveInterActSingle(context, obj)
 
-        '''
-        bpy.context.view_layer.objects.active = obj
-
-        bpy.ops.object.constraints_clear()
-        bpy.ops.object.modifier_remove(
-            modifier="Dynamic Paint")  # remove dynamic paint
-        emptylocation = obj.parent.location
-        # obj.parent.remove(parent, do_unlink=True)
-        obj.parent = None
-        obj.location = emptylocation
-
-        # for o in context.selectable_objects:
-        # o.select_set(False)
-
-        deletelist = []
-        deletelist.append(obj.parent)
-        bpy.ops.object.delete({"selected_objects": deletelist})
-
-    # remove colletions (2.8)
-        if obj.name in bpy.data.collections['Wave'].objects:
-            bpy.data.collections['Wave'].objects.unlink(obj)
-            # bpy.ops.collection.objects_remove_active(collection='Wave')
-        else:
-            print(str(obj.name) + "was not in Wave collection")
-
-        if obj.name in bpy.data.collections['Paint'].objects:
-            bpy.data.collections['Paint'].objects.unlink(obj)
-            # bpy.ops.collection.objects_remove_active(collection='Paint')
-        else:
-            print(str(obj.name) + " was not in Paint collection")
-
-        ocean_id = obj.aom_data.float_parent_id
-        print(f'search id: ')
-        ocean = get_ocean_from_id(context, ocean_id)
-        print(str(obj.name) + ' aus wave und paint entfernt, jetzt nur noch den cage')
-        if obj.name + ".FloatAnimCage" in bpy.data.objects:
-            for col in bpy.data.collections:
-                print("Suche" + str(obj.name) +
-                      " in Collection" + str(col.name))
-                if obj.name + ".FloatAnimCage" in col.objects:
-                    print(str(obj.name) + "gefunden in " + str(col.name))
-                    bpy.data.objects.remove(
-                        bpy.data.objects[obj.name + ".FloatAnimCage"], do_unlink=True)
-                    ocean.modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
-                    data.collections.remove(col)
-        else:
-            print("es gab kein Float Animation Cage")
-
-        # aom obj settings
-        obj.aom_data.interaction_type = ''
-        obj.aom_data.float_parent_id = -1
-        obj.aom_data.namenum = -1
-        '''
 
 # remove interaction aber mit nur einem Object
 
@@ -660,13 +611,7 @@ def RemoveInterActSingle(context, obj):
 
     context.view_layer.objects.active = obj
     bpy.ops.object.constraints_clear()
-    '''
-    if 'Copy Location' in obj.constraints:
-        obj.constraints.remove(obj.constraints['Copy Location'])
-    if 'Copy Rotation' in obj.constraints:
-        obj.constraints.remove(obj.constraints['Copy Rotation'])
-        bpy.ops.object.constraints_clear()  # !!!!
-    '''
+
     if "Dynamic Paint" in obj.modifiers:
         bpy.ops.object.modifier_remove(
             modifier="Dynamic Paint")  # remove dynamic paint
@@ -1167,17 +1112,6 @@ class BE_OT_GenOceanMat(bpy.types.Operator):
             if active != None:
                 AdvOceanMat(context, active)
 
-        return{"FINISHED"}
-
-
-class BE_OT_InitializeAOM(bpy.types.Operator):
-    '''Generates the material set in the dropdown on the selected ocean(s).'''
-    bl_label = "Initialize "
-    bl_idname = "initialize.aom"
-    bl_options = {"REGISTER", "UNDO"}
-
-    def execute(self, context):
-        initialize_addon(context)
         return{"FINISHED"}
 
 

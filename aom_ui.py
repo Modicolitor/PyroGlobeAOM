@@ -268,7 +268,7 @@ class BE_PT_AdvOceanFoam(bpy.types.Panel):
 class BE_PT_AdvOceanWaves(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_label = "Ocean Wave Settings"
+    bl_label = "Object Wave Settings"
     bl_category = "Adv-Ocean"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -299,6 +299,11 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
                 subcol = col.column()
                 canvas_settings = ocean.modifiers["Dynamic Paint"].canvas_settings
                 subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_timescale")
+
+                subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_speed", text="Speed")
+                subcol.prop(
                     canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
                 subcol.prop(
                     canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
@@ -314,7 +319,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
     bl_category = "Adv-Ocean"
     bl_options = {'DEFAULT_CLOSED'}
 
-    @classmethod
+    @ classmethod
     def poll(cls, context):
         return hasattr(context.scene, "aom_props")
 
@@ -494,7 +499,7 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
     bl_category = "Adv-Ocean"
     bl_options = {'DEFAULT_CLOSED'}
 
-    @classmethod
+    @ classmethod
     def poll(cls, context):
         return hasattr(context.scene, "aom_props")
 
