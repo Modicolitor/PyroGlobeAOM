@@ -793,6 +793,17 @@ class BE_OT_GenOceanButton(bpy.types.Operator):
         return{"FINISHED"}
 
 
+class BE_OT_InitalizeAddon(bpy.types.Operator):
+    '''Initialize Advanced Ocean Modifier'''
+    bl_label = "Initialize AOM"
+    bl_idname = "aom.initialize"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        initialize_addon(context)
+        return{"FINISHED"}
+
+
 class BE_OT_UpdateOceAniFrame(bpy.types.Operator):
     '''Updates all simlation ranges and animation speed.'''
     bl_label = "Update"
@@ -1221,7 +1232,8 @@ class BE_OT_RemoveOceanSpray(bpy.types.Operator):
 
     def execute(self, context):
         oceans = oceanlist(context, context.selected_objects)
-        GN = AOMGeoNodesHandler(context)
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
 
         for ob in oceans:
             GN.remove_spray(context, ob)

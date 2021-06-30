@@ -164,7 +164,7 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
         # elif ocean != None:
         #    subcol.operator("initialize.aom", icon="MOD_WAVE", text="Initialize")
         else:
-            subcol.operator("gen.ocean", icon="MOD_WAVE")
+            subcol.operator("aom.initialize", icon="MOD_WAVE")
 
 
 class BE_PT_AdvOceanInteract(bpy.types.Panel):
