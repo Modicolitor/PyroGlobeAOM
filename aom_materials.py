@@ -707,7 +707,13 @@ class AOMMatHandler:
         node.location = (800, 2175)
         node.blend_type = 'ADD'
         node.use_clamp = False
-        node.inputs[0].default_value = 0.6
+        node.inputs[0].default_value = 1.0
+
+        node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
+        node.name = "MultiplyPatchiness"
+        node.location = (800, 2375)
+        node.operation = 'MULTIPLY'
+        node.use_clamp = False
 
         # RGB mixshader für zweite Noise Texture
         node = nodes.new('ShaderNodeMixRGB')
@@ -715,12 +721,15 @@ class AOMMatHandler:
         node.location = (1000, 2175)
         node.blend_type = 'SUBTRACT'
         node.use_clamp = False
-        node.inputs[0].default_value = 0.6
+        node.inputs[0].default_value = 1.0
 
         # link Add notes to Subtract
         links.new(nodes['MixFoamWet'].outputs['Color'],
                   nodes['SubNoise2'].inputs['Color1'])
+
         links.new(nodes['SubNoise1'].outputs['Color'],
+                  nodes['MultiplyPatchiness'].inputs[0])
+        links.new(nodes['MultiplyPatchiness'].outputs[0],
                   nodes['SubNoise2'].inputs['Color2'])
 
         # links.new(nodes['Patchiness'].outputs[0],
@@ -1091,9 +1100,24 @@ class AOMMatHandler:
         node.location = (800, 1175)
         node.name = 'SubNoise1'
         node.blend_type = 'SUBTRACT'
-        node.use_clamp = True
-        node.inputs[0].default_value = 0.6
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.1
 
+        # node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
+        #node.name = "MultiplyPatchiness"
+        #node.location = (800, 1375)
+        #node.operation = 'MULTIPLY'
+        #node.use_clamp = False
+
+        # RGB mixshader für zweite Noise Texture
+        node = nodes.new('ShaderNodeMixRGB')
+        node.name = "SubNoise2"
+        node.location = (1000, 975)
+        node.blend_type = 'SUBTRACT'
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.1
+
+        '''
         # RGB mixshader für zweite Noise Texture
         node = nodes.new('ShaderNodeMixRGB')
         node.location = (1000, 975)
@@ -1101,7 +1125,7 @@ class AOMMatHandler:
         node.blend_type = 'SUBTRACT'
         node.use_clamp = True
         node.inputs[0].default_value = 0.6
-
+        '''
         # link Add notes to Subtract
         links.new(nodes['Mix'].outputs['Color'],
                   nodes['SubNoise1'].inputs['Color1'])
@@ -1684,8 +1708,11 @@ class AOMMatHandler:
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
 
         # pathchiness
-        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['MRNoise1'].inputs[4])
+        links.new(nodes['Patchiness'].outputs[0],
+                  nodes['MRNoise2'].inputs[4])
+        #links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
 
         links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
@@ -1765,8 +1792,8 @@ class AOMMatHandler:
         links.new(nodes['FoamOut'].outputs[0], nodes['MainMix'].inputs[2])
 
         # pathchiness
-        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0], nodes['SubNoise2'].inputs[0])
+        links.new(nodes['Patchiness'].outputs[0], nodes['MRNoise1'].inputs[4])
+        links.new(nodes['Patchiness'].outputs[0], nodes['MRNoise2'].inputs[4])
 
         links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
@@ -1951,9 +1978,9 @@ class AOMMatHandler:
                   nodes['CRWet'].inputs[4])
 
         links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise1'].inputs[0])
-        links.new(nodes['Patchiness'].outputs[0],
-                  nodes['SubNoise2'].inputs[0])
+                  nodes['MultiplyPatchiness'].inputs[1])
+        # links.new(nodes['Patchiness'].outputs[0],
+        #          nodes['SubNoise2'].inputs[0])
         links.new(nodes['DisplStrength'].outputs[0],
                   nodes['Disp'].inputs[2])
 
@@ -2017,13 +2044,73 @@ class AOMMatHandler:
 
         if Preset == '1':
             nodes['Patchiness'].outputs[0].default_value = 0.4
-            Ocean.foam_coverage = -0.1
+            Ocean.foam_coverage = 0.1
         elif Preset == '2':
             nodes['Patchiness'].outputs[0].default_value = 0.4
             Ocean.foam_coverage = 0.2
         elif Preset == '3':
-            nodes['Patchiness'].outputs[0].default_value = 0.4
-            Ocean.foam_coverage = 0.3
+            nodes['Patchiness'].outputs[0].default_value = 0.3
+            Ocean.foam_coverage = 0.4
+
+            '''('4', 'Shallow Lovely', ''),
+                ('5', 'Shallow Lively', ''),
+                ('6', 'Shallow Stormy', ''),
+                ('7', 'Established Lovely', ''),
+                ('8', 'Established Lively', ''),
+                ('9', 'Established Stormy', ''),
+            '''
+
+        elif Preset == '4':
+            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 2
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.1
+
+        elif Preset == '5':
+            nodes['Patchiness'].outputs[0].default_value = 0.2
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.3
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.4
+
+        elif Preset == '6':
+            nodes['Patchiness'].outputs[0].default_value = 0.1
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.45
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.4
+
+        elif Preset == '7':
+            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.0
+
+        elif Preset == '8':
+            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.0
+        elif Preset == '9':
+            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.0
+
+        elif Preset == '10':
+            nodes['Patchiness'].outputs[0].default_value = 0.0
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 2.6
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.6
+
+        elif Preset == '11':
+            nodes['Patchiness'].outputs[0].default_value = 0.0
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.0
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.0
+        elif Preset == '12':
+            nodes['Patchiness'].outputs[0].default_value = 0.0
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.0
+            nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
+            Ocean.foam_coverage = 0.0
 
     def Ocean29_adjust_to_preset(self, context, ocean):
         Ocean = ocean.modifiers["Ocean"]

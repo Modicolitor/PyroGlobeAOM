@@ -118,7 +118,7 @@ class AOMPreset_Handler:
     def set_stormy(self, context, Ocean, mat):
         Ocean = Ocean.modifiers["Ocean"]
         Ocean.spectrum = 'PHILLIPS'
-
+        Ocean.spatial_size = 54
         Ocean.wave_scale = 6
         Ocean.wave_alignment = 0.8
         Ocean.choppiness = 0.3
@@ -132,7 +132,7 @@ class AOMPreset_Handler:
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1
-            nodes['Patchiness'].outputs[0].default_value = 0.5
+            nodes['Patchiness'].outputs[0].default_value = 0.4
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
@@ -145,13 +145,13 @@ class AOMPreset_Handler:
         Ocean.choppiness = 1
         Ocean.wind_velocity = 54
         Ocean.wave_scale_min = 0.00
-        Ocean.foam_coverage = 0.3
+        Ocean.foam_coverage = 0.1
         #Ocean.damping = 0.2
 
         if "AdvOceanMat" in mat.name:
 
             nodes = mat.node_tree.nodes
-            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.4
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
             nodes['Patchiness'].outputs[0].default_value = 0.6
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
@@ -173,11 +173,11 @@ class AOMPreset_Handler:
         if "AdvOceanMat" in mat.name:
 
             nodes = mat.node_tree.nodes
-            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.4
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
-            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['Patchiness'].outputs[0].default_value = 0.2
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
-            nodes['DisplStrength'].outputs[0].default_value = 0.02
+            nodes['DisplStrength'].outputs[0].default_value = 0.06
 
     def set_shallow_stormy(self, context, Ocean, mat):
         Ocean = Ocean.modifiers["Ocean"]
@@ -194,11 +194,11 @@ class AOMPreset_Handler:
         if "AdvOceanMat" in mat.name:
 
             nodes = mat.node_tree.nodes
-            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
+            nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.8
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.5
-            nodes['Patchiness'].outputs[0].default_value = 0.6
+            nodes['Patchiness'].outputs[0].default_value = 0.3
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
-            nodes['DisplStrength'].outputs[0].default_value = 0.02
+            nodes['DisplStrength'].outputs[0].default_value = 0.06
 
     def set_established_lovely(self, context, Ocean, mat):
         Ocean = Ocean.modifiers["Ocean"]
