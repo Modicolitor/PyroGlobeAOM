@@ -349,7 +349,8 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
             if ocean != None:
                 mat = ocean.material_slots[0].material
                 is_advanced = context.scene.aom_props.AdvMaterialOptions
-                if is_ocean_material(context, mat):
+                if is_ocean_material(context, mat) and hasattr(mat.node_tree, "nodes"):
+
                     subcol.prop(context.scene.aom_props,
                                 'AdvMaterialOptions', text='Advanced Options')
                     nodes = mat.node_tree.nodes

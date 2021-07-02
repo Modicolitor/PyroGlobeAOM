@@ -924,9 +924,10 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
     mod.time = end[1]
     mod.keyframe_insert(data_path="time")
 
-    for fcu in ocean.animation_data.action.fcurves:
-        for keyframe in fcu.keyframe_points:
-            keyframe.interpolation = 'LINEAR'
+    if hasattr(ocean.animation_data, 'action'):
+        for fcu in ocean.animation_data.action.fcurves:
+            for keyframe in fcu.keyframe_points:
+                keyframe.interpolation = 'LINEAR'
 
     if is_extrapolate:
         context.area.type = 'GRAPH_EDITOR'

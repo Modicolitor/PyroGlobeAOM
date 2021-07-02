@@ -17,13 +17,16 @@ class AOMMatHandler:
         if mat is None:
             # create material
             mat = bpy.data.materials.new(name=newMatName)
+            mat.use_nodes = True
 
+        print(f"mat in get material {mat}")
         return mat
 
     def get_cagematerial(self):
         mat = bpy.data.materials.get("aom_cage_material")
         if mat is None:
             mat = bpy.data.materials.new(name="aom_cage_material")
+
         return mat
 
     def get_preset_name(self, index):
@@ -38,16 +41,20 @@ class AOMMatHandler:
             return 'Legacy'
 
     def del_nodes(self):
-        nodes = self.material.node_tree.nodes
-        for node in nodes:
-            nodes.remove(node)
+        if hasattr(self.material.node_tree, "nodes"):
+            nodes = self.material.node_tree.nodes
+            for node in nodes:
+                nodes.remove(node)
 
     def make_material(self, oc):
+        print(f"oc in material {oc}")
         self.material = self.get_material()
+        #object.active_material.blend_method = 'BLEND'
         self.handle_materialslots(oc)
         #self.material = self.get_material()
         self.material.use_screen_refraction = True
         self.material.use_sss_translucency = True
+        self.material.blend_method = 'BLEND'
 
         node_tree = self.material.node_tree
 
@@ -179,7 +186,7 @@ class AOMMatHandler:
         REngine = self.context.scene.render.engine
         self.context.scene.render.engine = 'BLENDER_EEVEE'
         # Better 'BLEND'??????????'HASHED'
-        self.context.object.active_material.blend_method = 'BLEND'
+        #self.context.object.active_material.blend_method = 'BLEND'
         self.context.scene.render.engine = REngine
 
     def handle_materialslots(self, ob):
@@ -191,7 +198,7 @@ class AOMMatHandler:
             #  no slots
             ob.data.materials.append(self.material)
 
-        self.context.object.active_material.use_nodes = True
+        ob.active_material.use_nodes = True
         self.eevee_settings()
 
     def water_28(self, node_tree):
