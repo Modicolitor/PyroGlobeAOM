@@ -1330,3 +1330,116 @@ class BE_OT_RemoveOceanRippels(bpy.types.Operator):
                 else:
                     GN.remove_ripples(context, ocean, None)
         return{"FINISHED"}
+
+
+class BE_OT_DisconnectBumpWaves(bpy.types.Operator):
+    '''Disconnects the Bump Waves part from the shader. This can significantly improves performance while working and rendering.'''
+    bl_label = "Disconnect Bump Waves"
+    bl_idname = "aom.disconnect_bumpwaves"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        MatHandler = AOMMatHandler(context)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.disconnect_bumpwaves(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_ConnectBumpWaves(bpy.types.Operator):
+    '''Connects the Bump Waves part to the shader, giving more fine detail to the water surface. However, it will cause a slow performance in the viewport and render.'''
+    bl_label = "Connect Bump Waves"
+    bl_idname = "aom.connect_bumpwaves"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.connect_bumpwaves(context, ob)
+
+        return{"FINISHED"}
+
+
+# disp
+
+
+class BE_OT_DisconnectDisplacement(bpy.types.Operator):
+    '''Disconnects the Foam Displacement part from the shader. This can significantly improves performance while working and rendering.'''
+    bl_label = "Disconnect Foam Displacement"
+    bl_idname = "aom.disconnect_foamdisp"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        MatHandler = AOMMatHandler(context)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.disconnect_foamdisp(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_ConnectDisplacement(bpy.types.Operator):
+    '''Connects the Foam Displacement part to the shader, giving more fine detail to the foam and bubbles. However, it will cause a slow performance in the viewport and render.'''
+    bl_label = "Connect Foam Displacement"
+    bl_idname = "aom.connect_foamdisp"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.connect_foamdisp(context, ob)
+
+        return{"FINISHED"}
+
+# bump
+
+
+class BE_OT_DisconnectFoamBump(bpy.types.Operator):
+    '''Disconnects the Foam Bump part from the shader. This can significantly improves performance while working and rendering.'''
+    bl_label = "Disconnect Foam Bump"
+    bl_idname = "aom.disconnect_foambump"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        MatHandler = AOMMatHandler(context)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.disconnect_foambump(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_ConnectFoamBump(bpy.types.Operator):
+    '''Connects the Foam Bump part to the shader, giving more fine detail to the foam and bubbles. However, it will cause a slow performance in the viewport and render.'''
+    bl_label = "Connect Foam Bump"
+    bl_idname = "aom.connect_foambump"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.connect_foambump(context, ob)
+
+        return{"FINISHED"}

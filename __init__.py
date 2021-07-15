@@ -39,6 +39,12 @@ from .aom import BE_OT_RemoveOceanSpray
 from .aom import BE_OT_OceanRippels
 from .aom import BE_OT_RemoveOceanRippels
 from .aom import BE_OT_InitalizeAddon
+from .aom import BE_OT_DisconnectBumpWaves
+from .aom import BE_OT_ConnectBumpWaves
+from .aom import BE_OT_DisconnectDisplacement
+from .aom import BE_OT_ConnectDisplacement
+from .aom import BE_OT_DisconnectFoamBump
+from .aom import BE_OT_ConnectFoamBump
 #from .modalops import PP_OT_PlanarZScaleMenu
 
 
@@ -94,6 +100,12 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_OceanRippels,
            BE_OT_RemoveOceanRippels,
            BE_OT_InitalizeAddon,
+           BE_OT_DisconnectBumpWaves,
+           BE_OT_ConnectBumpWaves,
+           BE_OT_DisconnectDisplacement,
+           BE_OT_ConnectDisplacement,
+           BE_OT_DisconnectFoamBump,
+           BE_OT_ConnectFoamBump,
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

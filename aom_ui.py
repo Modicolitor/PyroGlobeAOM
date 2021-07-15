@@ -386,13 +386,15 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                         pass
 
                     subcol.label(text="Fake Bump Waves")
-
+                    row = subcol.row(align=True)
+                    row.operator("aom.connect_bumpwaves", icon="PINNED")
+                    row.operator("aom.disconnect_bumpwaves",
+                                 icon="UNPINNED")
                     try:
                         subcol.prop(nodes['WaterBumpTexScale'].outputs[0],
                                     'default_value', text='Wave Texture Scale')
                     except:
                         pass
-
                     try:
                         subcol.prop(nodes['WaterBumpStrength'].outputs[0],
                                     'default_value', text='Fake Wave Strength')
@@ -476,11 +478,19 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                         ###################################
                     except:
                         pass
+                    row = subcol.row(align=True)
+                    row.operator("aom.connect_foambump", icon="PINNED")
+                    row.operator("aom.disconnect_foambump",
+                                 icon="UNPINNED")
                     try:
                         subcol.prop(nodes['FoamBumpCtl'].outputs[0],
                                     'default_value', text='BumpStrength')
                     except:
                         pass
+                    row = subcol.row(align=True)
+                    row.operator("aom.connect_foamdisp", icon="PINNED")
+                    row.operator("aom.disconnect_foamdisp",
+                                 icon="UNPINNED")
                     try:
                         subcol.prop(nodes['DisplStrength'].outputs[0],
                                     'default_value', text='Displacement')

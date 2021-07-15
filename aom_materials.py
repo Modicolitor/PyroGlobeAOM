@@ -1757,12 +1757,12 @@ class AOMMatHandler:
         links.new(nodes['CRFoamTransmission'].outputs[0],
                   nodes['FoamOut'].inputs['Transmission'])
 
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
         links.new(nodes['FoamFacOut'].outputs[0],
                   nodes['FoamBump'].inputs['Height'])
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
 
         links.new(nodes['FoamSubsurf'].outputs[0],
                   nodes['MRSubsurface'].inputs[4])
@@ -1842,12 +1842,12 @@ class AOMMatHandler:
         links.new(nodes['CRFoamTransmission'].outputs[0],
                   nodes['FoamOut'].inputs['Transmission'])
 
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['FoamBump'].inputs['Height'])
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
 
         links.new(nodes['FoamSubsurf'].outputs[0],
                   nodes['MRSubsurface'].inputs[4])
@@ -1898,8 +1898,8 @@ class AOMMatHandler:
                   nodes['FoamOut'].inputs[15])
         links.new(nodes['FoamBumpCtl'].outputs[0],
                   nodes['FoamBump'].inputs['Height'])
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
 
         links.new(nodes['LowerOceanFoam_Log'].outputs[0],
                   nodes['CRFoam'].inputs[1])
@@ -1949,8 +1949,8 @@ class AOMMatHandler:
         links.new(nodes['CRFoamTransmission'].outputs[0],
                   nodes['FoamOut'].inputs['Transmission'])
 
-        links.new(nodes['FoamBump'].outputs[0],
-                  nodes['FoamOut'].inputs['Normal'])
+        # links.new(nodes['FoamBump'].outputs[0],
+        #          nodes['FoamOut'].inputs['Normal'])
 
         links.new(nodes['Disp'].outputs[0],
                   nodes['MaterialOutEevee'].inputs[2])
@@ -2173,3 +2173,69 @@ class AOMMatHandler:
         elif Preset == '3':
             nodes['Patchiness'].outputs[0].default_value = 0.2
             Ocean.foam_coverage = 0.3
+
+    def disconnect_bumpwaves(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        self.remove_links_fromnode("WaterBump", links)
+
+    def connect_bumpwaves(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+        if 'WaterBump' in nodes:
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Glossy BSDF'].inputs[2])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Glossy BSDF.001'].inputs[2])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Refraction BSDF'].inputs[3])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight'].inputs[1])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight.001'].inputs[1])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight.002'].inputs[1])
+
+    def remove_links_fromnode(self, name, links):
+        for l in links:
+            if name == l.from_node.name:
+                links.remove(l)
+
+    def disconnect_foamdisp(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        links = node_tree.links
+
+        self.remove_links_fromnode("Disp", links)
+
+    def connect_foamdisp(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+        if 'Disp' in nodes:
+            links.new(nodes['Disp'].outputs[0],
+                      nodes['MaterialOutEevee'].inputs[2])
+            links.new(nodes['Disp'].outputs[0],
+                      nodes['MaterialOutCycles'].inputs[2])
+
+    def disconnect_foambump(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        links = node_tree.links
+
+        self.remove_links_fromnode("FoamBump", links)
+
+    def connect_foambump(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+        if 'FoamBump' in nodes:
+            links.new(nodes['FoamBump'].outputs[0],
+                      nodes['FoamOut'].inputs['Normal'])
