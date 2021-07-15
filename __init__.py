@@ -45,6 +45,9 @@ from .aom import BE_OT_DisconnectDisplacement
 from .aom import BE_OT_ConnectDisplacement
 from .aom import BE_OT_DisconnectFoamBump
 from .aom import BE_OT_ConnectFoamBump
+from .aom import BE_OT_Transparency_on
+from .aom import BE_OT_Transparency_off
+
 #from .modalops import PP_OT_PlanarZScaleMenu
 
 
@@ -56,7 +59,7 @@ from .aom import BE_OT_ConnectFoamBump
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (3, 00),
+    "version": (2, 93, 3),
     "blender": (2, 93, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add as many floating Objects as you like.",
@@ -106,6 +109,9 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_ConnectDisplacement,
            BE_OT_DisconnectFoamBump,
            BE_OT_ConnectFoamBump,
+           BE_OT_Transparency_on,
+           BE_OT_Transparency_off,
+
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)

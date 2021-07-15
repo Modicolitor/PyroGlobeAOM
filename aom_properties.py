@@ -14,6 +14,9 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     AdvMaterialOptions: bpy.props.BoolProperty(
         name="OceanFoamBool", default=False)
 
+    AddMaxPerformance: bpy.props.BoolProperty(
+        name="OceanFoamBool", default=False)
+
     OceAniSpeed: bpy.props.FloatProperty(
         name="ObjFoamSpeed", default=1)
 

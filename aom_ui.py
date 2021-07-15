@@ -341,6 +341,8 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
             except:
                 pass
             subcol.operator("gen.ocmat", icon="MATERIAL")
+            subcol.prop(context.scene.aom_props, "AddMaxPerformance",
+                        text="Add with best performance")
 
             ocean = get_active_ocean(context)
 
@@ -351,10 +353,11 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                 is_advanced = context.scene.aom_props.AdvMaterialOptions
                 if is_ocean_material(context, mat) and hasattr(mat.node_tree, "nodes"):
 
+                    subcol.label(text="Water Material Settings")
                     subcol.prop(context.scene.aom_props,
                                 'AdvMaterialOptions', text='Advanced Options')
                     nodes = mat.node_tree.nodes
-                    subcol.label(text="Water Material Settings")
+
                     try:
 
                         subcol.prop(nodes['RGB'].outputs[0],
@@ -385,11 +388,6 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                     except:
                         pass
 
-                    subcol.label(text="Fake Bump Waves")
-                    row = subcol.row(align=True)
-                    row.operator("aom.connect_bumpwaves", icon="PINNED")
-                    row.operator("aom.disconnect_bumpwaves",
-                                 icon="UNPINNED")
                     try:
                         subcol.prop(nodes['WaterBumpTexScale'].outputs[0],
                                     'default_value', text='Wave Texture Scale')
@@ -478,24 +476,46 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                         ###################################
                     except:
                         pass
-                    row = subcol.row(align=True)
-                    row.operator("aom.connect_foambump", icon="PINNED")
-                    row.operator("aom.disconnect_foambump",
-                                 icon="UNPINNED")
+
                     try:
                         subcol.prop(nodes['FoamBumpCtl'].outputs[0],
                                     'default_value', text='BumpStrength')
                     except:
                         pass
-                    row = subcol.row(align=True)
-                    row.operator("aom.connect_foamdisp", icon="PINNED")
-                    row.operator("aom.disconnect_foamdisp",
-                                 icon="UNPINNED")
+
                     try:
                         subcol.prop(nodes['DisplStrength'].outputs[0],
                                     'default_value', text='Displacement')
                     except:
                         pass
+                    subcol.label(text="Performance")
+                    row = subcol.row(align=True)
+                    row.label(text="Fake Bump Waves  ")
+                    row.operator("aom.connect_bumpwaves",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.disconnect_bumpwaves",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Foam Bump             ")
+                    row.operator("aom.connect_foambump",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.disconnect_foambump",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Foam Displacement")
+                    row.operator("aom.connect_foamdisp",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.disconnect_foamdisp",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Transparency          ")
+                    row.operator("aom.transparency_on",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.transparency_off",
+                                 icon="UNPINNED", text="Off")
 
             #  box = row.box()
             # row = layout.row(align=True)

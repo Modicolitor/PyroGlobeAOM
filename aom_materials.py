@@ -97,6 +97,12 @@ class AOMMatHandler:
 
         self.label_nodes(node_tree)
         self.find_mat_to_adjust_for_preset(self.context, oc)
+
+        if self.context.scene.aom_props.AddMaxPerformance:
+            self.transparency_off(self.context, oc)
+            self.disconnect_foambump(self.context, oc)
+            self.disconnect_foamdisp(self.context, oc)
+            self.disconnect_bumpwaves(self.context, oc)
         return self.material
 
     def make_cagematerial(self, ob):
@@ -2239,3 +2245,15 @@ class AOMMatHandler:
         if 'FoamBump' in nodes:
             links.new(nodes['FoamBump'].outputs[0],
                       nodes['FoamOut'].inputs['Normal'])
+
+    def transparency_on(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        mat.use_sss_translucency = True
+        mat.blend_method = 'BLEND'
+        mat.use_screen_refraction = True
+
+    def transparency_off(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        mat.use_sss_translucency = False
+        mat.blend_method = 'OPAQUE'
+        mat.use_screen_refraction = False

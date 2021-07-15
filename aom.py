@@ -1443,3 +1443,40 @@ class BE_OT_ConnectFoamBump(bpy.types.Operator):
             MatHandler.connect_foambump(context, ob)
 
         return{"FINISHED"}
+
+
+# transparency_on
+class BE_OT_Transparency_on(bpy.types.Operator):
+    '''Switches the eevee transparency on.'''
+    bl_label = "Transparency On"
+    bl_idname = "aom.transparency_on"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.transparency_on(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_Transparency_off(bpy.types.Operator):
+    '''Switches the eevee transparency off. Might improve performance at least in material preview.'''
+    bl_label = "Transparency Off"
+    bl_idname = "aom.transparency_off"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.transparency_off(context, ob)
+
+        return{"FINISHED"}
