@@ -471,6 +471,7 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         data.collections[colweight.name].objects.link(cage)
         for col in cage.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
             if col.name != "Weight.00"+str(Namenum):
+                #!!!!!!!!!!!!!!!! BUg when cage is generated in the master collection, next line fails with "key "Master Collection" not found'""
                 data.collections[col.name].objects.unlink(cage)
                 # print("Cage entfernt aus " + str(col.name))
                 break

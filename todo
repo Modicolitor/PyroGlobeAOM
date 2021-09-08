@@ -20,6 +20,13 @@ GeoNodes Features:
 
 https://www.youtube.com/watch?v=Xh2Xuo00f0c
 
+BUGS: 
+
+[] aom 475: key "Master Collection" not found' when cage is generated in Master collection. 
+
+[]  people moving oceans and/or ducplicating with shift D --> check in operations and fix stuff
+
+
 
 
 
@@ -37,4 +44,18 @@ fixed bugs:
 
 
 [] remove node setup in make loop before making it
+
+
+Feature Idea 
+[] Wind patches on material ? or geo nodes ?  different parts different wavelength and reflektivity 
+[] water flow displace 
+[] use frames in material
+
+
+[] Mask modifier allows finer removing of water in the boat
+
+GeoNodes
+[] large waves 
+
+
 

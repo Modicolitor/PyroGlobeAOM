@@ -369,8 +369,26 @@ class AOMMatHandler:
         node.name = "WaterTexCo"
         node.location = (-3300, 000)
 
+        ng = self.get_windripplesNG()
+
+        node = nodes.new('ShaderNodeGroup')
+        node.node_tree = ng
+        node.name = 'WindRipples'
+        node.location = (-3000, 500)
+        #node.inputs[2].default_value = 1
+        #node.inputs[3].default_value = 0.2
+
+        node = nodes.new('ShaderNodeMixRGB')
+        node.name = "AddRipples"
+        node.location = (-2000, 300)
+        node.blend_type = 'ADD'
+        node.inputs[0].default_value = 1.0
+
         links.new(nodes['WaterTexCo'].outputs[2],
                   nodes['WaterMap'].inputs[0])
+        links.new(nodes['WaterTexCo'].outputs[2],
+                  nodes['WindRipples'].inputs[0])
+
         links.new(nodes['WaterMap'].outputs[0],
                   nodes['TexMusgraveL'].inputs[0])
         links.new(nodes['WaterMap'].outputs[0],
@@ -386,7 +404,7 @@ class AOMMatHandler:
         links.new(nodes['Timer'].outputs[0],
                   nodes['TexMusgraveL'].inputs[1])
         links.new(nodes['Timer'].outputs[0],
-                  nodes['TexMusgraveS'].inputs[1])
+                  nodes['WindRipples'].inputs[1])
 
         links.new(nodes['WaterBumpStrength'].outputs[0],
                   nodes['WaterBump'].inputs[0])
@@ -397,7 +415,12 @@ class AOMMatHandler:
                   nodes['CombTex'].inputs[2])
 
         links.new(nodes['CombTex'].outputs[0],
-                  nodes['WaterBump'].inputs[2])
+                  nodes['AddRipples'].inputs[1])
+        links.new(nodes['WindRipples'].outputs[0],
+                  nodes['AddRipples'].inputs[2])
+
+        links.new(nodes['AddRipples'].outputs[0],
+                  nodes['WaterBump'].inputs['Height'])
 
     def foam_material_30(self, node_tree):
         nodes = node_tree.nodes
@@ -2257,3 +2280,632 @@ class AOMMatHandler:
         mat.use_sss_translucency = False
         mat.blend_method = 'OPAQUE'
         mat.use_screen_refraction = False
+
+    def get_windripplesNG(self):
+
+        data = bpy.data
+        if "WindripplesNG" in data.node_groups:
+            return data.node_groups["WindripplesNG"]
+
+        # create NG and nodes
+        xoff = 0
+        yoff = 0
+
+        ng = data.node_groups.new(name="WindripplesNG", type='ShaderNodeTree')
+        ng.name = 'WindripplesNG'
+
+        # create group inputs
+        group_inputs = ng.nodes.new('NodeGroupInput')
+        group_inputs.location = (-1850+xoff, 500+yoff)
+        ng.inputs.new('NodeSocketVector', 'Vector')
+        ng.inputs.new('NodeSocketFloat', 'Time')
+
+        inp = ng.inputs.new('NodeSocketFloat', 'PatchSize')
+        inp.default_value = 6.3
+        inp = ng.inputs.new('NodeSocketFloat', 'Coverage')
+        inp.default_value = 0.5
+        inp = ng.inputs.new('NodeSocketFloat', 'RipplesDeform')
+        inp.default_value = 1.2
+        inp = ng.inputs.new('NodeSocketFloat', 'Direction')
+        inp.default_value = 0
+        inp = ng.inputs.new('NodeSocketFloat', 'RippleTexScale')  #
+        inp.default_value = 34.1
+        inp = ng.inputs.new('NodeSocketFloat', 'Morphspeed')
+        inp.default_value = 5
+        inp = ng.inputs.new('NodeSocketFloat', 'RippleHeight')
+        inp.default_value = 0.8
+
+        inp = ng.inputs.new('NodeSocketFloat', 'Ripplespeed')  # 714
+        inp.default_value = 714
+        inp = ng.inputs.new('NodeSocketFloat', 'MappingMoveSpeed')  # 0.001
+        inp.default_value = 0.001
+        inp = ng.inputs.new('NodeSocketFloat', 'Roughness')
+        inp.default_value = 0.95
+
+        nodes = ng.nodes
+        links = ng.links
+
+        #frame = nodes.new(type="NodeFrame")
+        #frame.location = (-800+xoff, 400+yoff)
+        #frame.label = 'Hier Framelabel'
+
+        node = nodes.new('NodeFrame')
+        node.location = (-3188+xoff, 1715+yoff)
+        node.label = 'WindRipples'
+        node.name = 'WindRipples'
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('NodeFrame')
+        node.parent = nodes['WindRipples']
+        node.location = (-370+xoff, 685+yoff)
+        node.label = 'Windmap'
+        node.name = 'Windmap'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('NodeFrame')
+        node.parent = nodes['Windmap']
+        node.location = (-25+xoff, -36+yoff)
+        node.label = 'WindmapMovement'
+        node.name = 'WindmapMovement'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('NodeFrame')
+        node.parent = nodes['WindRipples']
+        node.location = (-145+xoff, -270+yoff)
+        node.label = 'WindRippleMovement'
+        node.name = 'WindRippleMovement'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('NodeReroute')
+        node.parent = nodes['WindRipples']
+        node.location = (-144+xoff, -860+yoff)
+        node.label = 'Reroute2'
+        node.name = 'Reroute2'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRipples']
+        node.location = (-345+xoff, -832+yoff)
+        node.label = 'ScaleTime'
+        node.name = 'ScaleTime'
+        node.operation = 'MULTIPLY'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeTexWave')
+        node.parent = nodes['WindRipples']
+        node.location = (568+xoff, -319+yoff)
+        node.label = 'WindWAveTex2'
+        node.name = 'WindWAveTex2'
+
+        node.hide = False
+        # node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        #node.inputs[1] = 60.0
+        node.inputs[2].default_value = 7.0
+        node.inputs[3].default_value = 2.0
+        node.inputs[4].default_value = 2.5
+        node.inputs[5].default_value = 1.0
+        #node.inputs[6] = 117.19998931884766
+
+        ##################################################
+        node = nodes.new('ShaderNodeTexWave')
+        node.parent = nodes['WindRipples']
+        node.location = (569+xoff, 8+yoff)
+        node.label = 'WindWAveTex1'
+        node.name = 'WindWAveTex1'
+
+        node.hide = False
+        # node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        #node.inputs[1] = 44.0
+        node.inputs[2].default_value = 7.0
+        node.inputs[3].default_value = 1.0
+        node.inputs[4].default_value = 2.5
+        node.inputs[5].default_value = 1.0
+        #node.inputs[6] = 117.19998931884766
+
+        ##################################################
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.parent = nodes['WindRipples']
+        node.location = (-1177+xoff, -275+yoff)
+        node.label = 'WIndRippleRotationAdj'
+        node.name = 'WIndRippleRotationAdj'
+
+        node.hide = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        #node.inputs[2] = 0.29999998211860657
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRipples']
+        node.location = (-1097+xoff, -553+yoff)
+        node.operation = 'MULTIPLY'
+        node.label = 'WindScaleSecWavTex'
+        node.name = 'WindScaleSecWavTex'
+
+        node.hide = False
+        #node.inputs[0] = 0.5
+        node.inputs[1].default_value = 1.4
+        #node.inputs[2] = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1466+xoff, 106+yoff)
+        node.label = 'WindpatchCoverage'
+        node.name = 'WindpatchCoverage'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1465+xoff, 212+yoff)
+        node.label = 'WindpatchSize'
+        node.name = 'WindpatchSize'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1481+xoff, -811+yoff)
+        node.label = 'WindRippleHeight'
+        node.name = 'WindRippleHeight'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRipples']
+        node.location = (1282+xoff, -354+yoff)
+        node.label = 'WindScaleHeigt'
+        node.name = 'WindScaleHeigt'
+        node.operation = 'MULTIPLY'
+        node.hide = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMapRange')
+        node.parent = nodes['WindRipples']
+        node.location = (1058+xoff, -174+yoff)
+        node.label = 'Windripple output'
+        node.name = 'Windripple output'
+        node.clamp = False
+        node.hide = False
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 0
+        node.inputs[2].default_value = 1.0
+        node.inputs[3].default_value = 0
+        node.inputs[4].default_value = 0
+        node.inputs[5].default_value = 4.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMixRGB')
+        node.parent = nodes['WindRipples']
+        node.location = (799+xoff, -219+yoff)
+        node.label = 'WindCombWaveTex'
+        node.name = 'WindCombWaveTex'
+        node.blend_type = 'ADD'
+        node.hide = False
+        node.inputs[0].default_value = 1.0
+        # node.inputs[1] = <bpy_float[4], NodeSocketColor.default_value >
+        # node.inputs[2] = <bpy_float[4], NodeSocketColor.default_value >
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1527+xoff, -924+yoff)
+        node.label = 'WindpatchRipplespeed'
+        node.name = 'WindpatchRipplespeed'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1521+xoff, -601+yoff)
+        node.label = 'WindpatchMorphspeed'
+        node.name = 'WindpatchMorphspeed'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1467+xoff, 351+yoff)
+        node.label = 'SpeedMultiplierWindmap'
+        node.name = 'SpeedMultiplierWindmap'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1466+xoff, -377+yoff)
+        node.label = 'WindRippleTexScale'
+        node.name = 'WindRippleTexScale'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1467+xoff, -266+yoff)
+        node.label = 'WIndRippleRotation'
+        node.name = 'WIndRippleRotation'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        node.parent = nodes['WindRipples']
+        node.location = (-1476+xoff, -52+yoff)
+        node.label = 'WindRipplesDeform'
+        node.name = 'WindRipplesDeform'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRipples']
+        node.location = (-1178+xoff, -34+yoff)
+        node.label = 'WindRipplesDeformAdj'
+        node.name = 'WindRipplesDeformAdj'
+        node.operation = 'DIVIDE'
+        node.hide = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 100.0
+        #node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMixRGB')
+        node.parent = nodes['WindRipples']
+        node.location = (304+xoff, -294+yoff)
+        node.label = 'WindDeformMix'
+        node.name = 'WindDeformMix'
+
+        node.hide = False
+        node.inputs[0].default_value = 0.0833333358168602
+        # node.inputs[1] = <bpy_float[4], NodeSocketColor.default_value >
+        # node.inputs[2] = <bpy_float[4], NodeSocketColor.default_value >
+
+        ##################################################
+        node = nodes.new('NodeReroute')
+        node.parent = nodes['WindRipples']
+        node.location = (-300+xoff, -300+yoff)
+        node.label = 'Reroute1'
+        node.name = 'Reroute1'
+
+        node.hide = False
+        #node.inputs[0] = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeTexNoise')
+        node.parent = nodes['WindRipples']
+        node.location = (127+xoff, -453+yoff)
+        node.label = 'WindDeformNoise'
+        node.name = 'WindDeformNoise'
+        node.noise_dimensions = '4D'
+        node.hide = False
+        # node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        #node.inputs[1] = 0.0
+        node.inputs[2].default_value = 14.899999618530273
+        node.inputs[3].default_value = 16.0
+        node.inputs[4].default_value = 0.183
+        node.inputs[5].default_value = 0.8999999761581421
+
+        ##################################################
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.parent = nodes['WindmapMovement']
+        node.location = (22+xoff, -82+yoff)
+        node.label = 'XtoVectorPatch'
+        node.name = 'XtoVectorPatch'
+
+        node.hide = True
+        #node.inputs[0] = 0.0
+        #node.inputs[1] = 0.0
+        #node.inputs[2] = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMapRange')
+        node.parent = nodes['Windmap']
+        node.location = (633+xoff, -77+yoff)
+        node.label = 'ContrastWindmap'
+        node.name = 'ContrastWindmap'
+        node.interpolation_type = 'LINEAR'
+        node.hide = False
+        node.clamp = True
+        #node.inputs[0] = 1.0
+        node.inputs[1].default_value = 0
+        #node.inputs[2] = 0.49999991059303284
+        node.inputs[3].default_value = 1.0
+        node.inputs[4].default_value = 0.0
+        #node.inputs[5] = 4.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeTexNoise')
+        node.parent = nodes['Windmap']
+        node.location = (396+xoff, -42+yoff)
+        node.label = 'WindMapNoise'
+        node.name = 'WindMapNoise'
+        node.noise_dimensions = '4D'
+
+        node.hide = False
+        # node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        #node.inputs[1] = 2.799999713897705
+        #node.inputs[2] = 8.399999618530273
+        node.inputs[3].default_value = 1.0
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('NodeReroute')
+        node.parent = nodes['Windmap']
+        node.location = (17+xoff, -228+yoff)
+        node.label = 'MorphW'
+        node.name = 'MorphW'
+
+        node.hide = False
+
+        ##################################################
+        node = nodes.new('ShaderNodeMapping')
+        node.parent = nodes['WindmapMovement']
+        node.location = (16+xoff, -119+yoff)
+        node.label = 'WindmapCoord'
+        node.name = 'WindmapCoord'
+
+        node.hide = True
+        # node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        # node.inputs[1] = <Vector(0.0000, 0.0000, 0.0000) >
+        # node.inputs[2] = <Euler(x=0.0000, y=0.0000, z=0.0000), order = 'XYZ' >
+        # node.inputs[3] = <Vector(1.0000, 1.0000, 1.0000) >
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindmapMovement']
+        node.location = (19+xoff, -41+yoff)
+        node.label = 'ScaleMoveWindMap'
+        node.name = 'ScaleMoveWindMap'
+        node.operation = 'MULTIPLY'
+        node.hide = True
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.009999999776482582
+        node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMapping')
+        node.parent = nodes['WindRipples']
+        node.location = (-878+xoff, 624+yoff)
+        node.label = 'RotatedBaseCoordSys'
+        node.name = 'RotatedBaseCoordSys'
+
+        node.hide = False
+        '''node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        node.inputs[1] = <Vector(0.0000, 0.0000, 0.0000) >
+        node.inputs[2] = <Euler(x=0.0000, y=0.0000, z=0.0000), order = 'XYZ' >
+        node.inputs[3] = <Vector(1.0000, 1.0000, 1.0000) >'''
+
+        ##################################################
+        node = nodes.new('ShaderNodeCombineXYZ')
+        node.parent = nodes['WindRippleMovement']
+        node.location = (-124+xoff, -32+yoff)
+        node.label = 'XtoVectorRipple'
+        node.name = 'XtoVectorRipple'
+
+        node.hide = True
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMapping')
+        node.parent = nodes['WindRippleMovement']
+        node.location = (52+xoff, -69+yoff)
+        node.label = 'WindRippleCoord'
+        node.name = 'WindRippleCoord'
+
+        node.hide = True
+        '''node.inputs[0] = <bpy_float[3], NodeSocketVector.default_value >
+        node.inputs[1] = <Vector(0.0000, 0.0000, 0.0000) >
+        node.inputs[2] = <Euler(x=0.0000, y=0.0000, z=0.0000), order = 'XYZ' >
+        node.inputs[3] = <Vector(1.0000, 1.0000, 1.0000) >'''
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRippleMovement']
+        node.location = (-123+xoff, 0+yoff)
+        node.label = 'ScaleMoveDeform'
+        node.name = 'ScaleMoveDeform'
+        node.operation = 'MULTIPLY'
+        node.hide = True
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.009
+        node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRippleMovement']
+        node.location = (-408+xoff, -158+yoff)
+        node.label = 'NoiseMorph'
+        node.name = 'NoiseMorph'
+        node.operation = 'MULTIPLY'
+        node.hide = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 3.0999999046325684
+        node.inputs[2].default_value = 0.0
+
+        ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRippleMovement']
+        node.location = (-170+xoff, -160+yoff)
+        node.label = 'MorphAdjDeform'
+        node.name = 'MorphAdjDeform'
+        node.operation = 'MULTIPLY'
+        node.hide = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[2].default_value = 0.30
+        #node.inputs[2].default_value = 0.0
+
+        links.new(nodes['ScaleMoveDeform'].outputs['Value'],
+                  nodes['XtoVectorRipple'].inputs['X'])
+        links.new(nodes['Reroute1'].outputs['Output'],
+                  nodes['ScaleMoveDeform'].inputs[0])
+        # links.new(nodes['SpeedMultiplierWindmap'].outputs['Value'],
+        #          nodes['ScaleMoveDeform'].inputs[0])
+        links.new(nodes['RotatedBaseCoordSys'].outputs['Vector'],
+                  nodes['WindRippleCoord'].inputs['Vector'])
+        links.new(nodes['XtoVectorRipple'].outputs['Vector'],
+                  nodes['WindRippleCoord'].inputs['Location'])
+        # links.new(nodes['Timer'].outputs['Value'],
+        #          nodes['Math.001'].inputs['Value'])
+        links.new(nodes['WindpatchMorphspeed'].outputs['Value'],
+                  nodes['NoiseMorph'].inputs['Value'])
+        links.new(nodes['NoiseMorph'].outputs['Value'],
+                  nodes['MorphAdjDeform'].inputs['Value'])
+        links.new(nodes['RotatedBaseCoordSys'].outputs['Vector'],
+                  nodes['WindmapCoord'].inputs['Vector'])
+        links.new(nodes['XtoVectorPatch'].outputs['Vector'],
+                  nodes['WindmapCoord'].inputs['Location'])
+        links.new(nodes['ScaleMoveWindMap'].outputs['Value'],
+                  nodes['XtoVectorPatch'].inputs['X'])
+        links.new(nodes['Reroute1'].outputs['Output'],
+                  nodes['ScaleMoveWindMap'].inputs[0])
+        # links.new(nodes['SpeedMultiplierWindmap'].outputs['Value'],
+        #          nodes['ScaleMoveWindMap'].inputs[1])
+        links.new(nodes['NoiseMorph'].outputs['Value'],
+                  nodes['MorphW'].inputs['Input'])
+        links.new(nodes['WindMapNoise'].outputs['Fac'],
+                  nodes['ContrastWindmap'].inputs['Value'])
+        links.new(nodes['WindpatchCoverage'].outputs['Value'],
+                  nodes['ContrastWindmap'].inputs['From Max'])
+        links.new(nodes['WindmapCoord'].outputs['Vector'],
+                  nodes['WindMapNoise'].inputs['Vector'])
+        links.new(nodes['MorphW'].outputs['Output'],
+                  nodes['WindMapNoise'].inputs['W'])
+        links.new(nodes['WindpatchSize'].outputs['Value'],
+                  nodes['WindMapNoise'].inputs['Scale'])
+        links.new(nodes['WindRippleCoord'].outputs['Vector'],
+                  nodes['WindDeformNoise'].inputs['Vector'])
+        links.new(nodes['MorphAdjDeform'].outputs['Value'],
+                  nodes['WindDeformNoise'].inputs['W'])
+        links.new(nodes['Reroute2'].outputs['Output'],
+                  nodes['Reroute1'].inputs['Input'])
+        # links.new(nodes['WaterTexCo'].outputs['UV'],
+        #          nodes['RotatedBaseCoordSys'].inputs['Vector'])
+        links.new(nodes['WIndRippleRotationAdj'].outputs['Vector'],
+                  nodes['RotatedBaseCoordSys'].inputs['Rotation'])
+        links.new(nodes['WindWAveTex1'].outputs['Fac'],
+                  nodes['WindCombWaveTex'].inputs['Color1'])
+        links.new(nodes['WindWAveTex2'].outputs['Color'],
+                  nodes['WindCombWaveTex'].inputs['Color2'])
+        links.new(nodes['WindRipplesDeformAdj'].outputs['Value'],
+                  nodes['WindDeformMix'].inputs['Fac'])
+        links.new(nodes['WindRippleCoord'].outputs['Vector'],
+                  nodes['WindDeformMix'].inputs['Color1'])
+        links.new(nodes['WindDeformNoise'].outputs['Color'],
+                  nodes['WindDeformMix'].inputs['Color2'])
+        links.new(nodes['WindRippleTexScale'].outputs['Value'],
+                  nodes['WindScaleSecWavTex'].inputs['Value'])
+        links.new(nodes['ScaleTime'].outputs['Value'],
+                  nodes['Reroute2'].inputs['Input'])
+        # links.new(nodes['Timer'].outputs['Value'],
+        #          nodes['ScaleTime'].inputs['Value'])
+        links.new(nodes['WindpatchRipplespeed'].outputs['Value'],
+                  nodes['ScaleTime'].inputs['Value'])
+        links.new(nodes['WindDeformMix'].outputs['Color'],
+                  nodes['WindWAveTex2'].inputs['Vector'])
+        links.new(nodes['WindScaleSecWavTex'].outputs['Value'],
+                  nodes['WindWAveTex2'].inputs['Scale'])
+        links.new(nodes['Reroute2'].outputs['Output'],
+                  nodes['WindWAveTex2'].inputs['Phase Offset'])
+        links.new(nodes['WindDeformMix'].outputs['Color'],
+                  nodes['WindWAveTex1'].inputs['Vector'])
+        # links.new(nodes['WindRippleTexScale'].outputs['Value'],
+        #          nodes['WindWAveTex1'].inputs['Scale'])
+        links.new(nodes['Reroute2'].outputs['Output'],
+                  nodes['WindWAveTex1'].inputs['Phase Offset'])
+        links.new(nodes['WIndRippleRotation'].outputs['Value'],
+                  nodes['WIndRippleRotationAdj'].inputs['Z'])
+        links.new(nodes['Windripple output'].outputs['Result'],
+                  nodes['WindScaleHeigt'].inputs[0])
+        links.new(nodes['WindRippleHeight'].outputs['Value'],
+                  nodes['WindScaleHeigt'].inputs[1])
+        links.new(nodes['WindCombWaveTex'].outputs['Color'],
+                  nodes['Windripple output'].inputs['Value'])
+        links.new(nodes['ContrastWindmap'].outputs['Result'],
+                  nodes['Windripple output'].inputs['To Max'])
+        # links.new(nodes['WindRipplesDeform'].outputs['Value'],
+        #          nodes['WindRipplesDeformAdj'].inputs['Value'])
+
+        '''
+        ng.inputs.new('NodeSocketVector', 'Vector')
+        ng.inputs.new('NodeSocketFloat', 'Time')
+        inp = ng.inputs.new('NodeSocketFloat', 'PatchSize')
+        inp = ng.inputs.new('NodeSocketFloat', 'Coverage')
+        inp = ng.inputs.new('NodeSocketFloat', 'RipplesDeform')
+        inp = ng.inputs.new('NodeSocketFloat', 'Direction')
+        inp = ng.inputs.new('NodeSocketFloat', 'RippleTexScale')  #
+        inp = ng.inputs.new('NodeSocketFloat', 'Morphspeed')
+        inp = ng.inputs.new('NodeSocketFloat', 'RippleHeight')
+        inp = ng.inputs.new('NodeSocketFloat', 'Ripplespeed')  # 714
+        inp = ng.inputs.new('NodeSocketFloat', 'MappingMoveSpeed')
+        '''
+        links.new(nodes['Group Input'].outputs['Vector'],
+                  nodes['RotatedBaseCoordSys'].inputs['Vector'])
+        links.new(nodes['Group Input'].outputs['Time'],
+                  nodes['NoiseMorph'].inputs[1])
+        links.new(nodes['Group Input'].outputs['Time'],
+                  nodes['ScaleTime'].inputs[0])
+
+        links.new(nodes['Group Input'].outputs['PatchSize'],
+                  nodes['WindMapNoise'].inputs['Scale'])
+        links.new(nodes['Group Input'].outputs['Coverage'],
+                  nodes['ContrastWindmap'].inputs[2])
+        links.new(nodes['Group Input'].outputs['RipplesDeform'],
+                  nodes['WindRipplesDeformAdj'].inputs[0])
+
+        links.new(nodes['Group Input'].outputs['Direction'],
+                  nodes['WIndRippleRotationAdj'].inputs[2])
+        links.new(nodes['Group Input'].outputs['RippleTexScale'],
+                  nodes['WindScaleSecWavTex'].inputs[0])
+        links.new(nodes['Group Input'].outputs['RippleTexScale'],
+                  nodes['WindWAveTex1'].inputs['Scale'])
+
+        links.new(nodes['Group Input'].outputs['Morphspeed'],
+                  nodes['NoiseMorph'].inputs[0])
+        links.new(nodes['Group Input'].outputs['RippleHeight'],
+                  nodes['WindScaleHeigt'].inputs[1])
+        links.new(nodes['Group Input'].outputs['Ripplespeed'],
+                  nodes['ScaleTime'].inputs[1])
+
+        links.new(nodes['Group Input'].outputs['MappingMoveSpeed'],
+                  nodes['ScaleMoveWindMap'].inputs[1])
+        links.new(nodes['Group Input'].outputs['MappingMoveSpeed'],
+                  nodes['ScaleMoveDeform'].inputs[1])
+
+        links.new(nodes['Group Input'].outputs['Roughness'],
+                  nodes['WindWAveTex1'].inputs[5])
+        links.new(nodes['Group Input'].outputs['Roughness'],
+                  nodes['WindWAveTex2'].inputs[5])
+
+        group_ouputs = ng.nodes.new('NodeGroupOutput')
+        group_ouputs.name = "Group Output"
+        group_ouputs.location = (00, 400)
+        ng.outputs.new('NodeSocketColor', 'Fac')
+
+        links.new(nodes['WindScaleHeigt'].outputs[0],
+                  nodes['Group Output'].inputs[0])
+        return ng
