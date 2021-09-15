@@ -1,3 +1,4 @@
+from aom_properties import AOMPropertyGroup
 import bpy
 from .aom import get_active_ocean
 from .aom_def import is_ocean_material
@@ -326,6 +327,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
     def draw(self, context):
 
         if hasattr(context.scene, "aom_props"):
+            aom_props = context.scene.aom_props
             layout = self.layout
 
             layout.use_property_split = True
@@ -488,12 +490,48 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Displacement')
                     except:
                         pass
+
+                    subcol.prop(context.scene.aom_props,
+                                'is_WindRippleUi', text='Wind Ripple Ui')
+
+                    if aom_props.is_WindRippleUi:
+                        if "WindRipples" in nodes:
+                            subcol.prop(nodes['WindRipples'].inputs['RippleHeight'],
+                                        'default_value', text='RippleHeight')
+                            subcol.prop(nodes['WindRipples'].inputs['RippleTexScale'],
+                                        'default_value', text='Ripple TexScale')
+                            subcol.prop(nodes['WindRipples'].inputs['Roughness'],
+                                        'default_value', text='Ripple Roughness')
+                            subcol.prop(nodes['WindRipples'].inputs['RipplesDeform'],
+                                        'default_value', text='Ripple Deform')
+
+                            subcol.prop(nodes['WindRipples'].inputs['Direction'],
+                                        'default_value', text='Rotation')
+                            subcol.prop(nodes['WindRipples'].inputs['Ripplespeed'],
+                                        'default_value', text='Ripple Speed')
+
+                            subcol.prop(nodes['WindRipples'].inputs['Coverage'],
+                                        'default_value', text='Coverage')
+                            subcol.prop(nodes['WindRipples'].inputs['PatchSize'],
+                                        'default_value', text='Patch Size')
+                            subcol.prop(nodes['WindRipples'].inputs['Morphspeed'],
+                                        'default_value', text='Morph Speed')
+                            subcol.prop(nodes['WindRipples'].inputs['MappingMoveSpeed'],
+                                        'default_value', text='Patch Speed')
+
                     subcol.label(text="Performance")
                     row = subcol.row(align=True)
-                    row.label(text="Fake Bump Waves  ")
+                    row.label(text="Fake Bump Waves    ")
                     row.operator("aom.connect_bumpwaves",
                                  icon="PINNED", text="On")
                     row.operator("aom.disconnect_bumpwaves",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Wind Ripples            ")
+                    row.operator("aom.windripples_on",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.windripples_off",
                                  icon="UNPINNED", text="Off")
 
                     row = subcol.row(align=True)
@@ -515,6 +553,13 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                     row.operator("aom.transparency_on",
                                  icon="PINNED", text="On")
                     row.operator("aom.transparency_off",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Dynamic Paint        ")
+                    row.operator("aom.dynpaint_on",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.dynpaint_off",
                                  icon="UNPINNED", text="Off")
 
             #  box = row.box()

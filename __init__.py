@@ -47,6 +47,10 @@ from .aom import BE_OT_DisconnectFoamBump
 from .aom import BE_OT_ConnectFoamBump
 from .aom import BE_OT_Transparency_on
 from .aom import BE_OT_Transparency_off
+from .aom import BE_OT_windripples_on
+from .aom import BE_OT_windripples_off
+from .aom import BE_OT_DynPaint_on
+from .aom import BE_OT_DynPaint_off
 
 #from .modalops import PP_OT_PlanarZScaleMenu
 
@@ -111,6 +115,10 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_ConnectFoamBump,
            BE_OT_Transparency_on,
            BE_OT_Transparency_off,
+           BE_OT_windripples_on,
+           BE_OT_windripples_off,
+           BE_OT_DynPaint_on,
+           BE_OT_DynPaint_off
 
            )
 

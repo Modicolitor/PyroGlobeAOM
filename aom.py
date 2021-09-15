@@ -472,7 +472,8 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         for col in cage.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
             if col.name != "Weight.00"+str(Namenum):
                 #!!!!!!!!!!!!!!!! BUg when cage is generated in the master collection, next line fails with "key "Master Collection" not found'""
-                data.collections[col.name].objects.unlink(cage)
+
+                col.objects.unlink(cage)
                 # print("Cage entfernt aus " + str(col.name))
                 break
 
@@ -1369,6 +1370,41 @@ class BE_OT_ConnectBumpWaves(bpy.types.Operator):
         return{"FINISHED"}
 
 
+class BE_OT_windripples_off(bpy.types.Operator):
+    '''Disconnects the Wind Ripples part from the shader. This can significantly improves performance while working and rendering.'''
+    bl_label = "Disconnect Bump Waves"
+    bl_idname = "aom.windripples_off"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        MatHandler = AOMMatHandler(context)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.windripples_off(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_windripples_on(bpy.types.Operator):
+    '''Connects the Wind Ripples part to the shader, giving more fine detail to the water surface. However, it will cause a slow performance in the viewport and render.'''
+    bl_label = "Connect Bump Waves"
+    bl_idname = "aom.windripples_on"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.windripples_on(context, ob)
+
+        return{"FINISHED"}
+
 # disp
 
 
@@ -1480,4 +1516,42 @@ class BE_OT_Transparency_off(bpy.types.Operator):
         for ob in oceans:
             MatHandler.transparency_off(context, ob)
 
+        return{"FINISHED"}
+
+
+# Dynamic Paint Off
+class BE_OT_DynPaint_on(bpy.types.Operator):
+    '''Switches on all object ocean interactions like waves and object foam.'''
+    bl_label = "Dynamic Paint On"
+    bl_idname = "aom.dynpaint_on"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            ob.modifiers["Dynamic Paint"].show_viewport = True
+            ob.modifiers["Dynamic Paint"].show_render = True
+
+        return{"FINISHED"}
+
+
+class BE_OT_DynPaint_off(bpy.types.Operator):
+    '''Switches off all object ocean interactions like waves and object foam.'''
+    bl_label = "Dynamic Paint Off"
+    bl_idname = "aom.dynpaint_off"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            ob.modifiers["Dynamic Paint"].show_viewport = False
+            ob.modifiers["Dynamic Paint"].show_render = False
         return{"FINISHED"}

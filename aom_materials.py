@@ -342,7 +342,7 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeValue')
         node.name = "Timer"
-        node.location = (-2700, 000)
+        node.location = (-3300, 300)
         source = node.outputs[0]
         target = bpy.context.scene
         prop = 'default_value'
@@ -350,6 +350,12 @@ class AOMMatHandler:
         id_type = 'SCENE'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="0.0002*", id_type=id_type)
+
+        node = nodes.new('ShaderNodeMath')
+        node.name = "TimerWaveScale"
+        node.location = (-2400, 000)
+        node.inputs[1].default_value = 1.3
+        node.operation = 'MULTIPLY'
 
         node = nodes.new('ShaderNodeValue')
         node.name = "WaterBumpTexScale"
@@ -379,6 +385,12 @@ class AOMMatHandler:
         #node.inputs[3].default_value = 0.2
 
         node = nodes.new('ShaderNodeMixRGB')
+        node.name = "AddBumpWaves"
+        node.location = (-2300, 300)
+        node.blend_type = 'MIX'
+        node.inputs[0].default_value = 1.0
+
+        node = nodes.new('ShaderNodeMixRGB')
         node.name = "AddRipples"
         node.location = (-2000, 300)
         node.blend_type = 'ADD'
@@ -402,9 +414,13 @@ class AOMMatHandler:
                   nodes['TexMusgraveS'].inputs[2])
 
         links.new(nodes['Timer'].outputs[0],
-                  nodes['TexMusgraveL'].inputs[1])
-        links.new(nodes['Timer'].outputs[0],
                   nodes['WindRipples'].inputs[1])
+        links.new(nodes['Timer'].outputs[0],
+                  nodes['TimerWaveScale'].inputs[0])
+        links.new(nodes['TimerWaveScale'].outputs[0],
+                  nodes['TexMusgraveL'].inputs[1])
+        links.new(nodes['TimerWaveScale'].outputs[0],
+                  nodes['TexMusgraveS'].inputs[1])
 
         links.new(nodes['WaterBumpStrength'].outputs[0],
                   nodes['WaterBump'].inputs[0])
@@ -415,6 +431,8 @@ class AOMMatHandler:
                   nodes['CombTex'].inputs[2])
 
         links.new(nodes['CombTex'].outputs[0],
+                  nodes['AddBumpWaves'].inputs[2])
+        links.new(nodes['AddBumpWaves'].outputs[0],
                   nodes['AddRipples'].inputs[1])
         links.new(nodes['WindRipples'].outputs[0],
                   nodes['AddRipples'].inputs[2])
@@ -2209,14 +2227,17 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        self.remove_links_fromnode("WaterBump", links)
+        nodes["AddBumpWaves"].inputs[0].default_value = 0
+        #self.remove_links_fromnode("WaterBump", links)
 
     def connect_bumpwaves(self, context, ocean):
         mat = ocean.material_slots[0].material
         node_tree = mat.node_tree
         nodes = node_tree.nodes
         links = node_tree.links
-        if 'WaterBump' in nodes:
+
+        nodes["AddBumpWaves"].inputs[0].default_value = 1
+        '''if 'WaterBump' in nodes:
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Glossy BSDF'].inputs[2])
             links.new(nodes['WaterBump'].outputs[0],
@@ -2228,7 +2249,24 @@ class AOMMatHandler:
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Layer Weight.001'].inputs[1])
             links.new(nodes['WaterBump'].outputs[0],
-                      nodes['Layer Weight.002'].inputs[1])
+                      nodes['Layer Weight.002'].inputs[1])'''
+
+    def windripples_off(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        nodes["AddRipples"].inputs[0].default_value = 0
+        #self.remove_links_fromnode("WaterBump", links)
+
+    def windripples_on(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        nodes["AddRipples"].inputs[0].default_value = 1
 
     def remove_links_fromnode(self, name, links):
         for l in links:
@@ -2571,6 +2609,18 @@ class AOMMatHandler:
         #node.inputs[2].default_value = 0.0
 
         ##################################################
+        node = nodes.new('ShaderNodeMath')
+        node.parent = nodes['WindRipples']
+        node.location = (-1178+xoff, 200+yoff)
+        node.label = 'WindPatchSpeedAdj'
+        node.name = 'WindPatchSpeedAdj'
+        node.operation = 'DIVIDE'
+        node.hide = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 100.0
+        #node.inputs[2].default_value = 0.0
+
+        ##################################################
         node = nodes.new('ShaderNodeMixRGB')
         node.parent = nodes['WindRipples']
         node.location = (304+xoff, -294+yoff)
@@ -2756,7 +2806,7 @@ class AOMMatHandler:
         node.operation = 'MULTIPLY'
         node.hide = False
         node.inputs[0].default_value = 0.5
-        node.inputs[2].default_value = 0.30
+        node.inputs[1].default_value = 0.30
         #node.inputs[2].default_value = 0.0
 
         links.new(nodes['ScaleMoveDeform'].outputs['Value'],
@@ -2892,9 +2942,12 @@ class AOMMatHandler:
                   nodes['ScaleTime'].inputs[1])
 
         links.new(nodes['Group Input'].outputs['MappingMoveSpeed'],
+                  nodes['WindPatchSpeedAdj'].inputs[0])
+        links.new(nodes['WindPatchSpeedAdj'].outputs[0],
                   nodes['ScaleMoveWindMap'].inputs[1])
-        links.new(nodes['Group Input'].outputs['MappingMoveSpeed'],
+        links.new(nodes['WindPatchSpeedAdj'].outputs[0],
                   nodes['ScaleMoveDeform'].inputs[1])
+        # WindPatchSpeedAdj
 
         links.new(nodes['Group Input'].outputs['Roughness'],
                   nodes['WindWAveTex1'].inputs[5])

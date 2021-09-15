@@ -7,6 +7,7 @@ presets
 GeoNodes Features: 
 [] Waves 
     [] Waves Break particles 
+    [] stretch
 
 [] Remove Water Bool 
 
@@ -16,15 +17,21 @@ GeoNodes Features:
 # [] test material node trees
 # [] clean up get value section to bl_idname
 
-[+] Loop animation: 
 
-https://www.youtube.com/watch?v=Xh2Xuo00f0c
 
 BUGS: 
 
-[] aom 475: key "Master Collection" not found' when cage is generated in Master collection. 
 
-[]  people moving oceans and/or ducplicating with shift D --> check in operations and fix stuff
+
+[]  people moving oceans and/or ducplicating with shift D --> check in operations and fix stuff. Whats the problem???
+
+WindRipples Release:
+
+[] fine tune defaults 
+[] fix patch loss 
+
+[] werbe video
+
 
 
 

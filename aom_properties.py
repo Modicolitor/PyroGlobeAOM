@@ -17,6 +17,9 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
     AddMaxPerformance: bpy.props.BoolProperty(
         name="OceanFoamBool", default=False)
 
+    is_WindRippleUi: bpy.props.BoolProperty(
+        name="OceanFoamBool", default=False)
+
     OceAniSpeed: bpy.props.FloatProperty(
         name="ObjFoamSpeed", default=1)
 
