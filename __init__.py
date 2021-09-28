@@ -65,7 +65,7 @@ from .aom import BE_OT_DynPaint_off
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (2, 93, 3),
+    "version": (2, 93, 4),
     "blender": (2, 93, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add as many floating Objects as you like.",
