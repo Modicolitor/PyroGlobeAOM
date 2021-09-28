@@ -41,6 +41,8 @@ from .aom import BE_OT_RemoveOceanRippels
 from .aom import BE_OT_InitalizeAddon
 from .aom import BE_OT_DisconnectBumpWaves
 from .aom import BE_OT_ConnectBumpWaves
+from .aom import BE_OT_DisconnectBump
+from .aom import BE_OT_ConnectBump
 from .aom import BE_OT_DisconnectDisplacement
 from .aom import BE_OT_ConnectDisplacement
 from .aom import BE_OT_DisconnectFoamBump
@@ -109,6 +111,8 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_InitalizeAddon,
            BE_OT_DisconnectBumpWaves,
            BE_OT_ConnectBumpWaves,
+           BE_OT_DisconnectBump,
+           BE_OT_ConnectBump,
            BE_OT_DisconnectDisplacement,
            BE_OT_ConnectDisplacement,
            BE_OT_DisconnectFoamBump,

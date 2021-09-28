@@ -1334,6 +1334,42 @@ class BE_OT_RemoveOceanRippels(bpy.types.Operator):
         return{"FINISHED"}
 
 
+class BE_OT_DisconnectBump(bpy.types.Operator):
+    '''Disconnects the Bump Waves part from the shader. This can significantly improves performance while working and rendering.'''
+    bl_label = "Disconnect Bump Waves"
+    bl_idname = "aom.disconnect_bump"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        oceans = oceanlist(context, context.selected_objects)
+        MatHandler = AOMMatHandler(context)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.disconnect_bump(context, ob)
+
+        return{"FINISHED"}
+
+
+class BE_OT_ConnectBump(bpy.types.Operator):
+    '''Connects the Bump Waves part to the shader, giving more fine detail to the water surface. However, it will cause a slow performance in the viewport and render.'''
+    bl_label = "Connect Bump Waves"
+    bl_idname = "aom.connect_bump"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        MatHandler = AOMMatHandler(context)
+        oceans = oceanlist(context, context.selected_objects)
+
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+        for ob in oceans:
+            MatHandler.connect_bump(context, ob)
+
+        return{"FINISHED"}
+
+
 class BE_OT_DisconnectBumpWaves(bpy.types.Operator):
     '''Disconnects the Bump Waves part from the shader. This can significantly improves performance while working and rendering.'''
     bl_label = "Disconnect Bump Waves"
@@ -1371,8 +1407,8 @@ class BE_OT_ConnectBumpWaves(bpy.types.Operator):
 
 
 class BE_OT_windripples_off(bpy.types.Operator):
-    '''Disconnects the Wind Ripples part from the shader. This can significantly improves performance while working and rendering.'''
-    bl_label = "Disconnect Bump Waves"
+    '''Removes Wind Ripples.'''
+    bl_label = "Remove Wind Ripples"
     bl_idname = "aom.windripples_off"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -1389,8 +1425,8 @@ class BE_OT_windripples_off(bpy.types.Operator):
 
 
 class BE_OT_windripples_on(bpy.types.Operator):
-    '''Connects the Wind Ripples part to the shader, giving more fine detail to the water surface. However, it will cause a slow performance in the viewport and render.'''
-    bl_label = "Connect Bump Waves"
+    '''Adds Ripples that move in morphing patches as animated bump texture to the shader. This approximates the affect of wind having on quiet waters.'''
+    bl_label = "Add Wind Ripples"
     bl_idname = "aom.windripples_on"
     bl_options = {"REGISTER", "UNDO"}
 
@@ -1401,6 +1437,7 @@ class BE_OT_windripples_on(bpy.types.Operator):
         if len(oceans) == 0:
             oceans = [get_active_ocean(context)]
         for ob in oceans:
+            MatHandler.connect_bump(context, ob)
             MatHandler.windripples_on(context, ob)
 
         return{"FINISHED"}

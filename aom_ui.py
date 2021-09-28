@@ -400,6 +400,11 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Fake Wave Strength')
                     except:
                         pass
+                    try:
+                        subcol.prop(nodes['TimerWaveScale'].outputs[1],
+                                    'default_value', text='Fake Wave Speed')
+                    except:
+                        pass
 
                     subcol.label(text="Foam Material Settings")
                     try:
@@ -493,7 +498,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
                     subcol.prop(context.scene.aom_props,
                                 'is_WindRippleUi', text='Wind Ripple Ui')
-
+                    '''
                     if aom_props.is_WindRippleUi:
                         if "WindRipples" in nodes:
                             subcol.prop(nodes['WindRipples'].inputs['RippleHeight'],
@@ -517,22 +522,29 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                             subcol.prop(nodes['WindRipples'].inputs['Morphspeed'],
                                         'default_value', text='Morph Speed')
                             subcol.prop(nodes['WindRipples'].inputs['MappingMoveSpeed'],
-                                        'default_value', text='Patch Speed')
+                                        'default_value', text='Patch Speed')'''
 
                     subcol.label(text="Performance")
                     row = subcol.row(align=True)
-                    row.label(text="Fake Bump Waves    ")
+                    row.label(text="All Bump                  ")
+                    row.operator("aom.connect_bump",
+                                 icon="PINNED", text="On")
+                    row.operator("aom.disconnect_bump",
+                                 icon="UNPINNED", text="Off")
+
+                    row = subcol.row(align=True)
+                    row.label(text="Wave Bump             ")
                     row.operator("aom.connect_bumpwaves",
                                  icon="PINNED", text="On")
                     row.operator("aom.disconnect_bumpwaves",
                                  icon="UNPINNED", text="Off")
 
-                    row = subcol.row(align=True)
+                    '''row = subcol.row(align=True)
                     row.label(text="Wind Ripples            ")
                     row.operator("aom.windripples_on",
                                  icon="PINNED", text="On")
                     row.operator("aom.windripples_off",
-                                 icon="UNPINNED", text="Off")
+                                 icon="UNPINNED", text="Off")'''
 
                     row = subcol.row(align=True)
                     row.label(text="Foam Bump             ")
@@ -582,6 +594,7 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
     def draw(self, context):
 
         if hasattr(context.scene, "aom_props"):
+            aom_props = context.scene.aom_props
             layout = self.layout
 
             layout.use_property_split = True
@@ -620,7 +633,7 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                 subcol = col.column()
                 subcol = subcol.box()
 
-                subcol.label(text='Ripples')
+                subcol.label(text='Object Ripples')
                 subcol.operator("aom.ripples", icon="MOD_INSTANCE")
                 boo, mod = in_mods_multi("Ripples", mods)
                 if boo:
@@ -635,7 +648,48 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                         subcol.label(
                             text='Set an object in the  "Ripples" modifier!', icon='ERROR')
 
-            #
+            #   subcol = col.column()
+                subcol = subcol.box()
+
+                subcol.label(text='Wind Ripples')
+                subcol.operator("aom.windripples_on",
+                                icon="OUTLINER_DATA_LIGHTPROBE")
+                '''
+                row.operator("aom.windripples_on",
+                                 icon="PINNED", text="On")
+                row.operator("aom.windripples_off",
+                                icon="UNPINNED", text="Off")'''
+                nodes = ocean.material_slots[0].material.node_tree.nodes
+                if nodes["AddWindRipples"].inputs[0].default_value > 0:
+                    subcol.operator("aom.windripples_off",
+                                    icon="OUTLINER_DATA_LIGHTPROBE")
+                    subcol.prop(context.scene.aom_props,
+                                'is_WindRippleUi', text='Wind Ripple Ui')
+
+                    if aom_props.is_WindRippleUi:
+                        if "WindRipples" in nodes:
+                            subcol.prop(nodes['WindRipples'].inputs['RippleHeight'],
+                                        'default_value', text='RippleHeight')
+                            subcol.prop(nodes['WindRipples'].inputs['RippleTexScale'],
+                                        'default_value', text='Ripple TexScale')
+                            subcol.prop(nodes['WindRipples'].inputs['Roughness'],
+                                        'default_value', text='Ripple Roughness')
+                            subcol.prop(nodes['WindRipples'].inputs['RipplesDeform'],
+                                        'default_value', text='Ripple Deform')
+
+                            subcol.prop(nodes['WindRipples'].inputs['Direction'],
+                                        'default_value', text='Rotation')
+                            subcol.prop(nodes['WindRipples'].inputs['Ripplespeed'],
+                                        'default_value', text='Ripple Speed')
+
+                            subcol.prop(nodes['WindRipples'].inputs['Coverage'],
+                                        'default_value', text='Coverage')
+                            subcol.prop(nodes['WindRipples'].inputs['PatchSize'],
+                                        'default_value', text='Patch Size')
+                            subcol.prop(nodes['WindRipples'].inputs['Morphspeed'],
+                                        'default_value', text='Morph Speed')
+                            subcol.prop(nodes['WindRipples'].inputs['MappingMoveSpeed'],
+                                        'default_value', text='Patch Speed')
 
 
 def in_mods_multi(str, mods):

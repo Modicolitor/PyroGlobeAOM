@@ -353,7 +353,7 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeMath')
         node.name = "TimerWaveScale"
-        node.location = (-2400, 000)
+        node.location = (-2600, 000)
         node.inputs[1].default_value = 1.3
         node.operation = 'MULTIPLY'
 
@@ -391,10 +391,10 @@ class AOMMatHandler:
         node.inputs[0].default_value = 1.0
 
         node = nodes.new('ShaderNodeMixRGB')
-        node.name = "AddRipples"
+        node.name = "AddWindRipples"
         node.location = (-2000, 300)
         node.blend_type = 'ADD'
-        node.inputs[0].default_value = 1.0
+        node.inputs[0].default_value = 0.0
 
         links.new(nodes['WaterTexCo'].outputs[2],
                   nodes['WaterMap'].inputs[0])
@@ -433,11 +433,11 @@ class AOMMatHandler:
         links.new(nodes['CombTex'].outputs[0],
                   nodes['AddBumpWaves'].inputs[2])
         links.new(nodes['AddBumpWaves'].outputs[0],
-                  nodes['AddRipples'].inputs[1])
+                  nodes['AddWindRipples'].inputs[1])
         links.new(nodes['WindRipples'].outputs[0],
-                  nodes['AddRipples'].inputs[2])
+                  nodes['AddWindRipples'].inputs[2])
 
-        links.new(nodes['AddRipples'].outputs[0],
+        links.new(nodes['AddWindRipples'].outputs[0],
                   nodes['WaterBump'].inputs['Height'])
 
     def foam_material_30(self, node_tree):
@@ -2251,13 +2251,43 @@ class AOMMatHandler:
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Layer Weight.002'].inputs[1])'''
 
+    def disconnect_bump(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        #nodes["AddBumpWaves"].inputs[0].default_value = 0
+        self.remove_links_fromnode("WaterBump", links)
+
+    def connect_bump(self, context, ocean):
+        mat = ocean.material_slots[0].material
+        node_tree = mat.node_tree
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        #nodes["AddBumpWaves"].inputs[0].default_value = 1
+        if 'WaterBump' in nodes:
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Glossy BSDF'].inputs[2])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Glossy BSDF.001'].inputs[2])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Refraction BSDF'].inputs[3])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight'].inputs[1])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight.001'].inputs[1])
+            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['Layer Weight.002'].inputs[1])
+
     def windripples_off(self, context, ocean):
         mat = ocean.material_slots[0].material
         node_tree = mat.node_tree
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddRipples"].inputs[0].default_value = 0
+        nodes["AddWindRipples"].inputs[0].default_value = 0
         #self.remove_links_fromnode("WaterBump", links)
 
     def windripples_on(self, context, ocean):
@@ -2266,7 +2296,7 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddRipples"].inputs[0].default_value = 1
+        nodes["AddWindRipples"].inputs[0].default_value = 1
 
     def remove_links_fromnode(self, name, links):
         for l in links:
@@ -2340,25 +2370,36 @@ class AOMMatHandler:
 
         inp = ng.inputs.new('NodeSocketFloat', 'PatchSize')
         inp.default_value = 6.3
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'Coverage')
         inp.default_value = 0.5
+        inp.min_value = 0
+        inp.max_value = 1
         inp = ng.inputs.new('NodeSocketFloat', 'RipplesDeform')
         inp.default_value = 1.2
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'Direction')
         inp.default_value = 0
+
         inp = ng.inputs.new('NodeSocketFloat', 'RippleTexScale')  #
         inp.default_value = 34.1
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'Morphspeed')
         inp.default_value = 5
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'RippleHeight')
         inp.default_value = 0.8
+        inp.min_value = 0
 
         inp = ng.inputs.new('NodeSocketFloat', 'Ripplespeed')  # 714
         inp.default_value = 714
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'MappingMoveSpeed')  # 0.001
-        inp.default_value = 0.001
+        inp.default_value = 0.10
+        inp.min_value = 0
         inp = ng.inputs.new('NodeSocketFloat', 'Roughness')
         inp.default_value = 0.95
+        inp.min_value = 0
 
         nodes = ng.nodes
         links = ng.links
