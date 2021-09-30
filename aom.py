@@ -10,15 +10,6 @@ from .aom_geonodes import AOMGeoNodesHandler
 from .aom_properties import AOMPropertyGroup
 from .aom_properties import AOMObjProperties
 
-bl_info = {  # für export als addon
-    "name": "Advanced Ocean Modifier",
-    "author": "Modicolitor",
-    "version": (3, 00),
-    "blender": (2, 93, 0),
-    "location": "View3D > Tools",
-    "description": "Create an Ocean with all Material properties set and add as many floating Objects as you like.",
-    "category": "Object"}
-
 
 # ob = bpy.context.object
 # scene = bpy.context.scene

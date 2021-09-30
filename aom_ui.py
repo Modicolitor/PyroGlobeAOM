@@ -1,4 +1,4 @@
-from aom_properties import AOMPropertyGroup
+
 import bpy
 from .aom import get_active_ocean
 from .aom_def import is_ocean_material
