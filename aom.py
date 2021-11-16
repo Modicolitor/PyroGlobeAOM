@@ -226,7 +226,7 @@ def update_OceAniFrame(context, ocean):
     # end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
     #    context, context.scene.aom_props.OceAniEnd))
     # Animation
-    set_ocean_keyframes(context, context.object,
+    set_ocean_keyframes(context, ocean,
                         ocean.modifiers["Ocean"], start, end, True)
 
     canvas = ocean.modifiers['Dynamic Paint'].canvas_settings
@@ -923,9 +923,9 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
                 keyframe.interpolation = 'LINEAR'
 
     if is_extrapolate:
-        context.area.type = 'GRAPH_EDITOR'
-        bpy.ops.graph.extrapolation_type(type='LINEAR')
-        context.area.type = 'VIEW_3D'
+        for fcu in ocean.animation_data.action.fcurves:
+            fcu.extrapolation = 'LINEAR'
+
     context.scene.frame_current = oriframecurrent
 
 
