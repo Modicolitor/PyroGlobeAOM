@@ -65,10 +65,10 @@ from .aom import BE_OT_DynPaint_off
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (2, 93, 6),
-    "blender": (2, 93, 0),
+    "version": (3, 0, 0),
+    "blender": (3, 0, 0),
     "location": "View3D > Tools",
-    "description": "Create an Ocean with all Material properties set and add as many floating Objects as you like.",
+    "description": "Create an Ocean with all Material properties set and add floating Objects, ripples, spray.",
     "category": "Object"}
 
 #from .ui import PP_PT_PuzzlePrintActive
