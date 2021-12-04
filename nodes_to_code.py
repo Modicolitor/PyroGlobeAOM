@@ -1,5 +1,7 @@
 # todo
-
+# [] output sockets are not always 0 (but all called value (but value don't work))
+# [] inputs should not be called value  but the index
+# features
 # [] nodegroups
 # [] test material node trees
 # [] clean up get value section to bl_idname
@@ -20,7 +22,8 @@ def sort_nodes_list(nodes):
     for xloc in xlocs:
         for node in nodes:
             if xloc == node.location[0]:
-                sortednodes.append(node)
+                if node not in sortednodes:
+                    sortednodes.append(node)
     return sortednodes
 
 
@@ -47,7 +50,7 @@ def get_value(ob):
     elif hasattr(ob, "children"):
         return ''
 
-    elif str(type(ob)) == "<class 'bpy.types.NodeSocketVector'>" or str(type(ob)) == "<class 'bpy_prop_array'>" or str(type(ob)) == "<class 'Vector'>":
+    elif str(type(ob)) == "<class 'bpy.types.NodeSocketVector'>" or str(type(ob)) == "<class 'bpy_prop_array'>" or str(type(ob)) == "<class 'Vector'>" or str(type(ob)) == "<class 'Euler'>":
 
         vecstring = "("
         for d in ob:
@@ -105,7 +108,7 @@ def nodes_to_nodecode(group):
             special_operations(node)
             for a, inp in enumerate(node.inputs):
                 value = get_putput(a, inp)
-                if value != '':
+                if value != '' and value != None:
                     print(f'node.inputs[{a}].default_value = {value}')
 
             for a, inp in enumerate(node.outputs):
@@ -258,6 +261,6 @@ def gen_links(group, nodes, links):
                 f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
 
 
-group = bpy.data.node_groups['Ripples']
+group = bpy.data.node_groups['Spray']
 
 nodes_to_nodecode(group)

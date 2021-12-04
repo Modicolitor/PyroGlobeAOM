@@ -642,11 +642,9 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                         text='Look in the modifiers tap for settings.', icon='QUESTION')
                     # ripple options
 
-                    # subcol.prop()
-
-                    if mod['Input_13'] == None:
+                    if mod['Input_7'] == None:
                         subcol.label(
-                            text='Set an object in the  "Ripples" modifier!', icon='ERROR')
+                            text='Please set an object in the  "Ripples" modifier!', icon='ERROR')
 
             #   subcol = col.column()
                 subcol = subcol.box()
