@@ -47,6 +47,7 @@ class AOMMatHandler:
                 nodes.remove(node)
 
     def make_material(self, oc):
+        self.ocean = oc
         print(f"oc in material {oc}")
         self.material = self.get_material()
         #object.active_material.blend_method = 'BLEND'
@@ -883,7 +884,10 @@ class AOMMatHandler:
         source = node.inputs[1]
         target = bpy.context.object
         prop = 'default_value'
-        data_path = 'modifiers["Ocean"].wave_alignment'
+        ocean_mod = self.get_ocean_mod(self.ocean)
+        # 'modifiers["Ocean"].wave_alignment'
+        data_path = 'modifiers["' + ocean_mod.name + '"].wave_alignment'
+        #data_path = 'modifiers["Ocean"].wave_alignment'
         id_type = 'OBJECT'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="", id_type=id_type)
@@ -899,7 +903,9 @@ class AOMMatHandler:
         source = node.inputs[2]
         target = bpy.context.object
         prop = 'default_value'
-        data_path = 'modifiers["Ocean"].wave_direction'
+        # 'modifiers["Ocean"].wave_direction'
+        data_path = data_path = 'modifiers["' + \
+            ocean_mod.name + '"].wave_direction'
         id_type = 'OBJECT'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="", id_type=id_type)
@@ -1227,7 +1233,8 @@ class AOMMatHandler:
         source = node.inputs[1]
         target = bpy.context.object
         prop = 'default_value'
-        data_path = 'modifiers["Ocean"].wave_alignment'
+        ocean_mod = self.get_ocean_mod(self.ocean)
+        data_path = 'modifiers["' + ocean_mod.name + '"].wave_alignment'
         id_type = 'OBJECT'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="", id_type=id_type)
@@ -1243,7 +1250,7 @@ class AOMMatHandler:
         source = node.inputs[2]
         target = bpy.context.object
         prop = 'default_value'
-        data_path = 'modifiers["Ocean"].wave_direction'
+        data_path = 'modifiers["' + ocean_mod.name + '"].wave_direction'
         id_type = 'OBJECT'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="", id_type=id_type)
@@ -2088,7 +2095,7 @@ class AOMMatHandler:
             self.Legacy_adjust_to_preset(context, ocean)
 
     def Ocean30_adjust_to_preset(self, context, ocean):
-        Ocean = ocean.modifiers["Ocean"]
+        Ocean = self.get_ocean_mod(ocean)
 
         node_tree = ocean.material_slots[0].material.node_tree
         nodes = node_tree.nodes
@@ -2167,7 +2174,7 @@ class AOMMatHandler:
             Ocean.foam_coverage = 0.0
 
     def Ocean29_adjust_to_preset(self, context, ocean):
-        Ocean = ocean.modifiers["Ocean"]
+        Ocean = self.get_ocean_mod(ocean)
         node_tree = ocean.material_slots[0].material.node_tree
         nodes = node_tree.nodes
         links = node_tree.links
@@ -2185,7 +2192,7 @@ class AOMMatHandler:
             Ocean.foam_coverage = 0.4
 
     def Legacy_improve_adjust_to_preset(self, context, ocean):
-        Ocean = ocean.modifiers["Ocean"]
+        Ocean = self.get_ocean_mod(ocean)
         node_tree = ocean.material_slots[0].material.node_tree
 
         nodes = node_tree.nodes
@@ -2204,7 +2211,7 @@ class AOMMatHandler:
             Ocean.foam_coverage = 0.4
 
     def Legacy_adjust_to_preset(self, context, ocean):
-        Ocean = ocean.modifiers["Ocean"]
+        Ocean = self.get_ocean_mod(ocean)
         node_tree = ocean.material_slots[0].material.node_tree
         nodes = node_tree.nodes
         links = node_tree.links
@@ -3003,3 +3010,15 @@ class AOMMatHandler:
         links.new(nodes['WindScaleHeigt'].outputs[0],
                   nodes['Group Output'].inputs[0])
         return ng
+
+    def get_ocean_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'OCEAN':
+                return mod
+        return None
+
+    def get_dynpaint_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'DYNAMIC_PAINT':
+                return mod
+        return None

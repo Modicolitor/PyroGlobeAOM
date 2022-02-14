@@ -97,55 +97,52 @@ class BE_PT_AdvOceanMenu(bpy.types.Panel):
 
                 subcol = col.column()
                 # row = layout.row(align=True)
-
-                if 'Ocean' in ocean.modifiers:
-
+                ocean_mod = get_ocean_mod(ocean)
+                if ocean_mod != None:
                     subcol.label(text="Ocean Settings")
-
                     # layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "resolution")
+                        ocean_mod, "resolution")
                     try:
                         subcol.prop(
-                            ocean.modifiers['Ocean'], "viewport_resolution")
+                            ocean_mod, "viewport_resolution")
                     except:
                         pass
                     try:
                         subcol.prop(
-                            ocean.modifiers['Ocean'], "spectrum")
+                            ocean_mod, "spectrum")
                     except:
                         pass
 
                     # row = layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "repeat_x")
+                        ocean_mod, "repeat_x")
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "repeat_y")
+                        ocean_mod, "repeat_y")
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "spatial_size")
+                        ocean_mod, "spatial_size")
 
                     # subcol = col.column()
                     # row = layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "wave_alignment")
+                        ocean_mod, "wave_alignment")
                     # subcol = col.column()
                     # row = layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "wave_scale")
+                        ocean_mod, "wave_scale")
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "wave_scale_min")
+                        ocean_mod, "wave_scale_min")
                     # subcol = col.column()
                     # row = layout.row(align=True)
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "wind_velocity", text="Pointiness 1")
+                        ocean_mod, "wind_velocity", text="Pointiness 1")
                     subcol.prop(
-                        ocean.modifiers['Ocean'], "choppiness", text="Pointiness 2")
+                        ocean_mod, "choppiness", text="Pointiness 2")
 
-                    oceanmod = ocean.modifiers['Ocean']
                     try:
-                        if oceanmod.spectrum == 'TEXEL_MARSEN_ARSLOE' or oceanmod.spectrum == 'JONSWAP':
+                        if ocean_mod.spectrum == 'TEXEL_MARSEN_ARSLOE' or ocean_mod.spectrum == 'JONSWAP':
                             subcol.prop(
-                                ocean.modifiers['Ocean'], "fetch_jonswap", text="fetch")
+                                ocean_mod, "fetch_jonswap", text="fetch")
                     except:
                         pass
 
@@ -219,53 +216,6 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 # row = layout.row(align=True)
 
 
-'''
-class BE_PT_AdvOceanFoam(bpy.types.Panel):
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_label = "Ocean Foam Settings"
-    bl_category = "Adv-Ocean"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        return hasattr(context.scene, "aom_props")
-
-    def draw(self, context):
-        layout = self.layout
-
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
-
-        flow = layout.grid_flow(row_major=True, columns=0,
-                                even_columns=False, even_rows=False, align=True)
-        col = flow.column()
-
-        subcol = col.column()
-
-       # col = layout.column(align=True)  ### col befehl packt die werte in einen kasten
-    #    row = layout.row(align=True)
-        if hasattr(context.scene, "aom_props"):
-            ocean = get_active_ocean(context)
-
-            if ocean != None:
-                # if "AdvOcean" in bpy.data.objects:
-                # subcol = col.column()
-                # row = layout.row(align=True)
-                subcol.label(text="Object Foam Settings")
-                subcol = col.column()
-                subcol.prop(ocean.modifiers["Dynamic Paint"]
-                            .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
-                # row = layout.row(align=True)
-
-    # !!!!!!            subcol.prop(bpy.data.objects["AdvOcean"].modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Fade")
-                subcol.label(text="Ocean Foam Settings")
-                subcol = col.column()
-                # row = layout.row(align=True)
-                subcol.prop(
-                    ocean.modifiers["Ocean"], "foam_coverage", text="Coverage")'''
-
-
 class BE_PT_AdvOceanWaves(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
@@ -297,20 +247,22 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
             if ocean != None:
                 # subcol = col.column()
                 # row = layout.row(align=True)
-                subcol = col.column()
-                canvas_settings = ocean.modifiers["Dynamic Paint"].canvas_settings
-                subcol.prop(
-                    canvas_settings.canvas_surfaces["Waves"], "wave_timescale")
+                dp_mod = get_dynpaint_mod(ocean)
+                if dp_mod != None:
+                    subcol = col.column()
+                    canvas_settings = dp_mod.canvas_settings
+                    subcol.prop(
+                        canvas_settings.canvas_surfaces["Waves"], "wave_timescale")
 
-                subcol.prop(
-                    canvas_settings.canvas_surfaces["Waves"], "wave_speed", text="Speed")
-                subcol.prop(
-                    canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
-                subcol.prop(
-                    canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
-                subcol.prop(
-                    canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
-                # row = layout.row(align=True)
+                    subcol.prop(
+                        canvas_settings.canvas_surfaces["Waves"], "wave_speed", text="Speed")
+                    subcol.prop(
+                        canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
+                    subcol.prop(
+                        canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
+                    subcol.prop(
+                        canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
+                    # row = layout.row(align=True)
 
 
 class BE_PT_AdvOceanMat(bpy.types.Panel):
@@ -427,11 +379,13 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Transmission')
                     except:
                         pass
-                    if 'Ocean' in ocean.modifiers:
-                        subcol.prop(ocean.modifiers["Ocean"], 'foam_coverage')
-                    if 'Dynamic Paint' in ocean.modifiers:
-                        subcol.prop(ocean.modifiers["Dynamic Paint"]
-                                    .canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Object Foam Fade")
+                    ocean_mod = get_ocean_mod(ocean)
+                    dp_mod = get_dynpaint_mod(ocean)
+                    if ocean_mod != None:
+                        subcol.prop(ocean_mod, 'foam_coverage')
+                    if dp_mod != None:
+                        subcol.prop(
+                            dp_mod.canvas_settings.canvas_surfaces["Wetmap"], "dry_speed", text="Object Foam Fade")
                     if is_advanced:
                         subcol.label(text="Ocean Foam Finetune")
                         try:
@@ -706,3 +660,17 @@ def in_mods(str, mods):
             a = True
             return a, mod
     return False, None
+
+
+def get_ocean_mod(ocean):
+    for mod in ocean.modifiers:
+        if mod.type == 'OCEAN':
+            return mod
+    return None
+
+
+def get_dynpaint_mod(ocean):
+    for mod in ocean.modifiers:
+        if mod.type == 'DYNAMIC_PAINT':
+            return mod
+    return None

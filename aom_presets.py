@@ -34,15 +34,27 @@ class AOMPreset_Handler:
         elif PresetSel == '12':
             self.set_abstract_Watt(context, ocean, mat)
 
-    def set_initsettings(self, context, Ocean, mat):
+    def get_ocean_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'OCEAN':
+                return mod
+        return None
+
+    def get_dynpaint_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'DYNAMIC_PAINT':
+                return mod
+        return None
+
+    def set_initsettings(self, context, ocean, mat):
 
         # dp
-
-        waves = context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Waves"]
+        dp_mod = self.get_dynpaint_mod(ocean)
+        waves = dp_mod.canvas_settings.canvas_surfaces["Waves"]
         waves.wave_damping = 0.02
         waves.wave_smoothness = 0.7
 
-        oceanmod = Ocean.modifiers["Ocean"]
+        oceanmod = self.get_ocean_mod(ocean)
         oceanmod.foam_coverage = 0.3
         oceanmod.damping = 0.5
         oceanmod.viewport_resolution = 15
@@ -74,7 +86,7 @@ class AOMPreset_Handler:
             nodes['MRNoise2'].inputs[4].default_value = 0.4
 
     def set_lovely(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
         Ocean.choppiness = 1.00
         Ocean.wave_scale = 0.2
@@ -95,8 +107,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_lively(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_lively(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
         Ocean.wave_scale = 1.0
         Ocean.choppiness = 1.00
@@ -115,8 +127,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_stormy(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_stormy(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
         Ocean.spatial_size = 54
         Ocean.wave_scale = 6
@@ -136,8 +148,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_shallow_quiet(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_shallow_quiet(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 0.1
@@ -157,8 +169,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_shallow_lively(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_shallow_lively(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'TEXEL_MARSEN_ARSLOE'
 
         Ocean.wave_scale = 0.4
@@ -179,8 +191,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.06
 
-    def set_shallow_stormy(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_shallow_stormy(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'TEXEL_MARSEN_ARSLOE'
 
         Ocean.wave_scale = 0.5
@@ -200,8 +212,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.06
 
-    def set_established_lovely(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_established_lovely(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 0.2
@@ -221,8 +233,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_established_lively(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_established_lively(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 0.8
@@ -242,8 +254,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_established_stormy(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_established_stormy(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PIERSON_MOSKOWITZ'
 
         Ocean.wave_scale = 2
@@ -263,8 +275,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_abstract(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_abstract(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 2
@@ -291,8 +303,8 @@ class AOMPreset_Handler:
         # abstract
         # giant
 
-    def set_abstract2(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_abstract2(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 1.6
@@ -312,8 +324,8 @@ class AOMPreset_Handler:
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.3
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 
-    def set_abstract_Watt(self, context, Ocean, mat):
-        Ocean = Ocean.modifiers["Ocean"]
+    def set_abstract_Watt(self, context, ocean, mat):
+        Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
 
         Ocean.wave_scale = 1

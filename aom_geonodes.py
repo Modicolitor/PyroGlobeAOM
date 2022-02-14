@@ -92,9 +92,22 @@ class AOMGeoNodesHandler:
 
         mod[modinput.identifier] = col
 
+    def get_ocean_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'OCEAN':
+                return mod
+        return None
+
+    def get_dynpaint_mod(self, ocean):
+        for mod in ocean.modifiers:
+            if mod.type == 'DYNAMIC_PAINT':
+                return mod
+        return None
+
     def new_spray(self, context, ocean):
-        ocean.modifiers["Ocean"].use_spray = True
-        ocean.modifiers["Ocean"].spray_layer_name = "spray"
+        oceanmod = self.get_ocean_mod(ocean)
+        oceanmod.use_spray = True
+        oceanmod.spray_layer_name = "spray"
 
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
