@@ -74,17 +74,19 @@ def GenOcean(context):
     # data.collections[MColName].objects.link(data.objects['AdvOcean'])
 
     # Ocean Modifier
-    bpy.ops.object.modifier_add(type='OCEAN')
-    ob.modifiers["Ocean"].choppiness = 0.80
-    ob.modifiers["Ocean"].resolution = 15
-    ob.modifiers["Ocean"].wind_velocity = 8.68
-    ob.modifiers["Ocean"].wave_scale = 1.3
-    ob.modifiers["Ocean"].wave_scale_min = 0.01
-    ob.modifiers["Ocean"].wave_alignment = 0.2
-    ob.modifiers["Ocean"].random_seed = 1
-    ob.modifiers["Ocean"].use_foam = True
-    ob.modifiers["Ocean"].use_normals = True
-    ob.modifiers["Ocean"].foam_layer_name = "foam"
+    mod = data.objects[newname].modifiers.new(
+        name='Ocean', type="OCEAN")
+    # bpy.ops.object.modifier_add(type='OCEAN')
+    mod.choppiness = 0.80
+    mod.resolution = 15
+    mod.wind_velocity = 8.68
+    mod.wave_scale = 1.3
+    mod.wave_scale_min = 0.01
+    mod.wave_alignment = 0.2
+    mod.random_seed = 1
+    mod.use_foam = True
+    mod.use_normals = True
+    mod.foam_layer_name = "foam"
 
     # dieser wert bestimmt die Menge an Schaum, Lohnt sich bestimmt auszulagern
     #context.object.modifiers["Ocean"].foam_coverage = 0.6
@@ -93,17 +95,19 @@ def GenOcean(context):
 
     # Animation
     set_ocean_keyframes(context, context.object,
-                        ob.modifiers["Ocean"], start, end, True)
+                        mod, start, end, True)
 
     #print(get_ocean_keyframes(context, context.object))
 
     #####Dynamic Paint modifier und einstellungen##########
 
     ##dynamic paint#####
-    bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-    ob.modifiers["Dynamic Paint"].ui_type = 'CANVAS'
+    dynpaintmod = data.objects[newname].modifiers.new(
+        name='Dynamic Paint', type="DYNAMIC_PAINT")  # bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
+    # get_dynpaint_mod(ocean)
+    dynpaintmod.ui_type = 'CANVAS'
     bpy.ops.dpaint.type_toggle(type='CANVAS')
-    canvas = ob.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces
+    canvas = dynpaintmod.canvas_settings.canvas_surfaces
 
     # waves
 
@@ -113,14 +117,14 @@ def GenOcean(context):
     canvas["Waves"].wave_speed = 0.4
 
     bpy.ops.dpaint.surface_slot_add()
-    ob.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Surface"].name = "Wetmap"
+    dynpaintmod.canvas_settings.canvas_surfaces["Surface"].name = "Wetmap"
     bpy.ops.dpaint.output_toggle(output='A')    # dp paintmap wird erzeugt
     bpy.ops.dpaint.output_toggle(output='B')    # dp wetmap wird erzeugt
     canvas["Wetmap"].use_antialiasing = True  # antialising hacken setzt
     # canvas["Wetmap"].preview_id = 'WETMAP'
     canvas["Wetmap"].dry_speed = 100
     canvas["Wetmap"].use_spread = True
-    ob.modifiers["Ocean"].use_normals = True
+    mod.use_normals = True
     canvas["Wetmap"].use_dissolve = True
     canvas["Wetmap"].dissolve_speed = 80
     canvas["Wetmap"].spread_speed = 0.3
@@ -218,16 +222,32 @@ def remove_oceankeyframes(context, ocean):
             #    fcu.keyframe_points.remove(keyframe)
 
 
+def get_ocean_mod(ocean):
+    for mod in ocean.modifiers:
+        if mod.type == 'OCEAN':
+            return mod
+    return None
+
+
+def get_dynpaint_mod(ocean):
+    for mod in ocean.modifiers:
+        if mod.type == 'DYNAMIC_PAINT':
+            return mod
+    return None
+
+
 def update_OceAniFrame(context, ocean):
 
     remove_oceankeyframes(context, ocean)
     start, end = get_time_animation_keys(context)
+
+    oceanmod = get_ocean_mod(ocean)
     #start = (context.scene.aom_props.OceAniStart, 1)
     # end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
     #    context, context.scene.aom_props.OceAniEnd))
     # Animation
     set_ocean_keyframes(context, ocean,
-                        ocean.modifiers["Ocean"], start, end, True)
+                        oceanmod, start, end, True)
 
     canvas = ocean.modifiers['Dynamic Paint'].canvas_settings
     OceAniStart = context.scene.aom_props.OceAniStart
@@ -237,8 +257,8 @@ def update_OceAniFrame(context, ocean):
         can.frame_start = OceAniStart
         can.frame_end = OceAniEnd
 
-    ocean.modifiers["Ocean"].frame_start = OceAniStart
-    ocean.modifiers["Ocean"].frame_end = OceAniEnd
+    oceanmod.frame_start = OceAniStart
+    oceanmod.frame_end = OceAniEnd
 
 
 def floatablelist(context, list):
@@ -324,19 +344,19 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
         # Dynamic paint
 
-        obj.modifiers.new(name='Dynamic Paint', type='DYNAMIC_PAINT')
-        obj.modifiers['Dynamic Paint'].ui_type = 'BRUSH'
+        dynpmod = obj.modifiers.new(name='Dynamic Paint', type='DYNAMIC_PAINT')
+        dynpmod.ui_type = 'BRUSH'
 
         bpy.ops.dpaint.type_toggle(type='BRUSH')
         try:
             # Paint source auf Mesh Volume and Proximity
-            context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
+            dynpmod.brush_settings.paint_source = 'VOLUME_DISTANCE'
             print('try ob dynamic paint brush richtig ist, hat keinen !fehler ignoriert')
         except:
             print("Toggle Dynamic Paint add Brush exception raised")
             bpy.ops.object.modifier_remove(modifier="Dynamic Paint")
             bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-            obj.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
+            dynpmod.ui_type = 'BRUSH'
             bpy.ops.dpaint.type_toggle(type='BRUSH')
 
         context.view_layer.objects.active = obj
@@ -344,9 +364,9 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         print(str(obj.modifiers['Dynamic Paint'].brush_settings) +
               "modifierliste des aktuellen objectes")
 
-        obj.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME_DISTANCE'
-        obj.modifiers["Dynamic Paint"].brush_settings.paint_distance = 1.0
-        obj.modifiers["Dynamic Paint"].brush_settings.wave_factor = 1
+        dynpmod.brush_settings.paint_source = 'VOLUME_DISTANCE'
+        dynpmod.brush_settings.paint_distance = 1.0
+        dynpmod.brush_settings.wave_factor = 1
 
         print('jetzt gibt es rotation auf objekt in der schleifen nr.' + str(a))
         print('das active object for dem rotation constraint' + obj.name)
@@ -447,8 +467,10 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
         context.object.display_type = 'WIRE'
         # das zum Brush wird zugefügt
-        bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-        context.object.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
+        # bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
+        dpcage_mod = cage.modifiers.new(
+            name='Dynamic Paint', type='DYNAMIC_PAINT')
+        dpcage_mod.ui_type = 'BRUSH'
         bpy.ops.dpaint.type_toggle(type='BRUSH')
         #bpy.data.objects[name].hide_render = True
 
@@ -478,33 +500,29 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
         # Namenum = len(
         #    bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
-
+        dpoceanmod = get_dynpaint_mod(ocean)
         bpy.ops.dpaint.surface_slot_add()  # erzeugt neue Canvas
 
         try:
-            context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Surface.00"+str(
+            dpoceanmod.canvas_settings.canvas_surfaces["Surface.00"+str(
                 Namenum)].name = "Weight.00"+str(Namenum)
         except:
-            context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces[
+            dpoceanmod.canvas_settings.canvas_surfaces[
                 "Surface"].name = "Weight.00"+str(Namenum)
 
-        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].surface_type = 'WEIGHT'  # setzt den typ auf weight paint
-        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].use_dissolve = True        # fade option wird Aktiv geklickt... das weight paint verschwindet
-        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].dissolve_speed = 1         # nach 1 Frame
         # dynamic paint output  Vertex group wird erstellt  <--  könnte später ein Bug geben wenn schon weight paint existiert
         bpy.ops.dpaint.output_toggle(output='A')
-        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].output_name_a = "dp_weight.00"+str(Namenum)
         bpy.ops.dpaint.output_toggle(output='A')
-        ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(
+        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
             Namenum)].brush_collection = bpy.data.collections["Weight.00"+str(Namenum)]
-        # context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Weight.00"+str(Namenum)].show_preview = False
-
-        # for i in context.object.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces:
-        #    print(i)
 
         ################Gruppe fehlt hier--> !!!##############
         conRot2.target = bpy.data.objects[name]
@@ -566,15 +584,16 @@ def BrushStatic(context):
         context.view_layer.objects.active = RemoveInterActSingle(context, obj)
         obj.aom_data.interaction_type = 'STATIC'
 
+        dpoceanmod = get_dynpaint_mod(obj)
        # else:
         #    print(str(obj.name) + "wird nicht an Remove single weiter gegeben")
         try:  # gibt es schon einen Dynmaic Paint Brush???
-            context.object.modifiers["Dynamic Paint"].brush_settings.paint_source = 'VOLUME'
+            dpoceanmod.brush_settings.paint_source = 'VOLUME'
         except:  # wenn nicht
             print(
                 "Exception raised! NO dyn Paint, I'll create now. Obj: " + str(obj.name))
             obj.modifiers.new(name='Dynamic Paint', type='DYNAMIC_PAINT')
-            obj.modifiers["Dynamic Paint"].ui_type = 'BRUSH'
+            dpoceanmod.ui_type = 'BRUSH'
 
             bpy.ops.dpaint.type_toggle(type='BRUSH')
 
@@ -697,9 +716,10 @@ def FoamAnAus(context, ocean):
 
     ObjFoamBool = context.scene.aom_props.ObjFoamBool
     OceanFoamBool = context.scene.aom_props.OceanFoamBool
-
-    ocean.modifiers["Dynamic Paint"].canvas_settings.canvas_surfaces["Wetmap"].is_active = ObjFoamBool
-    ocean.modifiers["Ocean"].use_foam = OceanFoamBool
+    dpoceanmod = get_dynpaint_mod(ocean)
+    dpoceanmod.canvas_settings.canvas_surfaces["Wetmap"].is_active = ObjFoamBool
+    oceanmod = get_ocean_mod(ocean)
+    oceanmod.use_foam = OceanFoamBool
 
 
 def CageVis(Bool):
@@ -1561,8 +1581,9 @@ class BE_OT_DynPaint_on(bpy.types.Operator):
         if len(oceans) == 0:
             oceans = [get_active_ocean(context)]
         for ob in oceans:
-            ob.modifiers["Dynamic Paint"].show_viewport = True
-            ob.modifiers["Dynamic Paint"].show_render = True
+            dpoceanmod = get_dynpaint_mod(ob)
+            dpoceanmod.show_viewport = True
+            dpoceanmod.show_render = True
 
         return{"FINISHED"}
 
@@ -1580,6 +1601,7 @@ class BE_OT_DynPaint_off(bpy.types.Operator):
         if len(oceans) == 0:
             oceans = [get_active_ocean(context)]
         for ob in oceans:
-            ob.modifiers["Dynamic Paint"].show_viewport = False
-            ob.modifiers["Dynamic Paint"].show_render = False
+            dpoceanmod = get_dynpaint_mod(ob)
+            dpoceanmod.show_viewport = False
+            dpoceanmod.show_render = False
         return{"FINISHED"}
