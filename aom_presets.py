@@ -85,7 +85,7 @@ class AOMPreset_Handler:
             nodes['MRNoise1'].inputs[4].default_value = 0.4
             nodes['MRNoise2'].inputs[4].default_value = 0.4
 
-    def set_lovely(self, context, Ocean, mat):
+    def set_lovely(self, context, ocean, mat):
         Ocean = self.get_ocean_mod(ocean)
         Ocean.spectrum = 'PHILLIPS'
         Ocean.choppiness = 1.00

@@ -115,6 +115,7 @@ def GenOcean(context):
     canvas["Waves"].surface_type = 'WAVE'
     canvas["Waves"].use_antialiasing = True
     canvas["Waves"].wave_speed = 0.4
+    canvas["Waves"].point_cache.name = 'wavecache'
 
     bpy.ops.dpaint.surface_slot_add()
     dynpaintmod.canvas_settings.canvas_surfaces["Surface"].name = "Wetmap"
@@ -128,6 +129,7 @@ def GenOcean(context):
     canvas["Wetmap"].use_dissolve = True
     canvas["Wetmap"].dissolve_speed = 80
     canvas["Wetmap"].spread_speed = 0.3
+    canvas["Wetmap"].point_cache.name = 'wetcache'
 
     # die collections werden zugeordnet zu den Dynamic paint canvases
     canvas['Wetmap'].brush_collection = bpy.data.collections["Paint"]
@@ -587,15 +589,15 @@ def BrushStatic(context):
         dpoceanmod = get_dynpaint_mod(obj)
        # else:
         #    print(str(obj.name) + "wird nicht an Remove single weiter gegeben")
-        try:  # gibt es schon einen Dynmaic Paint Brush???
+        if dpoceanmod != None:  # gibt es schon einen Dynmaic Paint Brush???
             dpoceanmod.brush_settings.paint_source = 'VOLUME'
-        except:  # wenn nicht
+        else:  # wenn nicht
             print(
                 "Exception raised! NO dyn Paint, I'll create now. Obj: " + str(obj.name))
-            obj.modifiers.new(name='Dynamic Paint', type='DYNAMIC_PAINT')
-            dpoceanmod.ui_type = 'BRUSH'
-
+            dpoceanmod = obj.modifiers.new(
+                name='Dynamic Paint', type='DYNAMIC_PAINT')
             bpy.ops.dpaint.type_toggle(type='BRUSH')
+            dpoceanmod.ui_type = 'BRUSH'
 
         data.collections[Wave].objects.link(obj)
         data.collections[Paint].objects.link(obj)
