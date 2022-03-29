@@ -67,8 +67,19 @@ class AOMPreset_Handler:
             nodes['ObjectBaseStrength'].outputs[0].default_value = 1
 
             nodes['DisplStrength'].outputs[0].default_value = 0.02
-            nodes['Value'].outputs[0].default_value = 0.01  # rougness water =
-            nodes['RGB'].outputs[0].default_value = (1, 1, 1, 1)
+
+            # water material
+            nodes['OceanTint'].outputs[0].default_value = (
+                0.506227, 0.761285, 0.599078, 1.000000)
+            if 'LW_Water' in nodes:
+                nodes['LW_Water'].inputs[0].default_value = 0.1
+            nodes['OceanSubsurface'].outputs[0].default_value = 0.1
+            # rougness water =
+            nodes['Roughness'].outputs[0].default_value = 0.01
+            nodes['IOR'].outputs[0].default_value = 1.333
+            nodes['Transmission'].outputs[0].default_value = 0.1
+            nodes['Transparency'].outputs[0].default_value = 1.0
+
             nodes['WaterBumpTexScale'].outputs[0].default_value = 30
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
 
@@ -76,14 +87,17 @@ class AOMPreset_Handler:
             nodes['FoamRoughness'].outputs[0].default_value = 0.2
             nodes['FoamColor'].outputs[0].default_value = (1, 1, 1, 1)
             nodes['FoamBumpCtl'].outputs[0].default_value = 0.0
-            nodes['ScaleBub'].outputs[0].default_value = 1500.0
+            if 'ScaleBub' in nodes:
+                nodes['ScaleBub'].outputs[0].default_value = 1500.0
             nodes['NoiseScale'].outputs[0].default_value = 20.0
 
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.0
             nodes['FoamBaseStrength'].outputs[0].default_value = 1.0
             nodes['Patchiness'].outputs[0].default_value = 0.2
-            nodes['MRNoise1'].inputs[4].default_value = 0.4
-            nodes['MRNoise2'].inputs[4].default_value = 0.4
+            if 'MRNoise1' in nodes:
+                nodes['MRNoise1'].inputs[4].default_value = 0.4
+            if 'MRNoise2' in nodes:
+                nodes['MRNoise2'].inputs[4].default_value = 0.4
 
     def set_lovely(self, context, ocean, mat):
         Ocean = self.get_ocean_mod(ocean)

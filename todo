@@ -2,6 +2,12 @@
 
 bugs and test: 
 
+[] Error at removing ripples when nothing or the ocean is selected (works when object selected)
+[] water_28 auf neue inputs 
+[] ui an material anknüpfen
+[] windripples anknüpfen
+
+
 presets
 
 GeoNodes Features: 

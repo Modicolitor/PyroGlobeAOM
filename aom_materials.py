@@ -62,16 +62,21 @@ class AOMMatHandler:
         if self.context.scene.aom_props.MaterialSel == '1':
             self.del_nodes()
             self.outputnodes(node_tree)
-            self.water_28(node_tree)
+            self.water_31(node_tree)
+            self.make_waterbump_nodes(node_tree)
+            self.connect_bump(self.context, oc)
             self.foam_material_30(node_tree)
             self.FoamFac_bubbly(node_tree)
             self.foam_fac_ctl(node_tree)
+
             self.constructor_30(node_tree)
 
         elif self.context.scene.aom_props.MaterialSel == '2':
             self.del_nodes()
             self.outputnodes(node_tree)
-            self.water_28(node_tree)
+            self.water_31(node_tree)
+            self.make_waterbump_nodes(node_tree)
+            self.connect_bump(self.context, oc)
             self.foam_material_30(node_tree)
             self.FoamFac_legacy_improve(node_tree)
             self.FoamFac_legacy_improve_TransBub(node_tree)
@@ -82,6 +87,8 @@ class AOMMatHandler:
             self.del_nodes()
             self.outputnodes(node_tree)
             self.water_28(node_tree)
+            self.make_waterbump_nodes(node_tree)
+            self.connect_bump(self.context, oc)
             self.foam_material_30(node_tree)
             self.FoamFac_legacy_improve(node_tree)
             self.foam_fac_ctl(node_tree)
@@ -91,10 +98,14 @@ class AOMMatHandler:
             self.del_nodes()
             self.outputnodes(node_tree)
             self.water_28(node_tree)
+            self.make_waterbump_nodes(node_tree)
+            self.connect_bump(self.context, oc)
             self.foam_material_30(node_tree)
             self.FoamFac_legacy(node_tree)
             self.foam_fac_ctl(node_tree)
             self.constructor_legacy(node_tree)
+
+        self.connect_foambump(self.context, oc)
 
         self.label_nodes(node_tree)
         self.find_mat_to_adjust_for_preset(self.context, oc)
@@ -208,6 +219,164 @@ class AOMMatHandler:
         ob.active_material.use_nodes = True
         self.eevee_settings()
 
+    def water_31(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        xoff = -400
+        yoff = 500
+
+        '''node = nodes.new('NodeFrame')
+        # node.parent=
+        node.location = (462+xoff, 610+yoff)
+        node.label = 'Watermaterial'
+        node.name = 'Watermaterial'
+        node.hide = False'''
+
+        ##################################################
+        node = nodes.new('ShaderNodeBsdfPrincipled')
+        # node.parent=
+        node.location = (-582+xoff, -122+yoff)
+        node.label = 'OceanOut'
+        node.name = 'OceanOut'
+        node.hide = False
+        # node.inputs[0].default_value = <bpy_float[4], NodeSocketColor.default_value >
+        node.inputs[1].default_value = 0.10000000149011612
+        # node.inputs[2].default_value = <bpy_float[3], NodeSocketVector.default_value >
+        # node.inputs[3].default_value = <bpy_float[4], NodeSocketColor.default_value >
+        node.inputs[4].default_value = 1.3329999446868896
+        node.inputs[5].default_value = 0.0
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = 0.1818181872367859
+        node.inputs[8].default_value = 0.0
+        node.inputs[9].default_value = 0.036363635212183
+        node.inputs[10].default_value = 0.0
+        node.inputs[11].default_value = 0.0
+        node.inputs[12].default_value = 0.0
+        node.inputs[13].default_value = 0.5
+        node.inputs[14].default_value = 0.0
+        node.inputs[15].default_value = 0.029999999329447746
+        node.inputs[16].default_value = 1.3329999446868896
+        node.inputs[17].default_value = 0.3787878751754761
+        node.inputs[18].default_value = 0.0
+        # node.inputs[19].default_value = <bpy_float[4], NodeSocketColor.default_value >
+        node.inputs[20].default_value = 1.0
+        node.inputs[21].default_value = 1.0
+        # node.inputs[22].default_value = <bpy_float[3], NodeSocketVector.default_value >
+        # node.inputs[23].default_value = <bpy_float[3], NodeSocketVector.default_value >
+        # node.inputs[24].default_value = <bpy_float[3], NodeSocketVector.default_value >
+
+        ##################################################
+        node = nodes.new('ShaderNodeLayerWeight')
+        # node.parent=
+        node.location = (-1500+xoff, 100+yoff)
+        node.label = 'LW_Water'
+        node.name = 'LW_Water'
+        node.hide = False
+        node.inputs[0].default_value = 0.09999999403953552
+        # node.inputs[1].default_value = <bpy_float[3], NodeSocketVector.default_value >
+
+        ##################################################
+        node = nodes.new('ShaderNodeMixRGB')
+        # node.parent=
+        node.location = (-887+xoff, 0+yoff)
+        node.label = 'OceanColMix'
+        node.name = 'OceanColMix'
+        node.hide = False
+        node.inputs[0].default_value = 0
+        node.inputs[1].default_value = (0, 0, 0, 1)
+        # node.inputs[2].default_value = <bpy_float[4], NodeSocketColor.default_value >
+        self.make_water_ctl(node_tree)
+
+        node = nodes.new('NodeReroute')
+        node.name = "WaterNormalIn"
+        node.location = (-1600+xoff, -600+yoff)
+
+        ##################################################
+        links.new(nodes['OceanColMix'].outputs['Color'],
+                  nodes['OceanOut'].inputs['Base Color'])
+        links.new(nodes['OceanSubsurface'].outputs['Value'],
+                  nodes['OceanOut'].inputs['Subsurface'])
+        links.new(nodes['OceanTint'].outputs['Color'],
+                  nodes['OceanOut'].inputs['Subsurface Color'])
+        links.new(nodes['Roughness'].outputs['Value'],
+                  nodes['OceanOut'].inputs['Roughness'])
+        links.new(nodes['IOR'].outputs['Value'],
+                  nodes['OceanOut'].inputs['IOR'])
+        links.new(nodes['Transmission'].outputs['Value'],
+                  nodes['OceanOut'].inputs['Transmission'])
+        links.new(nodes['Transparency'].outputs['Value'],
+                  nodes['OceanOut'].inputs['Alpha'])
+        # links.new(nodes['WaterBump'].outputs['Normal'],
+        #          nodes['OceanOut'].inputs['Normal'])
+        links.new(nodes['LW_Water'].outputs['Fresnel'],
+                  nodes['OceanColMix'].inputs['Fac'])
+        # links.new(nodes['RGB.002'].outputs['Color'],
+        #          nodes['Mix'].inputs['Color1'])
+        links.new(nodes['OceanTint'].outputs['Color'],
+                  nodes['OceanColMix'].inputs['Color2'])
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['OceanOut'].inputs['Normal'])
+        #################################################################
+        #################################################################
+
+    def make_water_ctl(self, node_tree):
+        nodes = node_tree.nodes
+        xoff = -400
+        yoff = 500
+        node = nodes.new('ShaderNodeValue')
+        # node.parent=
+        node.location = (-1500+xoff, -250+yoff)
+        node.label = 'OceanSubsurface'
+        node.name = 'OceanSubsurface'
+        node.hide = False
+        node.outputs[0].default_value = 0.1
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        # node.parent=
+        node.location = (-1500+xoff, -350+yoff)
+        node.label = 'Roughness'
+        node.name = 'Roughness'
+        node.hide = False
+        node.outputs[0].default_value = 0.01
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        # node.parent=
+        node.location = (-1500+xoff, -450+yoff)
+        node.label = 'IOR'
+        node.name = 'IOR'
+        node.hide = False
+        node.outputs[0].default_value = 1.333
+
+        ##################################################
+        node = nodes.new('ShaderNodeRGB')
+        # node.parent=
+        node.location = (-1500+xoff, -0+yoff)
+        node.label = 'OceanTint'
+        node.name = 'OceanTint'
+        node.hide = False
+        node.outputs[0].default_value = (0.85, 0.95, 1, 1)
+        ##################################################
+
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        # node.parent=
+        node.location = (-1500+xoff, -550+yoff)
+        node.label = 'Transmission'
+        node.name = 'Transmission'
+        node.hide = False
+        node.outputs[0].default_value = 0.1
+        ##################################################
+        node = nodes.new('ShaderNodeValue')
+        # node.parent=
+        node.location = (-1500+xoff, -650+yoff)
+        node.label = 'Transparency'
+        node.name = 'Transparency'
+        node.hide = False
+        node.outputs[0].default_value = 1.0
+
     def water_28(self, node_tree):
         nodes = node_tree.nodes
         links = node_tree.links
@@ -274,32 +443,61 @@ class AOMMatHandler:
 
         # Rougness value and Ocean color
 
-        node = nodes.new('ShaderNodeRGB')
-        node.location = (-1400, 000)
-        nodes['RGB'].outputs[0].default_value = (1, 1, 1, 1)
+        self.make_water_ctl(node_tree)
+        #node = nodes.new('ShaderNodeRGB')
+        #node.location = (-1400, 000)
+        #nodes['RGB'].outputs[0].default_value = (1, 1, 1, 1)
 
-        links.new(nodes['RGB'].outputs[0],
+        # generalized normal input
+        node = nodes.new('NodeReroute')
+        node.name = "WaterNormalIn"
+        node.location = (-1970, -70)
+
+        links.new(nodes['OceanTint'].outputs[0],
                   nodes['Glossy BSDF'].inputs['Color'])
-        links.new(nodes['RGB'].outputs[0],
+        links.new(nodes['OceanTint'].outputs[0],
                   nodes['Refraction BSDF'].inputs['Color'])
-        links.new(nodes['RGB'].outputs[0],
+        links.new(nodes['OceanTint'].outputs[0],
                   nodes['Transparent BSDF'].inputs['Color'])
 
-        node = nodes.new('ShaderNodeValue')
-        node.location = (-1400, 200)
-        nodes['Value'].outputs[0].default_value = 0.01
-        links.new(nodes['Value'].outputs[0], nodes['Glossy BSDF'].inputs[1])
-        links.new(nodes['Value'].outputs[0],
+        #nodes['Value'].outputs[0].default_value = 0.01
+        links.new(nodes['Roughness'].outputs[0],
+                  nodes['Glossy BSDF'].inputs[1])
+        links.new(nodes['Roughness'].outputs[0],
                   nodes['Glossy BSDF.001'].inputs[1])
-        links.new(nodes['Value'].outputs[0],
+        links.new(nodes['Roughness'].outputs[0],
                   nodes['Refraction BSDF'].inputs[1])
 
-        # bump
+        links.new(nodes['IOR'].outputs[0],
+                  nodes['Refraction BSDF'].inputs['IOR'])
+
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['Glossy BSDF.001'].inputs[2])
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['Refraction BSDF'].inputs[3])
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['Layer Weight'].inputs[1])
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['Layer Weight.001'].inputs[1])
+        links.new(nodes['Transmission'].outputs[0],
+                  nodes['Layer Weight.001'].inputs[0])
+
+        links.new(nodes['WaterNormalIn'].outputs[0],
+                  nodes['Layer Weight.002'].inputs[1])
+        links.new(nodes['Transparency'].outputs[0],
+                  nodes['Layer Weight.002'].inputs[0])
+
+    def make_waterbump_nodes(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+
+        xoff = -500
+
         node = nodes.new('ShaderNodeBump')
         node.name = "WaterBump"
-        node.location = (-1700, 000)
+        node.location = (-1700+xoff, 000)
         node.inputs[1].default_value = 0.1
-
+        '''
         links.new(nodes['WaterBump'].outputs[0],
                   nodes['Glossy BSDF'].inputs[2])
         links.new(nodes['WaterBump'].outputs[0],
@@ -312,24 +510,24 @@ class AOMMatHandler:
                   nodes['Layer Weight.001'].inputs[1])
         links.new(nodes['WaterBump'].outputs[0],
                   nodes['Layer Weight.002'].inputs[1])
-
+        '''
         node = nodes.new('ShaderNodeMixRGB')
         node.name = "CombTex"
-        node.location = (-2000, 000)
+        node.location = (-2000+xoff, 000)
         node.blend_type = 'ADD'
         node.inputs[0].default_value = 0.1
 
         node = nodes.new('ShaderNodeTexMusgrave')
         node.name = "TexMusgraveL"
         node.musgrave_dimensions = '4D'
-        node.location = (-2300, 000)
+        node.location = (-2300+xoff, 000)
         node.inputs[3].default_value = 2
         node.inputs[4].default_value = 2
         node.inputs[5].default_value = 2
 
         node = nodes.new('ShaderNodeTexMusgrave')
         node.name = "TexMusgraveS"
-        node.location = (-2300, -300)
+        node.location = (-2300+xoff, -300)
         node.musgrave_dimensions = '4D'
         node.inputs[3].default_value = 1
         node.inputs[4].default_value = 0.2
@@ -337,13 +535,13 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeMath')
         node.name = "ScaleMultiS"
-        node.location = (-2500, -300)
+        node.location = (-2500+xoff, -300)
         node.inputs[1].default_value = 4
         node.operation = 'MULTIPLY'
 
         node = nodes.new('ShaderNodeValue')
         node.name = "Timer"
-        node.location = (-3300, 300)
+        node.location = (-3300+xoff, 300)
         source = node.outputs[0]
         target = bpy.context.scene
         prop = 'default_value'
@@ -354,48 +552,50 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeMath')
         node.name = "TimerWaveScale"
-        node.location = (-2600, 000)
+        node.location = (-2600+xoff, 000)
         node.inputs[1].default_value = 1.3
         node.operation = 'MULTIPLY'
 
         node = nodes.new('ShaderNodeValue')
         node.name = "WaterBumpTexScale"
-        node.location = (-2700, -300)
+        node.location = (-2700+xoff, -300)
         node.outputs[0].default_value = 30
 
         node = nodes.new('ShaderNodeValue')
         node.name = "WaterBumpStrength"
-        node.location = (-2700, -500)
+        node.location = (-2700+xoff, -500)
         node.outputs[0].default_value = 0.1
 
         node = nodes.new('ShaderNodeMapping')
         node.name = "WaterMap"
-        node.location = (-3000, 000)
+        node.location = (-3000+xoff, 000)
 
         node = nodes.new('ShaderNodeTexCoord')
         node.name = "WaterTexCo"
-        node.location = (-3300, 000)
+        node.location = (-3300+xoff, 000)
 
         ng = self.get_windripplesNG()
 
         node = nodes.new('ShaderNodeGroup')
         node.node_tree = ng
         node.name = 'WindRipples'
-        node.location = (-3000, 500)
+        node.location = (-3000+xoff, 500)
         #node.inputs[2].default_value = 1
         #node.inputs[3].default_value = 0.2
-
+        '''
         node = nodes.new('ShaderNodeMixRGB')
         node.name = "AddBumpWaves"
-        node.location = (-2300, 300)
+        node.location = (-2300+xoff, 300)
         node.blend_type = 'MIX'
-        node.inputs[0].default_value = 1.0
+        node.inputs[0].default_value = 1.0'''
 
         node = nodes.new('ShaderNodeMixRGB')
-        node.name = "AddWindRipples"
-        node.location = (-2000, 300)
+        node.name = "WaterBumpTexOut"
+        node.location = (-2000+xoff, 300)
         node.blend_type = 'ADD'
         node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = (0.0, 0.0, 0.0, 1.0)
+        node.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 
         links.new(nodes['WaterTexCo'].outputs[2],
                   nodes['WaterMap'].inputs[0])
@@ -431,14 +631,14 @@ class AOMMatHandler:
         links.new(nodes['TexMusgraveS'].outputs[0],
                   nodes['CombTex'].inputs[2])
 
+        # links.new(nodes['CombTex'].outputs[0],
+        #         nodes['AddBumpWaves'].inputs[2])
         links.new(nodes['CombTex'].outputs[0],
-                  nodes['AddBumpWaves'].inputs[2])
-        links.new(nodes['AddBumpWaves'].outputs[0],
-                  nodes['AddWindRipples'].inputs[1])
-        links.new(nodes['WindRipples'].outputs[0],
-                  nodes['AddWindRipples'].inputs[2])
+                  nodes['WaterBumpTexOut'].inputs[1])
+        # links.new(nodes['WindRipples'].outputs[0],
+        #          nodes['WaterBumpTexOut'].inputs[2])
 
-        links.new(nodes['AddWindRipples'].outputs[0],
+        links.new(nodes['WaterBumpTexOut'].outputs[0],
                   nodes['WaterBump'].inputs['Height'])
 
     def foam_material_30(self, node_tree):
@@ -2234,8 +2434,8 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddBumpWaves"].inputs[0].default_value = 0
-        #self.remove_links_fromnode("WaterBump", links)
+        #nodes["AddBumpWaves"].inputs[0].default_value = 0
+        self.remove_links_fromnode("CombTex", links)
 
     def connect_bumpwaves(self, context, ocean):
         mat = ocean.material_slots[0].material
@@ -2243,7 +2443,9 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddBumpWaves"].inputs[0].default_value = 1
+        #nodes["AddBumpWaves"].inputs[0].default_value = 1
+        links.new(nodes['CombTex'].outputs[0],
+                  nodes['WaterBumpTexOut'].inputs[1])
         '''if 'WaterBump' in nodes:
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Glossy BSDF'].inputs[2])
@@ -2276,8 +2478,8 @@ class AOMMatHandler:
         #nodes["AddBumpWaves"].inputs[0].default_value = 1
         if 'WaterBump' in nodes:
             links.new(nodes['WaterBump'].outputs[0],
-                      nodes['Glossy BSDF'].inputs[2])
-            links.new(nodes['WaterBump'].outputs[0],
+                      nodes['WaterNormalIn'].inputs[0])
+            '''links.new(nodes['WaterBump'].outputs[0],
                       nodes['Glossy BSDF.001'].inputs[2])
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Refraction BSDF'].inputs[3])
@@ -2286,7 +2488,7 @@ class AOMMatHandler:
             links.new(nodes['WaterBump'].outputs[0],
                       nodes['Layer Weight.001'].inputs[1])
             links.new(nodes['WaterBump'].outputs[0],
-                      nodes['Layer Weight.002'].inputs[1])
+                      nodes['Layer Weight.002'].inputs[1])'''
 
     def windripples_off(self, context, ocean):
         mat = ocean.material_slots[0].material
@@ -2294,8 +2496,8 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddWindRipples"].inputs[0].default_value = 0
-        #self.remove_links_fromnode("WaterBump", links)
+        #nodes["AddWindRipples"].inputs[0].default_value = 0
+        self.remove_links_fromnode("WindRipples", links)
 
     def windripples_on(self, context, ocean):
         mat = ocean.material_slots[0].material
@@ -2303,7 +2505,9 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        nodes["AddWindRipples"].inputs[0].default_value = 1
+        #nodes["AddWindRipples"].inputs[0].default_value = 1
+        links.new(nodes['WindRipples'].outputs[0],
+                  nodes['WaterBumpTexOut'].inputs[2])
 
     def remove_links_fromnode(self, name, links):
         for l in links:

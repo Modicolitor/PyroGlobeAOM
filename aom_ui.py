@@ -310,6 +310,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                     subcol.label(text="Water Material Settings")
                     subcol.prop(context.scene.aom_props,
                                 'AdvMaterialOptions', text='Advanced Options')
+                    node_tree = mat.node_tree
                     nodes = mat.node_tree.nodes
 
                     try:
@@ -450,48 +451,61 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                     except:
                         pass
 
-                    subcol.prop(context.scene.aom_props,
-                                'is_WindRippleUi', text='Wind Ripple Ui')
-                    '''
-                    if aom_props.is_WindRippleUi:
-                        if "WindRipples" in nodes:
-                            subcol.prop(nodes['WindRipples'].inputs['RippleHeight'],
-                                        'default_value', text='RippleHeight')
-                            subcol.prop(nodes['WindRipples'].inputs['RippleTexScale'],
-                                        'default_value', text='Ripple TexScale')
-                            subcol.prop(nodes['WindRipples'].inputs['Roughness'],
-                                        'default_value', text='Ripple Roughness')
-                            subcol.prop(nodes['WindRipples'].inputs['RipplesDeform'],
-                                        'default_value', text='Ripple Deform')
-
-                            subcol.prop(nodes['WindRipples'].inputs['Direction'],
-                                        'default_value', text='Rotation')
-                            subcol.prop(nodes['WindRipples'].inputs['Ripplespeed'],
-                                        'default_value', text='Ripple Speed')
-
-                            subcol.prop(nodes['WindRipples'].inputs['Coverage'],
-                                        'default_value', text='Coverage')
-                            subcol.prop(nodes['WindRipples'].inputs['PatchSize'],
-                                        'default_value', text='Patch Size')
-                            subcol.prop(nodes['WindRipples'].inputs['Morphspeed'],
-                                        'default_value', text='Morph Speed')
-                            subcol.prop(nodes['WindRipples'].inputs['MappingMoveSpeed'],
-                                        'default_value', text='Patch Speed')'''
+                    # subcol.prop(context.scene.aom_props,
+                    #            'is_WindRippleUi', text='Wind Ripple Ui')
 
                     subcol.label(text="Performance")
                     row = subcol.row(align=True)
                     row.label(text="All Bump                  ")
-                    row.operator("aom.connect_bump",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.disconnect_bump",
-                                 icon="UNPINNED", text="Off")
+                    if self.is_all_bump_on(node_tree):
+                        row.operator("aom.connect_bump",
+                                     icon="PINNED", text="On", depress=True)
+                        row.operator("aom.disconnect_bump",
+                                     icon="UNPINNED", text="Off", depress=False)
+                    else:
+                        row.operator("aom.connect_bump",
+                                     icon="PINNED", text="On", depress=False)
+                        row.operator("aom.disconnect_bump",
+                                     icon="UNPINNED", text="Off", depress=True)
 
                     row = subcol.row(align=True)
                     row.label(text="Wave Bump             ")
-                    row.operator("aom.connect_bumpwaves",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.disconnect_bumpwaves",
-                                 icon="UNPINNED", text="Off")
+                    if not self.is_all_bump_on(node_tree):
+
+                        row.operator("aom.connect_bumpwaves",
+                                     icon="PINNED", text="On", emboss=False)
+                        row.operator("aom.disconnect_bumpwaves",
+                                     icon="UNPINNED", text="Off", emboss=False)
+                    else:
+                        if not self.is_wave_bump_on(node_tree):
+                            row.operator("aom.connect_bumpwaves",
+                                         icon="PINNED", text="On", depress=False)
+                            row.operator("aom.disconnect_bumpwaves",
+                                         icon="UNPINNED", text="Off", depress=True)
+                        else:
+                            row.operator("aom.connect_bumpwaves",
+                                         icon="PINNED", text="On", depress=True)
+                            row.operator("aom.disconnect_bumpwaves",
+                                         icon="UNPINNED", text="Off", depress=False)
+
+                    row = subcol.row(align=True)
+                    row.label(text="Wind Ripples            ")
+                    if not self.is_all_bump_on(node_tree):
+                        row.operator("aom.windripples_on",
+                                     icon="PINNED", text="On", emboss=False)
+                        row.operator("aom.windripples_off",
+                                     icon="UNPINNED", text="Off", emboss=False)
+                    else:
+                        if self.is_windripples_on(node_tree):
+                            row.operator("aom.windripples_on",
+                                         icon="PINNED", text="On", depress=True)
+                            row.operator("aom.windripples_off",
+                                         icon="UNPINNED", text="Off", depress=False)
+                        else:
+                            row.operator("aom.windripples_on",
+                                         icon="PINNED", text="On", depress=False)
+                            row.operator("aom.windripples_off",
+                                         icon="UNPINNED", text="Off", depress=True)
 
                     '''row = subcol.row(align=True)
                     row.label(text="Wind Ripples            ")
@@ -502,34 +516,125 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
                     row = subcol.row(align=True)
                     row.label(text="Foam Bump             ")
-                    row.operator("aom.connect_foambump",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.disconnect_foambump",
-                                 icon="UNPINNED", text="Off")
+                    if not self.is_foam_bump_on(node_tree):
+                        row.operator("aom.connect_foambump",
+                                     icon="PINNED", text="On", depress=False)
+                        row.operator("aom.disconnect_foambump",
+                                     icon="UNPINNED", text="Off", depress=True)
+                    else:
+                        row.operator("aom.connect_foambump",
+                                     icon="PINNED", text="On", depress=True)
+                        row.operator("aom.disconnect_foambump",
+                                     icon="UNPINNED", text="Off", depress=False)
 
                     row = subcol.row(align=True)
                     row.label(text="Foam Displacement")
-                    row.operator("aom.connect_foamdisp",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.disconnect_foamdisp",
-                                 icon="UNPINNED", text="Off")
+                    if not self.is_foam_disp_on(node_tree):
+                        row.operator("aom.connect_foamdisp",
+                                     icon="PINNED", text="On", depress=False)
+                        row.operator("aom.disconnect_foamdisp",
+                                     icon="UNPINNED", text="Off", depress=True)
+                    else:
+                        row.operator("aom.connect_foamdisp",
+                                     icon="PINNED", text="On", depress=True)
+                        row.operator("aom.disconnect_foamdisp",
+                                     icon="UNPINNED", text="Off", depress=False)
 
                     row = subcol.row(align=True)
                     row.label(text="Transparency          ")
-                    row.operator("aom.transparency_on",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.transparency_off",
-                                 icon="UNPINNED", text="Off")
+                    if not self.is_transparency_on(mat):
+                        row.operator("aom.transparency_on",
+                                     icon="PINNED", text="On", depress=False)
+                        row.operator("aom.transparency_off",
+                                     icon="UNPINNED", text="Off", depress=True)
+                    else:
+                        row.operator("aom.transparency_on",
+                                     icon="PINNED", text="On", depress=True)
+                        row.operator("aom.transparency_off",
+                                     icon="UNPINNED", text="Off", depress=False)
 
                     row = subcol.row(align=True)
                     row.label(text="Dynamic Paint        ")
-                    row.operator("aom.dynpaint_on",
-                                 icon="PINNED", text="On")
-                    row.operator("aom.dynpaint_off",
-                                 icon="UNPINNED", text="Off")
+                    if self.is_dynpaint_off(get_dynpaint_mod(ocean)):
+                        row.operator("aom.dynpaint_on",
+                                     icon="PINNED", text="On", depress=False)
+                        row.operator("aom.dynpaint_off",
+                                     icon="UNPINNED", text="Off", depress=True)
+                    else:
+                        row.operator("aom.dynpaint_on",
+                                     icon="PINNED", text="On", depress=True)
+                        row.operator("aom.dynpaint_off",
+                                     icon="UNPINNED", text="Off", depress=False)
 
-            #  box = row.box()
-            # row = layout.row(align=True)
+    def is_all_bump_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.to_node.name == 'WaterNormalIn':
+                if link.from_node.name == 'WaterBump':
+                    return True
+        return False
+
+    def is_wave_bump_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.to_node.name == 'WaterBumpTexOut':
+                if link.from_node.name == 'CombTex':
+                    return True
+        return False
+
+    def is_windripples_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.to_node.name == 'WaterBumpTexOut':
+                if link.from_node.name == 'WindRipples':
+                    return True
+        return False
+
+    def is_foam_bump_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.to_node.name == 'FoamOut':
+                if link.from_node.name == 'FoamBump':
+                    return True
+        return False
+
+    def is_foam_disp_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.from_node.name == 'Disp':
+                return True
+        return False
+
+    def is_transparency_on(self, material):
+
+        if not material.blend_method == 'OPAQUE':
+            return True
+        return False
+
+    def is_dynpaint_off(self, mod):
+        if not mod == None:
+            if mod.show_viewport == False:
+                if mod.show_render == False:
+                    return True
+        return False
+
+        #  box = row.box()
+        # row = layout.row(align=True)
 
     # Generate OCean  Button
 
@@ -544,6 +649,17 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
     @ classmethod
     def poll(cls, context):
         return hasattr(context.scene, "aom_props")
+
+    def is_windripples_on(self, node_tree):
+        nodes = node_tree.nodes
+        links = node_tree.links
+        # if 'WaterBump' in nodes:
+        #    if 'Water' in nodes:
+        for link in links:
+            if link.to_node.name == 'WaterBumpTexOut':
+                if link.from_node.name == 'WindRipples':
+                    return True
+        return False
 
     def draw(self, context):
 
@@ -611,8 +727,10 @@ class BE_PT_AdvOceanSpecial(bpy.types.Panel):
                                  icon="PINNED", text="On")
                 row.operator("aom.windripples_off",
                                 icon="UNPINNED", text="Off")'''
-                nodes = ocean.material_slots[0].material.node_tree.nodes
-                if nodes["AddWindRipples"].inputs[0].default_value > 0:
+                node_tree = ocean.material_slots[0].material.node_tree
+                nodes = node_tree.nodes
+                # nodes["AddWindRipples"].inputs[0].default_value > 0:
+                if self.is_windripples_on(node_tree):
                     subcol.operator("aom.windripples_off",
                                     icon="OUTLINER_DATA_LIGHTPROBE")
                     subcol.prop(context.scene.aom_props,
