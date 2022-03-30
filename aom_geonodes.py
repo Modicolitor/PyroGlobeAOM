@@ -737,7 +737,7 @@ class AOMGeoNodesHandler:
         else:
             for mod in reversed(ocean.modifiers[:]):
                 if 'Ripples' in mod.name:
-                    ob = mod['Input_15']
+                    ob = mod['Input_7']
                     if ob != None:
                         ob.aom_data.ripple_parent = None
 

@@ -315,31 +315,37 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
 
                     try:
 
-                        subcol.prop(nodes['RGB'].outputs[0],
+                        subcol.prop(nodes['OceanTint'].outputs[0],
                                     'default_value', text='Color')
                     except:
                         pass
                     try:
-                        # Rougness value for the ocean
-                        subcol.prop(nodes['Value'].outputs['Value'],
-                                    'default_value', text='Roughness')
-                    except:
-                        pass
-                    try:
-                        subcol.prop(nodes['Layer Weight.002'].inputs[0],
-                                    'default_value', text='Transparency')
+                        subcol.prop(nodes['OceanSubsurface'].outputs[0],
+                                    'default_value', text='Subsurface')
                     except:
                         pass
 
                     try:
-                        subcol.prop(nodes['Layer Weight.001'].inputs[0],
+                        subcol.prop(nodes['Roughness'].outputs['Value'],
+                                    'default_value', text='Roughness')
+                    except:
+                        pass
+
+                    try:
+                        subcol.prop(nodes['IOR'].outputs['Value'],
+                                    'default_value', text='IOR')
+                    except:
+                        pass
+
+                    try:
+                        subcol.prop(nodes['Refraction'].inputs[0],
                                     'default_value', text='Refraction')
                     except:
                         pass
 
                     try:
-                        subcol.prop(nodes['Refraction BSDF'].inputs[2],
-                                    'default_value', text='IOR')
+                        subcol.prop(nodes['Transparency'].inputs[0],
+                                    'default_value', text='Transparency')
                     except:
                         pass
 

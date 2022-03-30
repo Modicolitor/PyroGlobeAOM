@@ -417,9 +417,16 @@ class AOMMatHandler:
         node.location = (-700, 000)
 
         # transparent mixer
-        node = nodes.new('ShaderNodeLayerWeight')  # layerweight machen
+        node = nodes.new('ShaderNodeLayerWeight')
         node.location = (-700, 200)
         node.inputs['Blend'].default_value = 0.1
+
+        node = nodes.new('ShaderNodeMath')
+        node.name = "ConvertTransp"
+        node.location = (-700, 400)
+        node.inputs[0].default_value = 1
+        node.operation = 'SUBTRACT'
+
         node = nodes.new('ShaderNodeMixShader')  # mixshader machen
         node.name = "OceanOut"
         node.location = (-500, 000)
@@ -484,7 +491,11 @@ class AOMMatHandler:
 
         links.new(nodes['WaterNormalIn'].outputs[0],
                   nodes['Layer Weight.002'].inputs[1])
+
         links.new(nodes['Transparency'].outputs[0],
+                  nodes['ConvertTransp'].inputs[1])
+
+        links.new(nodes['ConvertTransp'].outputs[0],
                   nodes['Layer Weight.002'].inputs[0])
 
     def make_waterbump_nodes(self, node_tree):
@@ -593,7 +604,7 @@ class AOMMatHandler:
         node.name = "WaterBumpTexOut"
         node.location = (-2000+xoff, 300)
         node.blend_type = 'ADD'
-        node.inputs[0].default_value = 0.0
+        node.inputs[0].default_value = 1.0
         node.inputs[1].default_value = (0.0, 0.0, 0.0, 1.0)
         node.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0)
 
