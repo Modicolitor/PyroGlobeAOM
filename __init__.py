@@ -37,6 +37,7 @@ from .aom import BE_OT_SetPreset
 from .aom import BE_OT_OceanSpray
 from .aom import BE_OT_RemoveOceanSpray
 from .aom import BE_OT_OceanRippels
+from .aom import BE_OT_GeoFloat
 from .aom import BE_OT_RemoveOceanRippels
 from .aom import BE_OT_InitalizeAddon
 from .aom import BE_OT_DisconnectBumpWaves
@@ -100,6 +101,7 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_CageVisability,
            BE_OT_RemBtn,
            # BE_OT_GenObjFoam,
+           BE_OT_GeoFloat,
            BE_OT_DeleteOcean,
            AOMPropertyGroup,
            AOMObjProperties,

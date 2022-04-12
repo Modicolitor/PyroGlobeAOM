@@ -442,6 +442,13 @@ class AOMGeoNodesHandler:
 
         # driver
 
+    def label_nodes(self, node_tree):
+
+        nodes = node_tree.nodes
+
+        for node in nodes:
+            node.label = node.name
+
     def make_rippels_nodes(self, mod, node_group):
         self.remove_nodes(node_group)
         nodes = node_group.nodes
@@ -640,7 +647,7 @@ class AOMGeoNodesHandler:
         node.inputs[3].default_value = (0.0, 0.0, 0.0,)
 
         node = nodes.new("NodeGroupOutput")
-        node.name = "Group Output.001"
+        node.name = "Group Output"
         node.location = (1308, 338)
         links.new(nodes['Group Input'].outputs[0],
                   nodes['Set Position'].inputs[0])
@@ -691,7 +698,7 @@ class AOMGeoNodesHandler:
         links.new(nodes['Map Range'].outputs['Result'],
                   nodes['Math.014'].inputs[1])
         links.new(nodes['Set Position'].outputs['Geometry'],
-                  nodes['Group Output.001'].inputs['Geometry'])
+                  nodes['Group Output'].inputs['Geometry'])
         links.new(nodes['Math.014'].outputs['Value'],
                   nodes['Combine XYZ'].inputs['Z'])
         links.new(nodes['Combine XYZ'].outputs['Vector'],
@@ -743,6 +750,1020 @@ class AOMGeoNodesHandler:
 
                     ocean.modifiers.remove(mod)
                     break
+
+    def make_FloatRotMove_nodegroup(self):
+        ngname = 'AOMFloatRotMove'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+
+        inp = node_group.inputs.new('NodeSocketGeometry', 'Target Geometry')
+        #inp.type = 'GEOMETRY'
+        inp = node_group.inputs.new('NodeSocketFloat', 'X')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'Y')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'Z')
+        inp.default_value = 18.3
+        inp = node_group.inputs.new('NodeSocketFloat', 'XDistance')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'YDistance')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'ZDistance')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'RotSensitivity')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'MoveSensitivity')
+        inp.default_value = 1.0
+
+        node = nodes.new("NodeGroupInput")
+        node.name = "Group Input"
+        node.location = (-2697, 0)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.005"
+        node.location = (-2460, -436)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute"
+        node.location = (-2395, -316)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.006"
+        node.location = (-2387, -469)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.003"
+        node.location = (-2358, -136)
+
+        frameCoords = nodes.new("NodeFrame")
+        frameCoords.name = "Coordinates"
+        frameCoords.location = (-2303, -306)
+
+        frameDetect = nodes.new("NodeFrame")
+        frameDetect.name = "Detection"
+        frameDetect.location = (-1240, -700)
+
+        frameDisplay = nodes.new("NodeFrame")
+        frameDisplay.name = "Display Detectionline"
+        frameDisplay.location = (480, 1140)
+
+        frameMove = nodes.new("NodeFrame")
+        frameMove.name = "Move"
+        frameMove.location = (1180, -20)
+
+        frameRot = nodes.new("NodeFrame")
+        frameRot.name = "Rotate"
+        frameRot.location = (1180, -200)
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "RotMath1"
+        node.parent = frameRot
+        node.location = (-2181, -398)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "MoveMath1"
+        node.parent = frameMove
+        node.location = (-1978, -140)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = -1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "RotMath2"
+        node.parent = frameRot
+        node.location = (-1945, -392)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.32
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeInputIndex")
+        node.name = "DispayIndex"
+        node.parent = frameDisplay
+        node.location = (-1850, -924)
+        node.outputs[0].default_value = 0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.010"
+        node.parent = frameMove
+        node.location = (-1775, -320)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.004"
+        node.location = (-1651, -94)
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "RotMath3"
+        node.parent = frameRot
+        node.location = (-1635, -218)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "MoveMath2"
+        node.parent = frameMove
+        node.location = (-1630, -156)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeMeshLine")
+        node.name = "DisplayLine"
+        node.parent = frameDisplay
+        node.location = (-1625, -395)
+        node.inputs[0].default_value = 2
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (1.0, 0.0, 0.0,)
+
+        node = nodes.new("FunctionNodeCompare")
+        node.name = "DisplayFind0"
+        node.parent = frameDisplay
+        node.location = (-1481, -681)
+        node.data_type = "FLOAT"
+        node.operation = "EQUAL"
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = 0
+        node.inputs[4].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[7].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[8].default_value = ""
+        node.inputs[9].default_value = ""
+        node.inputs[10].default_value = 0.9
+        node.inputs[11].default_value = 0.09
+        node.inputs[12].default_value = 0.0
+        node.outputs[0].default_value = False
+
+        node = nodes.new("FunctionNodeCompare")
+        node.name = "DisplayFind1"
+        node.parent = frameDisplay
+        node.location = (-1480, -860)
+        node.data_type = "FLOAT"
+        node.operation = "EQUAL"
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = 0
+        node.inputs[4].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[7].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[8].default_value = ""
+        node.inputs[9].default_value = ""
+        node.inputs[10].default_value = 0.9
+        node.inputs[11].default_value = 0.09
+        node.inputs[12].default_value = 0.0
+        node.outputs[0].default_value = False
+
+        node = nodes.new("GeometryNodeSetPosition")
+        node.name = "DisplaySetP1"
+        node.parent = frameDisplay
+        node.location = (-1300, -395)
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math"
+        node.parent = frameDisplay
+        node.location = (-1191, -926)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = -1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeSetPosition")
+        node.name = "DisplaySetP2"
+        node.parent = frameDisplay
+        node.location = (-990, -395)
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "DisplayExtrudeCombine"
+        node.parent = frameDisplay
+        node.location = (-977, -652)
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeExtrudeMesh")
+        node.name = "DisplayExtrude"
+        node.parent = frameDisplay
+        node.location = (-760, -400)
+        node.mode = 'VERTICES'
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = 1.0
+        node.inputs[4].default_value = True
+        node.outputs[1].default_value = False
+        node.outputs[2].default_value = False
+
+        node = nodes.new("GeometryNodeRaycast")
+        node.name = "RayP1"
+        node.parent = frameDetect
+        node.location = (-66, 480)
+        node.data_type = "FLOAT"
+        node.inputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[4].default_value = False
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[7].default_value = (0.0, 0.0, -1.0,)
+        node.inputs[8].default_value = 100.0
+        node.outputs[0].default_value = False
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[3].default_value = 0.0
+        node.outputs[4].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[5].default_value = 0.0
+        node.outputs[6].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.outputs[7].default_value = False
+        node.outputs[8].default_value = 0
+
+        node = nodes.new("GeometryNodeRaycast")
+        node.name = "RayP2"
+        node.parent = frameDetect
+        node.location = (-61, 71)
+        node.data_type = "FLOAT"
+        node.inputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[4].default_value = False
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[7].default_value = (0.0, 0.0, -1.0,)
+        node.inputs[8].default_value = 100.0
+        node.outputs[0].default_value = False
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[3].default_value = 0.0
+        node.outputs[4].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[5].default_value = 0.0
+        node.outputs[6].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.outputs[7].default_value = False
+        node.outputs[8].default_value = 0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.004"
+        node.parent = frameCoords
+        node.location = (31, 270)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.005"
+        node.parent = frameCoords
+        node.location = (31, -13)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.007"
+        node.parent = frameCoords
+        node.location = (31, -297)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.001"
+        node.parent = frameCoords
+        node.location = (31, 22)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.002"
+        node.parent = frameCoords
+        node.location = (31, -261)
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.013"
+        node.parent = frameCoords
+        node.location = (341, -933)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.008"
+        node.parent = frameCoords
+        node.location = (341, 306)
+        node.operation = "ADD"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.010"
+        node.parent = frameCoords
+        node.location = (341, 58)
+        node.operation = "ADD"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.009"
+        node.parent = frameCoords
+        node.location = (341, -437)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.011"
+        node.parent = frameCoords
+        node.location = (341, -685)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "Math.012"
+        node.parent = frameCoords
+        node.location = (341, -189)
+        node.operation = "ADD"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "Combine XYZ.008"
+        node.parent = frameCoords
+        node.location = (651, 176)
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "Combine XYZ.009"
+        node.parent = frameCoords
+        node.location = (651, -20)
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("NodeGroupOutput")
+        node.name = "Group Output"
+        node.location = (813, -59)
+
+        links.new(nodes['Group Input'].outputs[0],
+                  nodes['Reroute.004'].inputs[0])
+        links.new(nodes['Group Input'].outputs[1],  nodes['Reroute'].inputs[0])
+        links.new(nodes['Group Input'].outputs[2],
+                  nodes['Reroute.001'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Reroute.002'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],  nodes['Math'].inputs[0])
+        links.new(nodes['Group Input'].outputs[4],
+                  nodes['Reroute.003'].inputs[0])
+        links.new(nodes['Group Input'].outputs[5],
+                  nodes['Reroute.005'].inputs[0])
+        links.new(nodes['Group Input'].outputs[6],
+                  nodes['Reroute.006'].inputs[0])
+        links.new(nodes['Group Input'].outputs[7],
+                  nodes['RotMath3'].inputs[0])
+        links.new(nodes['Group Input'].outputs[8],
+                  nodes['Reroute.010'].inputs[0])
+        links.new(nodes['Reroute.004'].outputs['Output'],
+                  nodes['RayP1'].inputs['Target Geometry'])
+        links.new(nodes['Reroute.004'].outputs['Output'],
+                  nodes['RayP2'].inputs['Target Geometry'])
+        links.new(nodes['RotMath1'].outputs['Value'],
+                  nodes['RotMath2'].inputs['Value'])
+        links.new(nodes['Reroute.003'].outputs['Output'],
+                  nodes['Math.004'].inputs['Value'])
+        links.new(nodes['Reroute.005'].outputs['Output'],
+                  nodes['Math.005'].inputs['Value'])
+        links.new(nodes['Reroute.006'].outputs['Output'],
+                  nodes['Math.007'].inputs['Value'])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['Math.008'].inputs[0])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['Math.009'].inputs[0])
+        links.new(nodes['Math.004'].outputs['Value'],
+                  nodes['Math.008'].inputs[1])
+        links.new(nodes['Math.004'].outputs['Value'],
+                  nodes['Math.009'].inputs[1])
+        links.new(nodes['Math.005'].outputs['Value'],
+                  nodes['Math.010'].inputs[1])
+        links.new(nodes['Math.005'].outputs['Value'],
+                  nodes['Math.011'].inputs[1])
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['Math.010'].inputs[0])
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['Math.011'].inputs[0])
+        links.new(nodes['Math.007'].outputs['Value'],
+                  nodes['Math.012'].inputs[1])
+        links.new(nodes['Math.007'].outputs['Value'],
+                  nodes['Math.013'].inputs[1])
+        links.new(nodes['Math.008'].outputs['Value'],
+                  nodes['Combine XYZ.008'].inputs['X'])
+        links.new(nodes['Reroute.002'].outputs['Output'],
+                  nodes['Math.012'].inputs[0])
+        links.new(nodes['Reroute.002'].outputs['Output'],
+                  nodes['Math.013'].inputs[0])
+        links.new(nodes['Math.010'].outputs['Value'],
+                  nodes['Combine XYZ.008'].inputs['Y'])
+        links.new(nodes['Math.012'].outputs['Value'],
+                  nodes['Combine XYZ.008'].inputs['Z'])
+        links.new(nodes['Math.009'].outputs['Value'],
+                  nodes['Combine XYZ.009'].inputs['X'])
+        links.new(nodes['Math.011'].outputs['Value'],
+                  nodes['Combine XYZ.009'].inputs['Y'])
+        links.new(nodes['Math.013'].outputs['Value'],
+                  nodes['Combine XYZ.009'].inputs['Z'])
+        links.new(nodes['DisplayLine'].outputs['Mesh'],
+                  nodes['DisplaySetP1'].inputs['Geometry'])
+        links.new(nodes['DispayIndex'].outputs['Index'],
+                  nodes['DisplayFind0'].inputs['B'])
+        links.new(nodes['DisplayFind0'].outputs['Result'],
+                  nodes['DisplaySetP1'].inputs['Selection'])
+        links.new(nodes['Combine XYZ.008'].outputs['Vector'],
+                  nodes['DisplaySetP1'].inputs['Position'])
+        links.new(nodes['DisplayFind1'].outputs['Result'],
+                  nodes['DisplaySetP2'].inputs['Selection'])
+        links.new(nodes['DisplaySetP1'].outputs['Geometry'],
+                  nodes['DisplaySetP2'].inputs['Geometry'])
+        links.new(nodes['Combine XYZ.009'].outputs['Vector'],
+                  nodes['DisplaySetP2'].inputs['Position'])
+        links.new(nodes['Combine XYZ.008'].outputs['Vector'],
+                  nodes['RayP1'].inputs['Source Position'])
+        links.new(nodes['Combine XYZ.009'].outputs['Vector'],
+                  nodes['RayP2'].inputs['Source Position'])
+        links.new(nodes['Reroute.010'].outputs['Output'],
+                  nodes['MoveMath2'].inputs[1])
+        links.new(nodes['DisplayExtrude'].outputs['Mesh'],
+                  nodes['Group Output'].inputs[0])
+        links.new(nodes['RotMath3'].outputs['Value'],
+                  nodes['Group Output'].inputs[1])
+        links.new(nodes['MoveMath2'].outputs['Value'],
+                  nodes['Group Output'].inputs[2])
+        links.new(nodes['RotMath2'].outputs['Value'],
+                  nodes['RotMath3'].inputs[1])
+        links.new(nodes['RayP2'].outputs['Hit Distance'],
+                  nodes['RotMath1'].inputs[1])
+        links.new(nodes['MoveMath1'].outputs['Value'],
+                  nodes['MoveMath2'].inputs[0])
+        links.new(nodes['RayP1'].outputs['Hit Distance'],
+                  nodes['RotMath1'].inputs[0])
+        links.new(nodes['RotMath1'].outputs['Value'],
+                  nodes['MoveMath1'].inputs[0])
+        links.new(nodes['DisplaySetP2'].outputs['Geometry'],
+                  nodes['DisplayExtrude'].inputs['Mesh'])
+        links.new(nodes['DisplayExtrudeCombine'].outputs['Vector'],
+                  nodes['DisplayExtrude'].inputs['Offset'])
+        links.new(nodes['Math'].outputs['Value'],
+                  nodes['DisplayExtrudeCombine'].inputs['Z'])
+        links.new(nodes['DispayIndex'].outputs['Index'],
+                  nodes['DisplayFind1'].inputs['B'])
+
+        self.label_nodes(node_group)
+        return node_group
+
+    def make_geofloat(self, context, goal, obj, ocean):
+        mod, node_group = self.new_geonodes_mod(goal)
+        aom_props = context.scene.aom_props
+        is_GeoFloat_Smooth = aom_props.is_GeoFloat_Smooth
+        instanceFloatobj = aom_props.instanceFloatobj
+        if is_GeoFloat_Smooth:
+            mod.name = "GeoFloat_hash"
+            node_group = self.make_GeoFloat_hash  # !!!
+        else:
+            mod.name = "GeoFloat_plus"
+            node_group = self.make_GeoFloat_plus(mod)
+            #nodegroup.name = "Geoflat_plus"
+        #self.move_mod_one_up(ocean, mod)
+
+        if instanceFloatobj:
+            self.set_FloatInstanced(node_group)
+        else:
+            self.set_FloatNotInstanced(node_group)
+
+        if obj != None:
+            mod['Input_1'] = obj
+            # float_parent_id
+            #obj.aom_data.ripple_parent = ocean
+        if ocean != None:
+            mod['Input_2'] = ocean
+            #obj.aom_data.ripple_parent = ocean
+        #obj.modifiers.active = mod
+
+        #self.move_above_DP(obj, mod)
+
+    def make_GeoFloat_plus(self, mod):
+        # does it exist
+        ngname = 'AOMGeoFloat_plus'
+        if ngname in bpy.data.node_groups:
+            mod.node_group = bpy.data.node_groups[ngname]
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+
+        mod.node_group = node_group
+        nodes = node_group.nodes
+        links = node_group.links
+        inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
+        inp = node_group.inputs.new('NodeSocketObject', 'FloatObject')
+        #inp.hide_value = True
+        inp = node_group.inputs.new('NodeSocketObject', 'Ocean')
+        inp = node_group.inputs.new('NodeSocketFloat', 'DetectionHeight')
+        inp.default_value = 10.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'XRotSensitivity')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'YRotSensitivity')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'HeightSensitivity')
+        inp.default_value = 1.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'XDetectionDistance')
+        inp.default_value = 2.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'YDetectionDistance')
+        inp.default_value = 3.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'MoveSensitivityX')
+        inp.default_value = 0.2
+        inp = node_group.inputs.new('NodeSocketFloat', 'MoveSensitivityY')
+        inp.default_value = 0.2
+        inp = node_group.inputs.new('NodeSocketFloat', 'XOffset')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new('NodeSocketFloat', 'YOffset')
+        inp.default_value = 0.0
+        inp = node_group.inputs.new('NodeSocketBool', 'ShowFloatCage')
+        inp.default_value = True
+
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        frameDetect = nodes.new("NodeFrame")
+        frameDetect.name = "OceanSurfaceDetection"
+        frameDetect.location = (-1185, -865)
+
+        frameDisplay = nodes.new("NodeFrame")
+        frameDisplay.name = "DisplayToggle"
+        frameDisplay.location = (-70, -666)
+
+        frameSurface = nodes.new("NodeFrame")
+        frameSurface.name = "ShipFollowsurface"
+        frameSurface.location = (174, 2486)
+
+        frameInstance = nodes.new("NodeFrame")
+        frameInstance.name = "ShipInstancing"
+        frameInstance.location = (1123, 2870)
+
+        node = nodes.new("GeometryNodeObjectInfo")
+        node.name = "Ocean"
+        node.location = (-2180, -780)
+        node.transform_space = "RELATIVE"
+        node.inputs[1].default_value = False
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("NodeGroupInput")
+        node.name = "Group Input"
+        node.location = (-2469, -341)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.001"
+
+        node.location = (-2227, -1146)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.011"
+        node.location = (-1959, -887)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.009"
+        node.location = (-1933, -513)
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeMeshLine")
+        node.name = "InstancePoint"
+        node.parent = frameInstance
+        node.location = (-1887, -1954)
+        node.inputs[0].default_value = 1
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeObjectInfo")
+        node.name = "FloatObj"
+        node.parent = frameInstance
+        node.location = (-1881, -2241)
+        node.transform_space = "ORIGINAL"
+        node.inputs[1].default_value = False
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.005"
+        node.location = (-1854, -571)
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.006"
+        node.location = (-1854, -535)
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute"
+        node.location = (-1849, -377)
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "PToHeight"
+        node.parent = frameSurface
+        node.location = (-1838, -2396)
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeInstanceOnPoints")
+        node.name = "InstanceOnPoint"
+        node.parent = frameInstance
+        node.location = (-1649, -2096)
+        node.inputs[1].default_value = True
+        node.inputs[3].default_value = False
+        node.inputs[4].default_value = 0
+        node.inputs[5].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[6].default_value = (1.0, 1.0, 1.0,)
+
+        node = nodes.new("GeometryNodeRaycast")
+        node.name = "RayHeight"
+        node.parent = frameSurface
+        node.location = (-1561, -2174)
+        node.data_type = "FLOAT"
+        node.inputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.inputs[4].default_value = False
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[7].default_value = (0.0, 0.0, -1.0,)
+        node.inputs[8].default_value = 100.0
+        node.outputs[0].default_value = False
+        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[3].default_value = 0.0
+        node.outputs[4].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[5].default_value = 0.0
+        node.outputs[6].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.outputs[7].default_value = False
+        node.outputs[8].default_value = 0
+
+        node = nodes.new("ShaderNodeSeparateXYZ")
+        node.name = "HeightSep"
+        node.parent = frameSurface
+        node.location = (-1294, -2146)
+        node.inputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = 0.0
+
+        node = nodes.new("NodeReroute")
+        node.name = "Reroute.002"
+        node.location = (-1197, -185)
+        #node.inputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeMath")
+        node.name = "SetHeightSensitivity"
+        node.parent = frameSurface
+        node.location = (-996, -2262)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "HeightComb"
+        node.parent = frameSurface
+        node.location = (-694, -2126)
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        floatrotmoveNG = self.make_FloatRotMove_nodegroup()
+
+        node = nodes.new("GeometryNodeGroup")
+        node.node_tree = floatrotmoveNG
+        node.parent = frameDetect
+        node.name = "RotationX"
+        node.location = (-354, 445)
+        node.inputs[1].default_value = 0.8
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 3.4
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = 2.3
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = 1.0
+        #node.inputs[8].default_value = 1.0
+        #node.outputs[1].default_value = 0.0
+        #node.outputs[2].default_value = 0.0
+
+        node = nodes.new("GeometryNodeGroup")
+        node.node_tree = floatrotmoveNG
+        node.name = "RotationY"
+        node.parent = frameDetect
+        node.location = (-354, 19)
+        node.inputs[1].default_value = 0.8
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 3.4
+        node.inputs[4].default_value = 1.6
+        node.inputs[5].default_value = 0.0
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = 1.0
+        #node.inputs[8].default_value = 1.0
+        #node.outputs[1].default_value = 0.0
+        #node.outputs[2].default_value = 0.0
+
+        node = nodes.new("GeometryNodeJoinGeometry")
+        node.name = "JoinDisplay"
+        node.parent = frameDisplay
+        node.location = (-249, 246)
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "NewCoordinatesAfterMove"
+        node.location = (-119, 347)
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeSwitch")
+        node.name = "DisplaySwitch"
+        node.parent = frameDisplay
+        node.location = (70, 246)
+        node.input_type = "GEOMETRY"
+        node.inputs[0].default_value = False
+        node.inputs[1].default_value = False
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = True
+        node.inputs[8].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[9].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[10].default_value = (
+            0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0,)
+        node.inputs[11].default_value = (
+            0.800000011920929, 0.800000011920929, 0.800000011920929, 1.0,)
+        node.inputs[12].default_value = ""
+        node.inputs[13].default_value = ""
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = False
+        node.outputs[3].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[4].default_value = (0.0, 0.0, 0.0, 0.0,)
+        node.outputs[5].default_value = ""
+        node.outputs[7].default_value = None
+        node.outputs[8].default_value = None
+        node.outputs[9].default_value = None
+        node.outputs[10].default_value = None
+        node.outputs[11].default_value = None
+
+        node = nodes.new("ShaderNodeVectorMath")
+        node.name = "MoveXY"
+        node.location = (85, 416)
+        node.operation = "MULTIPLY"
+        node.inputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[1].default_value = (1.0, 1.0, 0.0,)
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = 1.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        node.outputs[1].default_value = 0.0
+
+        node = nodes.new("ShaderNodeCombineXYZ")
+        node.name = "RotComb"
+        node.location = (88, 208)
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeSetPosition")
+        node.name = "SetMove"
+        node.location = (329, 511)
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (0.0, 0.0, 0.0,)
+
+        node = nodes.new("GeometryNodeTransform")
+        node.name = "SetHeightRot"
+        node.location = (630, 406)
+        node.inputs[1].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[2].default_value = (0.0, 0.0, 0.0,)
+        node.inputs[3].default_value = (1.0, 1.0, 1.0,)
+
+        node = nodes.new("GeometryNodeJoinGeometry")
+        node.name = "JoinAll"
+        node.location = (876, -294)
+
+        node = nodes.new("NodeGroupOutput")
+        node.name = "Group Output"
+        node.location = (1186, -294)
+        links.new(nodes['Group Input'].outputs[1],
+                  nodes['FloatObj'].inputs[0])
+        links.new(nodes['Group Input'].outputs[2],  nodes['Ocean'].inputs[0])
+        links.new(nodes['Group Input'].outputs[3],
+                  nodes['Reroute.005'].inputs[0])
+        links.new(nodes['Group Input'].outputs[4],  nodes['Reroute'].inputs[0])
+        links.new(nodes['Group Input'].outputs[5],
+                  nodes['Reroute.001'].inputs[0])
+        links.new(nodes['Group Input'].outputs[6],
+                  nodes['Reroute.002'].inputs[0])
+        links.new(nodes['Group Input'].outputs[7],
+                  nodes['RotationY'].inputs[4])
+        links.new(nodes['Group Input'].outputs[8],
+                  nodes['RotationX'].inputs[5])
+        links.new(nodes['Group Input'].outputs[9],
+                  nodes['RotationX'].inputs[8])
+        links.new(nodes['Group Input'].outputs[10],
+                  nodes['RotationY'].inputs[8])
+        links.new(nodes['Group Input'].outputs[11],
+                  nodes['Reroute.009'].inputs[0])
+        links.new(nodes['Group Input'].outputs[12],
+                  nodes['Reroute.006'].inputs[0])
+        links.new(nodes['Group Input'].outputs[13],
+                  nodes['DisplaySwitch'].inputs[1])
+        links.new(nodes['RotationY'].outputs[0],
+                  nodes['JoinDisplay'].inputs['Geometry'])
+        links.new(nodes['JoinAll'].outputs['Geometry'],
+                  nodes['Group Output'].inputs[0])
+        links.new(nodes['InstancePoint'].outputs['Mesh'],
+                  nodes['InstanceOnPoint'].inputs['Points'])
+        links.new(nodes['FloatObj'].outputs['Geometry'],
+                  nodes['InstanceOnPoint'].inputs['Instance'])
+        links.new(nodes['SetMove'].outputs['Geometry'],
+                  nodes['SetHeightRot'].inputs['Geometry'])
+        links.new(nodes['RotComb'].outputs['Vector'],
+                  nodes['SetHeightRot'].inputs['Rotation'])
+        links.new(nodes['RotationY'].outputs[1],
+                  nodes['RotComb'].inputs['Y'])
+        links.new(nodes['Reroute.011'].outputs['Output'],
+                  nodes['RotationY'].inputs[0])
+        links.new(nodes['Ocean'].outputs['Geometry'],
+                  nodes['Reroute.011'].inputs['Input'])
+        links.new(nodes['Reroute.011'].outputs['Output'],
+                  nodes['RayHeight'].inputs['Target Geometry'])
+        links.new(nodes['Reroute.009'].outputs['Output'],
+                  nodes['RotationY'].inputs['X'])
+        links.new(nodes['Reroute.006'].outputs['Output'],
+                  nodes['RotationY'].inputs['Y'])
+        links.new(nodes['Reroute.005'].outputs['Output'],
+                  nodes['RotationY'].inputs['Z'])
+        links.new(nodes['Reroute.011'].outputs['Output'],
+                  nodes['RotationX'].inputs[0])
+        links.new(nodes['Reroute.009'].outputs['Output'],
+                  nodes['RotationX'].inputs['X'])
+        links.new(nodes['Reroute.006'].outputs['Output'],
+                  nodes['RotationX'].inputs['Y'])
+        links.new(nodes['Reroute.005'].outputs['Output'],
+                  nodes['RotationX'].inputs['Z'])
+        links.new(nodes['RotationX'].outputs[1],
+                  nodes['RotComb'].inputs['X'])
+        links.new(nodes['Reroute.009'].outputs['Output'],
+                  nodes['PToHeight'].inputs['X'])
+        links.new(nodes['Reroute.006'].outputs['Output'],
+                  nodes['PToHeight'].inputs['Y'])
+        links.new(nodes['Reroute.005'].outputs['Output'],
+                  nodes['PToHeight'].inputs['Z'])
+        links.new(nodes['RotationX'].outputs[0],
+                  nodes['JoinDisplay'].inputs['Geometry'])
+        links.new(nodes['HeightSep'].outputs['X'],
+                  nodes['HeightComb'].inputs['X'])
+        links.new(nodes['HeightSep'].outputs['Y'],
+                  nodes['HeightComb'].inputs['Y'])
+        links.new(nodes['SetHeightSensitivity'].outputs['Value'],
+                  nodes['HeightComb'].inputs['Z'])
+        links.new(nodes['HeightSep'].outputs['Z'],
+                  nodes['SetHeightSensitivity'].inputs[0])
+        links.new(nodes['Reroute.002'].outputs['Output'],
+                  nodes['SetHeightSensitivity'].inputs[1])
+        links.new(nodes['RayHeight'].outputs['Hit Position'],
+                  nodes['HeightSep'].inputs['Vector'])
+        links.new(nodes['HeightComb'].outputs['Vector'],
+                  nodes['SetHeightRot'].inputs['Translation'])
+        links.new(nodes['InstanceOnPoint'].outputs['Instances'],
+                  nodes['SetMove'].inputs['Geometry'])
+        links.new(nodes['MoveXY'].outputs['Vector'],
+                  nodes['SetMove'].inputs['Offset'])
+        links.new(nodes['Reroute'].outputs['Output'],
+                  nodes['RotationX'].inputs['RotSensitivity'])
+        links.new(nodes['Reroute.001'].outputs['Output'],
+                  nodes['RotationY'].inputs['RotSensitivity'])
+        links.new(nodes['RotationY'].outputs[2],
+                  nodes['NewCoordinatesAfterMove'].inputs['Y'])
+        links.new(nodes['RotationX'].outputs[2],
+                  nodes['NewCoordinatesAfterMove'].inputs['X'])
+        links.new(nodes['Reroute.005'].outputs['Output'],
+                  nodes['NewCoordinatesAfterMove'].inputs['Z'])
+        links.new(nodes['NewCoordinatesAfterMove'].outputs['Vector'],
+                  nodes['MoveXY'].inputs['Vector'])
+        links.new(nodes['PToHeight'].outputs['Vector'],
+                  nodes['RayHeight'].inputs['Source Position'])
+        links.new(nodes['DisplaySwitch'].outputs[6],
+                  nodes['JoinAll'].inputs['Geometry'])
+        links.new(nodes['SetHeightRot'].outputs['Geometry'],
+                  nodes['JoinAll'].inputs['Geometry'])
+        links.new(nodes['JoinDisplay'].outputs['Geometry'],
+                  nodes['DisplaySwitch'].inputs[15])
+        mod['Input_3'] = 4.06
+        mod['Input_8'] = 1.0
+        mod['Input_9'] = 1.0
+        mod['Input_10'] = 1.0
+        mod['Input_11'] = 0.0
+        mod['Input_12'] = 0.0
+        mod['Input_13'] = 1
+        mod['Input_14'] = 1.0
+        mod['Input_6'] = 1.0
+        mod['Input_17'] = 1
+
+        self.label_nodes(node_group)
+        return node_group
+
+    def set_FloatNotInstanced(self, node_group):
+        nodes = node_group.nodes
+        links = node_group.links
+
+        links.new(nodes['Group Input'].outputs[0],
+                  nodes['SetMove'].inputs[0])
+
+    def set_FloatInstanced(self, node_group):
+        nodes = node_group.nodes
+        links = node_group.links
+
+        links.new(nodes['InstanceOnPoint'].outputs[0],
+                  nodes['SetMove'].inputs[0])
 
     def add_driver(
         self, source, target, prop, dataPath,

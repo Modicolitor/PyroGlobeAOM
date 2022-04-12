@@ -3,7 +3,7 @@ import bpy
 import mathutils
 import copy
 from .aom_def import is_ocean, is_floatcage
-#from .aom_properties import FloatdataItem
+# from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
 from .aom_presets import AOMPreset_Handler
 from .aom_geonodes import AOMGeoNodesHandler
@@ -89,7 +89,7 @@ def GenOcean(context):
     mod.foam_layer_name = "foam"
 
     # dieser wert bestimmt die Menge an Schaum, Lohnt sich bestimmt auszulagern
-    #context.object.modifiers["Ocean"].foam_coverage = 0.6
+    # context.object.modifiers["Ocean"].foam_coverage = 0.6
 
     start, end = get_time_animation_keys(context)
 
@@ -97,7 +97,7 @@ def GenOcean(context):
     set_ocean_keyframes(context, context.object,
                         mod, start, end, True)
 
-    #print(get_ocean_keyframes(context, context.object))
+    # print(get_ocean_keyframes(context, context.object))
 
     #####Dynamic Paint modifier und einstellungen##########
 
@@ -177,11 +177,11 @@ def get_ocean_id(context):
     if len(l) == 0:
         return 0
     else:
-        #largest = -1
+        # largest = -1
         # for i in l:
         #    if i > largest:
         #        largest = i
-        #print(f'largest id is {l[len(l)-1]}')
+        # print(f'largest id is {l[len(l)-1]}')
         return l[len(l)-1]+1  # largest + 1
 
 
@@ -244,7 +244,7 @@ def update_OceAniFrame(context, ocean):
     start, end = get_time_animation_keys(context)
 
     oceanmod = get_ocean_mod(ocean)
-    #start = (context.scene.aom_props.OceAniStart, 1)
+    # start = (context.scene.aom_props.OceAniStart, 1)
     # end = (context.scene.aom_props.OceAniEnd, get_animationlengthfromEnd(
     #    context, context.scene.aom_props.OceAniEnd))
     # Animation
@@ -269,7 +269,20 @@ def floatablelist(context, list):
         if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH':
             floatable.append(ob)
             print(f"Floatables are: {ob.name}")
+        '''elif is_floatcage(context, ob):
+            obj = get_object_from_cage(context, ob)
+            if not obj in floatable:
+                floatable.append(ob)'''
     return floatable
+
+
+def get_object_from_cage(context, cage):
+    obs = context.view_layer.objects
+    for ob in obs:
+        if ob.type == 'EMPTY':
+            if ob.aom_data.namenum == cage.aom_data.namenum:
+                # Copy Rotation.001
+                return ob.constraints["Copy Rotation.001"].target
 
 
 def oceanlist(context, list):
@@ -289,9 +302,10 @@ def get_new_namenum(context):
 
 
 # lasse soviele objecte wie du willst auf einmal floaten
-
+# def GeoFloatSel():
 
 def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
+
     data = bpy.data
 
     active = context.view_layer.objects.active
@@ -302,9 +316,10 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
     sellist = floatablelist(context, sellistori)
 
-    #print("sellist: " + str(sellist))
+    # print("sellist: " + str(sellist))
 
     for a, obj in enumerate(sellist):
+
         # bpy.context.selected_objects = sellist
         active = obj
         print(obj.name + " For schleife" + str(a))
@@ -345,7 +360,12 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
             print("Es gibt keine Wave Collection in Advanced Ocean Ordner")
 
         # Dynamic paint
+        colweight = data.collections.new(
+            "Weight.00"+str(Namenum))  # collection erschaffen
+        context.scene.collection.children[MColName].children[Brush].children.link(
+            colweight)  # in die Brush Collection der aktuellen Szene
 
+        # set as Dynpaint brush
         dynpmod = obj.modifiers.new(name='Dynamic Paint', type='DYNAMIC_PAINT')
         dynpmod.ui_type = 'BRUSH'
 
@@ -361,8 +381,6 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
             dynpmod.ui_type = 'BRUSH'
             bpy.ops.dpaint.type_toggle(type='BRUSH')
 
-        context.view_layer.objects.active = obj
-
         print(str(obj.modifiers['Dynamic Paint'].brush_settings) +
               "modifierliste des aktuellen objectes")
 
@@ -372,175 +390,181 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
         print('jetzt gibt es rotation auf objekt in der schleifen nr.' + str(a))
         print('das active object for dem rotation constraint' + obj.name)
+        aom_props = context.scene.aom_props
+        use_GeoFloat = aom_props.use_GeoFloat
+        instanceFloatobj = aom_props.instanceFloatobj
 
-        # generate empty for loc rot tranfer via parent
-        bpy.ops.object.empty_add(
-            type='PLAIN_AXES', align='WORLD', location=obj.location)
-        empty = context.object
-        empty.name = "Transferempty.00"+str(Namenum)
+        # shortcut case not instanced
+        if use_GeoFloat:
+            if not instanceFloatobj:
+                advcol = bpy.data.collections[MColName]
+                GN = AOMGeoNodesHandler(context, advcol)
+                GN.make_geofloat(context, obj, obj, ocean)
+                obj.aom_data.interaction_type = 'FLOAT'
+                obj.aom_data.float_parent_id = ocean.aom_data.ocean_id
+                obj.aom_data.namenum = Namenum
+                continue
+        else:
+            # Make transfer Empty
+            # context.view_layer.objects.active = obj
+            # generate empty for loc rot tranfer via parent
+            bpy.ops.object.empty_add(
+                type='PLAIN_AXES', align='WORLD', location=obj.location)
+            empty = context.object
+            empty.name = "Transferempty.00"+str(Namenum)
+            empty.aom_data.namenum = Namenum
 
-        # maker collection
-        colweight = data.collections.new(
-            "Weight.00"+str(Namenum))  # collection erschaffen
-        context.scene.collection.children[MColName].children[Brush].children.link(
-            colweight)  # in die Brush Collection der aktuellen Szene
+            # maker collection
 
-        # move empty to collection and remove from old place
-        data.collections[colweight.name].objects.link(empty)
-        for col in empty.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
-            if col.name != "Weight.00"+str(Namenum):
-                col.objects.unlink(empty)
-                # print("Cage entfernt aus " + str(col.name))
-                break
+            # move empty to collection and remove from old place
+            data.collections[colweight.name].objects.link(empty)
+            for col in empty.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
+                if col.name != "Weight.00"+str(Namenum):
+                    col.objects.unlink(empty)
+                    # print("Cage entfernt aus " + str(col.name))
+                    break
 
-        # die constraints auf das Empty packen
-        conRot1 = empty.constraints.new('COPY_ROTATION')
-        conRot1.target = ocean
-        conRot1.subtarget = "dp_weight.00" + str(Namenum)
-        conRot1.use_z = False
-        conRot1.invert_x = True
-        conRot1.invert_y = True
+            # die constraints auf das Empty packen
+            conRot1 = empty.constraints.new('COPY_ROTATION')
+            conRot1.target = ocean
+            conRot1.subtarget = "dp_weight.00" + str(Namenum)
+            conRot1.use_z = False
+            conRot1.invert_x = True
+            conRot1.invert_y = True
 
-        contLoc = empty.constraints.new('COPY_LOCATION')
-        contLoc.target = ocean
-        contLoc.subtarget = "dp_weight.00" + str(Namenum)
+            contLoc = empty.constraints.new('COPY_LOCATION')
+            contLoc.target = ocean
+            contLoc.subtarget = "dp_weight.00" + str(Namenum)
 
-        conRot2 = empty.constraints.new('COPY_ROTATION')
-        # see setting at the endof the function
+            conRot2 = obj.constraints.new('COPY_ROTATION')
+            conRot2.name = "AOMConRot"
+            # conRot2.target = cage #######################NEEDS To be Cage
+            conRot2.use_z = True
+            conRot2.use_y = False
+            conRot2.use_x = False
+            conRot2.owner_space = 'LOCAL'
+            # see setting at the endof the function
 
-        print('das active object nach dem rotation constraint' + obj.name)
+            print('das active object nach dem rotation constraint' + obj.name)
 
-        obj.parent = empty
+            obj.parent = empty
 
-        obj.location = mathutils.Vector((0, 0, 0))
+            obj.location = mathutils.Vector((0, 0, 0))
 
         #####################################################
         # ab hier der cage des objctes
         #####################################################
 
         # holllt die dimensionen der aktiven elemente .... muss bestimmt dimensionen des selected obejct im aktuellen schleifen durch lauf sein
-        locx = empty.location[0]
-        locy = empty.location[1]
-        locz = empty.location[2]
 
-        print("locx " + str(locx))
         dx = obj.dimensions[0]
         dy = obj.dimensions[1]
 
-        print(dx)
-        print(dy)
         # generiert Name.FloatCage
         name = obj.name
         print(name)
-        bpy.ops.mesh.primitive_uv_sphere_add(location=empty.location)
+        bpy.ops.mesh.primitive_uv_sphere_add(location=obj.location)
         cage = context.object
         cage.name = name + ".FloatAnimCage"
         cage.aom_data.is_floatcage = True
-        cage.display_type = 'WIRE'
-        cage.hide_render = True
+
+        cage.aom_data.namenum = Namenum
         MatHandler = AOMMatHandler(context)
         mat = MatHandler.make_cagematerial(cage)
-
-        if dx > dy:
-            print(obj.name + "x")
-            dy = 1.0*dy
-            dx = 1.0*dx
-            cage.scale[0] = dx
-            cage.scale[1] = dx
-        else:
-            print(obj.name + "y")
-            dy = 1.0*dy
-            dx = 1.0*dx
-            print(dy)
-            cage.scale[0] = dy
-            cage.scale[1] = dy
-
-        # x = bpy.data.objects["Cube"]
-        # x.location = (5,0,0)
-
-        # bpy.data.objects[name].location = (locx,locy,locz)
- #            bpy.data.objects[name].location = locy
- #            bpy.data.objects[name].location = locz
-
-        bpy.ops.transform.resize(value=(1, 1, 7), constraint_axis=(
-            False, False, True))  # in z=richtung 3 hoch machen
+        if use_GeoFloat:
+            if not instanceFloatobj:
+                if dx > dy:
+                    print(obj.name + "x")
+                    cage.scale[0] = dx
+                    cage.scale[1] = dx
+                else:
+                    print(obj.name + "y")
+                    print(dy)
+                    cage.scale[0] = dy
+                    cage.scale[1] = dy
+                cage.display_type = 'WIRE'
+                cage.hide_render = True
+                bpy.ops.transform.resize(value=(1, 1, 7), constraint_axis=(
+                    False, False, True))  # in z=richtung 3 hoch machen
 
         # bpy.ops.object.transform_apply(location=True, rotation=True, scale=True) ### apply rotation, scale, location
+        # geofloat with instanced Object uses Cage
+        if use_GeoFloat:
+            if instanceFloatobj:
+                advcol = bpy.data.collections[MColName]
+                GN = AOMGeoNodesHandler(context, advcol)
+                GN.make_geofloat(context, cage, obj, ocean)
+        else:
+            conRot2.target = cage
 
-        context.object.display_type = 'WIRE'
-        # das zum Brush wird zugefügt
-        # bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
-        dpcage_mod = cage.modifiers.new(
-            name='Dynamic Paint', type='DYNAMIC_PAINT')
-        dpcage_mod.ui_type = 'BRUSH'
-        bpy.ops.dpaint.type_toggle(type='BRUSH')
-        #bpy.data.objects[name].hide_render = True
+            context.object.display_type = 'WIRE'
+            # das zum Brush wird zugefügt
+            # bpy.ops.object.modifier_add(type='DYNAMIC_PAINT')
+            dpcage_mod = cage.modifiers.new(
+                name='Dynamic Paint', type='DYNAMIC_PAINT')
+            dpcage_mod.ui_type = 'BRUSH'
+            bpy.ops.dpaint.type_toggle(type='BRUSH')
+            # bpy.data.objects[name].hide_render = True
 
-        # jedesobject bekommt seine eigene Collection
+            data.collections[colweight.name].objects.link(cage)
+            for col in cage.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
+                if col.name != "Weight.00"+str(Namenum):
+                    #!!!!!!!!!!!!!!!! BUg when cage is generated in the master collection, next line fails with "key "Master Collection" not found'""
 
-        # index = CollectionIndex('OceanBrushes')
-
-        # colweight = data.collections.new("Weight.00"+str(Namenum))  ###collection erschaffen
-        # bpy.context.scene.collection.children[MColName].children[Brush].children.link(colweight) ### in die Brush Collection der aktuellen Szene
-
-        data.collections[colweight.name].objects.link(cage)
-        for col in cage.users_collection:  # suchen der collection in dem der Cage zuerste generiert wurde dann löschen des object instance
-            if col.name != "Weight.00"+str(Namenum):
-                #!!!!!!!!!!!!!!!! BUg when cage is generated in the master collection, next line fails with "key "Master Collection" not found'""
-
-                col.objects.unlink(cage)
-                # print("Cage entfernt aus " + str(col.name))
-                break
+                    col.objects.unlink(cage)
+                    # print("Cage entfernt aus " + str(col.name))
+                    break
 
         # helper transferEmpty as parent of object
 
         # print(active.name + "Akrives Objekt vor der AdvOcean")
         #################################################################################################################
         #################################################################################################################
-        #ocean = data.objects['AdvOcean']
+        # Adjust the ocean
+        #
+        ######
         context.view_layer.objects.active = ocean
+        if not use_GeoFloat:
+            # New weight paint for classic float
+            #    bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
+            dpoceanmod = get_dynpaint_mod(ocean)
+            bpy.ops.dpaint.surface_slot_add()  # erzeugt neue Canvas
 
-        # Namenum = len(
-        #    bpy.data.objects['AdvOcean'].modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces)
-        dpoceanmod = get_dynpaint_mod(ocean)
-        bpy.ops.dpaint.surface_slot_add()  # erzeugt neue Canvas
+            try:
+                dpoceanmod.canvas_settings.canvas_surfaces["Surface.00"+str(
+                    Namenum)].name = "Weight.00"+str(Namenum)
+            except:
+                dpoceanmod.canvas_settings.canvas_surfaces[
+                    "Surface"].name = "Weight.00"+str(Namenum)
 
-        try:
-            dpoceanmod.canvas_settings.canvas_surfaces["Surface.00"+str(
-                Namenum)].name = "Weight.00"+str(Namenum)
-        except:
-            dpoceanmod.canvas_settings.canvas_surfaces[
-                "Surface"].name = "Weight.00"+str(Namenum)
+            dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
+                Namenum)].surface_type = 'WEIGHT'  # setzt den typ auf weight paint
+            dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
+                Namenum)].use_dissolve = True        # fade option wird Aktiv geklickt... das weight paint verschwindet
+            dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
+                Namenum)].dissolve_speed = 1         # nach 1 Frame
+            # dynamic paint output  Vertex group wird erstellt  <--  könnte später ein Bug geben wenn schon weight paint existiert
+            bpy.ops.dpaint.output_toggle(output='A')
+            dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
+                Namenum)].output_name_a = "dp_weight.00"+str(Namenum)
+            bpy.ops.dpaint.output_toggle(output='A')
+            dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
+                Namenum)].brush_collection = bpy.data.collections["Weight.00"+str(Namenum)]
 
-        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
-            Namenum)].surface_type = 'WEIGHT'  # setzt den typ auf weight paint
-        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
-            Namenum)].use_dissolve = True        # fade option wird Aktiv geklickt... das weight paint verschwindet
-        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
-            Namenum)].dissolve_speed = 1         # nach 1 Frame
-        # dynamic paint output  Vertex group wird erstellt  <--  könnte später ein Bug geben wenn schon weight paint existiert
-        bpy.ops.dpaint.output_toggle(output='A')
-        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
-            Namenum)].output_name_a = "dp_weight.00"+str(Namenum)
-        bpy.ops.dpaint.output_toggle(output='A')
-        dpoceanmod.canvas_settings.canvas_surfaces["Weight.00"+str(
-            Namenum)].brush_collection = bpy.data.collections["Weight.00"+str(Namenum)]
-
-        ################Gruppe fehlt hier--> !!!##############
-        conRot2.target = bpy.data.objects[name]
-        conRot2.use_z = True
-        conRot2.use_y = False
-        conRot2.use_x = False
-
+        # if not instanceFloatobj:
         active = sellist[a]
-
-        # register in objects flotdata
-        print(f"add data to {context.object}")
-        print("____________________________________________________________________________________________________________________________________________________________")
+        # else:
+        #    active = cage
 
         active.aom_data.interaction_type = 'FLOAT'
         active.aom_data.float_parent_id = ocean.aom_data.ocean_id
         active.aom_data.namenum = Namenum
+
+        cage.aom_data.interaction_type = 'FLOAT'
+        cage.aom_data.float_parent_id = ocean.aom_data.ocean_id
+        cage.aom_data.namenum = Namenum
+
+        # setting zrotation on empty to cage on legacy float
 
 
 def remove_floats(context, ocean):
@@ -563,7 +587,7 @@ def BrushStatic(context):
     context = bpy.context
 
     sellistori = bpy.context.selected_objects[:]
-    #sellist = []
+    # sellist = []
 
     sellist = floatablelist(context, sellistori)
 
@@ -621,6 +645,7 @@ def RemoveInterAct(context):
 
 def RemoveInterActSingle(context, obj):
     if obj.aom_data.interaction_type == '':
+        print('stop without action')
         return obj
 
     context.view_layer.objects.active = obj
@@ -629,6 +654,12 @@ def RemoveInterActSingle(context, obj):
     if "Dynamic Paint" in obj.modifiers:
         bpy.ops.object.modifier_remove(
             modifier="Dynamic Paint")  # remove dynamic paint
+
+    print(obj.name+'before geofloat remove')
+    for mod in obj.modifiers:
+        if "GeoFloat" in mod.name:
+            bpy.ops.object.modifier_remove(
+                modifier=mod.name)  # remove dynamic paint
 
     empty = obj.parent
     if empty != None:
@@ -709,9 +740,9 @@ def add_driver(
 
 
 def FoamAnAus(context, ocean):
-    #scene = bpy.context.scene
-    #data = bpy.data
-    #context = bpy.context
+    # scene = bpy.context.scene
+    # data = bpy.data
+    # context = bpy.context
     #    mat=bpy.data.materials['AdvOceanMat']
     #    nodes = mat.node_tree.nodes
     #    links = mat.node_tree.links
@@ -844,7 +875,7 @@ class BE_OT_SetPreset(bpy.types.Operator):
 
         pre = AOMPreset_Handler()
         MatHandler = AOMMatHandler(context)
-        #oceans = get_ocean_from_list(context, context.scene.objects)
+        # oceans = get_ocean_from_list(context, context.scene.objects)
         oc = get_active_ocean(context)
         # for oc in oceans:
         pre.set_preset(context, oc)
@@ -953,7 +984,7 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
 
 def loop_ocean(context, ocean):
     # find original oc
-    #remove_loop(context, ocean)
+    # remove_loop(context, ocean)
     update_OceAniFrame(context, ocean)
 
     for mod in ocean.modifiers:
@@ -975,14 +1006,14 @@ def loop_ocean(context, ocean):
         copy_oceanmodprops(oldmod, mod)
 
         # get original keyframes set invert keyframes
-        #keyframes = get_ocean_keyframes(context, ocean)
+        # keyframes = get_ocean_keyframes(context, ocean)
         start, end = get_time_animation_keys(context)
 
         loopstart = (start[0], 0)
         loopend = (end[0], start[1])
         # 1 (1,0) <-- (1,5)
         # 2 (250,5) <-- (250,10)
-        #print(f"doppelt 11 : {2 * keyframes[1][1]} ")
+        # print(f"doppelt 11 : {2 * keyframes[1][1]} ")
         # if keyframes != None:
         set_ocean_keyframes(context, ocean, mod, loopstart, loopend, False)
 
@@ -998,7 +1029,7 @@ def loop_ocean(context, ocean):
         set_keyframes(context, mod, "wave_scale",
                       wave_scalemax, context.scene.aom_props.OceAniEnd)
 
-        ###modifiers["Ocean.001"].foam_layer_name = loopfoam
+        # modifiers["Ocean.001"].foam_layer_name = loopfoam
         mat = ocean.material_slots[0].material
         node_tree = mat.node_tree
         nodes = node_tree.nodes
@@ -1164,9 +1195,12 @@ class BE_OT_FloatSelButt(bpy.types.Operator):
 
     def execute(self, context):
         # ocean active?
+
         ocean = get_active_ocean(context)
+
         if ocean != None:
             FloatSel(context, ocean)
+
         # BrushCanvas()    ##hier ist der code unsauber: bei vielen objekten werden ganz oft paint und Weight als Gruppe eingetragen .... könnte trotzdem gehen weil es immerwieder überschrieben wird
 
         return{"FINISHED"}
@@ -1248,14 +1282,14 @@ class BE_OT_RemoveOceanSpray(bpy.types.Operator):
 
     def execute(self, context):
         oceans = oceanlist(context, context.selected_objects)
-        #print(f"set active ocean {oceans}")
+        # print(f"set active ocean {oceans}")
         advcol = bpy.data.collections[MColName]
         GN = AOMGeoNodesHandler(context, advcol)
-        #print(f"set active ocean {oceans}")
+        # print(f"set active ocean {oceans}")
 
         if len(oceans) == 0:
             oceans = [get_active_ocean(context)]
-            #print(f"set active ocean {oceans}")
+            # print(f"set active ocean {oceans}")
 
         for ob in oceans:
             GN.remove_spray(context, ob)
@@ -1292,11 +1326,38 @@ class BE_OT_OceanRippels(bpy.types.Operator):
             print(f"oc.name {oc.name}")
             if len(obs) != 0:
                 for ob in obs:
-                    #GN.remove_ripples(context, ob)
+                    # GN.remove_ripples(context, ob)
                     GN.new_ripples(context, oc, ob)
             else:
                 GN.new_ripples(context, oc, None)
 
+        return{"FINISHED"}
+
+
+class BE_OT_GeoFloat(bpy.types.Operator):
+    '''Makes objects float on a defined ocean via an Geometrynodes on an additional object (Floatcage)'''
+    bl_label = "Add GeoFloat"
+    bl_idname = "aom.geofloat"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
+
+        oceans = oceanlist(context, context.selected_objects)
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+            # print(f"got active {oceans}")
+
+        obs = floatablelist(context, context.selected_objects)
+
+        for oc in oceans:
+            print(f"oc.name {oc.name}")
+            if len(obs) != 0:
+                for ob in obs:
+                    # GN.remove_geofloat(context, ob)
+                    GN.make_geofloat(context, ob,  ob, oc)
         return{"FINISHED"}
 
 

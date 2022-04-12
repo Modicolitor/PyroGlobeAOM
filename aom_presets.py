@@ -75,7 +75,7 @@ class AOMPreset_Handler:
                 nodes['LW_Water'].inputs[0].default_value = 0.1
             nodes['OceanSubsurface'].outputs[0].default_value = 0.1
             # rougness water =
-            nodes['Roughness'].outputs[0].default_value = 0.01
+            nodes['Roughness'].outputs[0].default_value = 0.1
             nodes['IOR'].outputs[0].default_value = 1.333
             nodes['Transmission'].outputs[0].default_value = 0.1
             nodes['Transparency'].outputs[0].default_value = 1.0

@@ -1,9 +1,12 @@
 # todo
 # [] output sockets are not always 0 (but all called value (but value don't work))
 # [] inputs should not be called value  but the index
+# [] reroute shouldn't have inputs
+# [] node input geometry not detected
+# [] add frames and parent
 # features
 # [] nodegroups
-# [] test material node trees
+
 # [] clean up get value section to bl_idname
 
 # set last values mod[input macht probleme]
@@ -98,12 +101,14 @@ def nodes_to_nodecode(group):
         print('')
         print(f'node = nodes.new("{node.bl_idname}" )')
         print(f'node.name = "{node.name}" ')
+        #print(f'node.parent = "{node.name}" ')
         print(
             f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
 
         if node.bl_idname == 'NodeGroupInput':
             pass
-
+        elif node.bl_idname == 'NodeReroute':
+            pass
         else:
             special_operations(node)
             for a, inp in enumerate(node.inputs):
@@ -233,14 +238,15 @@ def gen_maininputs(group):
 
 
 def set_current_maininputs(mod):
-    for inp in mod.node_group.inputs:
-        try:
-            if get_value(mod[inp.identifier]):
-                print(
-                    f"mod['{inp.identifier}'] = {get_value(mod[inp.identifier])}")
-        except:
-            #print(f"Mööp {inp.name} ")
-            pass
+    if mod != None:
+        for inp in mod.node_group.inputs:
+            try:
+                if get_value(mod[inp.identifier]):
+                    print(
+                        f"mod['{inp.identifier}'] = {get_value(mod[inp.identifier])}")
+            except:
+                #print(f"Mööp {inp.name} ")
+                pass
 
 
 def gen_links(group, nodes, links):

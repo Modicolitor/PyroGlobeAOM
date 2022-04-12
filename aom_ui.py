@@ -203,6 +203,8 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 # row = layout.row(align=True)
                 # zeige button an
                 subcol.operator("float.sel", icon="MOD_OCEAN")
+                # subcol.operator(
+                #    "aom.geofloat", icon="MOD_OCEAN", text='Geofloat')
 
                 # row = layout.row(align=True)
                 subcol.operator("stat.ob", icon="PINNED")
@@ -212,6 +214,20 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
 
                 # row = layout.row(align=True)
                 subcol.operator("cag.vis", icon="RESTRICT_VIEW_OFF")
+                aom_props = context.scene.aom_props
+                subcol.prop(aom_props, 'use_GeoFloat', text='Use GeoFloat')
+                if aom_props.use_GeoFloat:
+                    subcol.prop(aom_props, 'instanceFloatobj',
+                                text='Instance Object')
+                    subcol.prop(aom_props, 'is_GeoFloat_Smooth',
+                                text='SmootherDetection')
+                else:
+                    subcol = col.column()
+                    subcol.enabled = False
+                    subcol.prop(aom_props, 'instanceFloatobj',
+                                text='Instance Object', emboss=True)
+                    subcol.prop(aom_props, 'is_GeoFloat_Smooth',
+                                text='SmootherDetection', emboss=True)
 
                 # row = layout.row(align=True)
 
@@ -307,9 +323,9 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                 is_advanced = context.scene.aom_props.AdvMaterialOptions
                 if is_ocean_material(context, mat) and hasattr(mat.node_tree, "nodes"):
 
+                    subcol = col.box()
                     subcol.label(text="Water Material Settings")
-                    subcol.prop(context.scene.aom_props,
-                                'AdvMaterialOptions', text='Advanced Options')
+
                     node_tree = mat.node_tree
                     nodes = mat.node_tree.nodes
 
@@ -338,14 +354,20 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                         pass
 
                     try:
-                        subcol.prop(nodes['Refraction'].inputs[0],
-                                    'default_value', text='Refraction')
+                        subcol.prop(nodes['Transmission'].outputs['Value'],
+                                    'default_value', text='Transparency')
                     except:
                         pass
 
                     try:
-                        subcol.prop(nodes['Transparency'].inputs[0],
-                                    'default_value', text='Transparency')
+                        subcol.prop(nodes['Transparency'].outputs['Value'],
+                                    'default_value', text='Alpha')
+                    except:
+                        pass
+                    subcol.label(text='Bump Waves')
+                    try:
+                        subcol.prop(nodes['WaterBumpStrength'].outputs[0],
+                                    'default_value', text='Wave Strength')
                     except:
                         pass
 
@@ -354,26 +376,25 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Wave Texture Scale')
                     except:
                         pass
-                    try:
-                        subcol.prop(nodes['WaterBumpStrength'].outputs[0],
-                                    'default_value', text='Fake Wave Strength')
-                    except:
-                        pass
+
                     try:
                         subcol.prop(nodes['TimerWaveScale'].outputs[1],
                                     'default_value', text='Fake Wave Speed')
                     except:
                         pass
 
+                    subcol = col.box()
                     subcol.label(text="Foam Material Settings")
+                    subcol.prop(context.scene.aom_props,
+                                'AdvMaterialOptions', text='Advanced Options')
                     try:
                         subcol.prop(nodes['FoamColor'].outputs[0],
-                                    'default_value', text='Color')
+                                    'default_value', text='Foam Color')
                     except:
                         pass
                     try:
                         subcol.prop(nodes['FoamSubsurf'].outputs[0],
-                                    'default_value', text='Subsurface Scattering')
+                                    'default_value', text='Foam Subsurface')
                     except:
                         pass
                     try:
@@ -386,6 +407,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                                     'default_value', text='Transmission')
                     except:
                         pass
+
                     ocean_mod = get_ocean_mod(ocean)
                     dp_mod = get_dynpaint_mod(ocean)
                     if ocean_mod != None:
@@ -460,6 +482,7 @@ class BE_PT_AdvOceanMat(bpy.types.Panel):
                     # subcol.prop(context.scene.aom_props,
                     #            'is_WindRippleUi', text='Wind Ripple Ui')
 
+                    subcol = col.column()
                     subcol.label(text="Performance")
                     row = subcol.row(align=True)
                     row.label(text="All Bump                  ")

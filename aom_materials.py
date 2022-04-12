@@ -105,7 +105,7 @@ class AOMMatHandler:
             self.foam_fac_ctl(node_tree)
             self.constructor_legacy(node_tree)
 
-        self.connect_foambump(self.context, oc)
+        # performance for the start
 
         self.label_nodes(node_tree)
         self.find_mat_to_adjust_for_preset(self.context, oc)
@@ -115,6 +115,7 @@ class AOMMatHandler:
             self.disconnect_foambump(self.context, oc)
             self.disconnect_foamdisp(self.context, oc)
             self.disconnect_bumpwaves(self.context, oc)
+
         return self.material
 
     def make_cagematerial(self, ob):

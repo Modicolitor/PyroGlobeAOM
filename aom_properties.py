@@ -15,10 +15,19 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
         name="OceanFoamBool", default=False)
 
     AddMaxPerformance: bpy.props.BoolProperty(
-        name="OceanFoamBool", default=False)
+        name="OceanFoamBool", default=True)
 
     is_WindRippleUi: bpy.props.BoolProperty(
         name="OceanFoamBool", default=True)
+
+    use_GeoFloat: bpy.props.BoolProperty(
+        name="UseGeofloat", default=True)
+
+    instanceFloatobj: bpy.props.BoolProperty(
+        name="InstanceFloatObj", default=False)
+
+    is_GeoFloat_Smooth: bpy.props.BoolProperty(
+        name="SmootherGeoFloat", default=False)
 
     OceAniSpeed: bpy.props.FloatProperty(
         name="ObjFoamSpeed", default=1)
