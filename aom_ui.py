@@ -215,8 +215,8 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 # row = layout.row(align=True)
                 subcol.operator("cag.vis", icon="RESTRICT_VIEW_OFF")
                 aom_props = context.scene.aom_props
-                subcol.prop(aom_props, 'use_GeoFloat', text='Use GeoFloat')
-                if aom_props.use_GeoFloat:
+                #subcol.prop(aom_props, 'use_GeoFloat', text='Use GeoFloat')
+                '''if aom_props.use_GeoFloat:
                     subcol.prop(aom_props, 'instanceFloatobj',
                                 text='Instance Object')
                     subcol.prop(aom_props, 'is_GeoFloat_Smooth',
@@ -227,9 +227,7 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                     subcol.prop(aom_props, 'instanceFloatobj',
                                 text='Instance Object', emboss=True)
                     subcol.prop(aom_props, 'is_GeoFloat_Smooth',
-                                text='SmootherDetection', emboss=True)
-
-                # row = layout.row(align=True)
+                                text='SmootherDetection', emboss=True)'''
 
 
 class BE_PT_AdvOceanWaves(bpy.types.Panel):

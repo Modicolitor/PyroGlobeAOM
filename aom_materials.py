@@ -40,11 +40,12 @@ class AOMMatHandler:
         elif index == 4:
             return 'Legacy'
 
-    def del_nodes(self):
-        if hasattr(self.material.node_tree, "nodes"):
-            nodes = self.material.node_tree.nodes
-            for node in nodes:
-                nodes.remove(node)
+    def del_nodes(self, node_tree):
+        # if hasattr(self.material.node_tree, "nodes"):
+        #    nodes = self.material.node_tree.nodes
+        nodes = node_tree.nodes
+        for node in nodes:
+            nodes.remove(node)
 
     def make_material(self, oc):
         self.ocean = oc
@@ -60,7 +61,7 @@ class AOMMatHandler:
         node_tree = self.material.node_tree
 
         if self.context.scene.aom_props.MaterialSel == '1':
-            self.del_nodes()
+            self.del_nodes(self.material.node_tree)
             self.outputnodes(node_tree)
             self.water_31(node_tree)
             self.make_waterbump_nodes(node_tree)
@@ -72,7 +73,7 @@ class AOMMatHandler:
             self.constructor_30(node_tree)
 
         elif self.context.scene.aom_props.MaterialSel == '2':
-            self.del_nodes()
+            self.del_nodes(self.material.node_tree)
             self.outputnodes(node_tree)
             self.water_31(node_tree)
             self.make_waterbump_nodes(node_tree)
@@ -84,7 +85,7 @@ class AOMMatHandler:
             self.constructor_wet2(node_tree)
 
         elif self.context.scene.aom_props.MaterialSel == '3':
-            self.del_nodes()
+            self.del_nodes(self.material.node_tree)
             self.outputnodes(node_tree)
             self.water_28(node_tree)
             self.make_waterbump_nodes(node_tree)
@@ -95,7 +96,7 @@ class AOMMatHandler:
             self.constructor_legacy_improve(node_tree)
 
         elif self.context.scene.aom_props.MaterialSel == '4':
-            self.del_nodes()
+            self.del_nodes(self.material.node_tree)
             self.outputnodes(node_tree)
             self.water_28(node_tree)
             self.make_waterbump_nodes(node_tree)
@@ -127,7 +128,7 @@ class AOMMatHandler:
         self.material.blend_method = 'CLIP'
         #self.material.use_screen_refraction = True
         #self.material.use_sss_translucency = True
-        self.del_nodes()
+        self.del_nodes(node_tree)
         nodes = node_tree.nodes
         links = node_tree.links
 
@@ -801,10 +802,15 @@ class AOMMatHandler:
     def get_BubbleNodeGroup(self):
         data = bpy.data
         if "BubbleNG" in data.node_groups:
-            return data.node_groups["BubbleNG"]
-
-        ng = data.node_groups.new(name="BubbleNG", type='ShaderNodeTree')
-        ng.name = 'BubbleNG'
+            if "Group Output" in data.node_groups['BubbleNG'].nodes:
+                print('Return Old NG')
+                return data.node_groups["BubbleNG"]
+            else:
+                self.del_nodes(data.node_groups['BubbleNG'])
+                ng = data.node_groups['BubbleNG']
+        else:
+            ng = data.node_groups.new(name="BubbleNG", type='ShaderNodeTree')
+            ng.name = 'BubbleNG'
 
         # create group inputs
         group_inputs = ng.nodes.new('NodeGroupInput')
@@ -820,7 +826,7 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeTexVoronoi')
         node.location = (-400, 675)
-        nodes["Voronoi Texture"].inputs[1].default_value = 100
+        #nodes["Voronoi Texture"].inputs[1].default_value = 100
 
         node = nodes.new('ShaderNodeValToRGB')
         node.location = (-000, 875)
@@ -2322,7 +2328,7 @@ class AOMMatHandler:
             nodes['Patchiness'].outputs[0].default_value = 0.4
             Ocean.foam_coverage = 0.2
         elif Preset == '3':
-            nodes['Patchiness'].outputs[0].default_value = 0.3
+            nodes['Patchiness'].outputs[0].default_value = 0.35
             Ocean.foam_coverage = 0.4
 
             '''('4', 'Shallow Lovely', ''),

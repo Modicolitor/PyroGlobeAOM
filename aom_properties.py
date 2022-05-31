@@ -21,7 +21,7 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
         name="OceanFoamBool", default=True)
 
     use_GeoFloat: bpy.props.BoolProperty(
-        name="UseGeofloat", default=True)
+        name="UseGeofloat", default=False)
 
     instanceFloatobj: bpy.props.BoolProperty(
         name="InstanceFloatObj", default=False)

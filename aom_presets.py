@@ -154,11 +154,11 @@ class AOMPreset_Handler:
         Ocean.damping = 0.5
 
         if "AdvOceanMat" in mat.name:
-
+            print('Found Ocean Material')
             nodes = mat.node_tree.nodes
             nodes['LowerOceanFoamCut'].outputs[0].default_value = 0.1
             nodes['FoamBaseStrength'].outputs[0].default_value = 1
-            nodes['Patchiness'].outputs[0].default_value = 0.4
+            nodes['Patchiness'].outputs[0].default_value = 0.35
             nodes['WaterBumpStrength'].outputs[0].default_value = 0.1
             nodes['DisplStrength'].outputs[0].default_value = 0.02
 

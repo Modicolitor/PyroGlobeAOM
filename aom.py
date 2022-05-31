@@ -471,7 +471,7 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         cage.aom_data.namenum = Namenum
         MatHandler = AOMMatHandler(context)
         mat = MatHandler.make_cagematerial(cage)
-        if use_GeoFloat:
+        if not use_GeoFloat:
             if not instanceFloatobj:
                 if dx > dy:
                     print(obj.name + "x")
