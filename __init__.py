@@ -37,7 +37,7 @@ from .aom import BE_OT_SetPreset
 from .aom import BE_OT_OceanSpray
 from .aom import BE_OT_RemoveOceanSpray
 from .aom import BE_OT_OceanRippels
-from .aom import BE_OT_GeoFloat
+#from .aom import BE_OT_GeoFloat
 from .aom import BE_OT_RemoveOceanRippels
 from .aom import BE_OT_InitalizeAddon
 from .aom import BE_OT_DisconnectBumpWaves
@@ -66,8 +66,8 @@ from .aom import BE_OT_DynPaint_off
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (3, 1, 4),
-    "blender": (3, 1, 0),
+    "version": (3, 3, 0),
+    "blender": (3, 3, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add floating Objects, ripples, spray.",
     "category": "Object"}
@@ -101,7 +101,7 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_CageVisability,
            BE_OT_RemBtn,
            # BE_OT_GenObjFoam,
-           BE_OT_GeoFloat,
+           # BE_OT_GeoFloat,
            BE_OT_DeleteOcean,
            AOMPropertyGroup,
            AOMObjProperties,

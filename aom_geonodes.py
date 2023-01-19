@@ -109,13 +109,18 @@ class AOMGeoNodesHandler:
         oceanmod.use_spray = True
         oceanmod.spray_layer_name = "spray"
 
+        
+        
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
         mod.name = "Spray"
-        nodegroup.name = "Spray"
+        #make spray nodegroup 
+        nodegroup = self.make_spray_nodes(mod, mod.node_group)
+        
         # self.move_mod_one_up(ocean, mod)
-        self.make_spray_nodes(mod, mod.node_group)
-
+        
+        
+        #nodegroup.name = "Spray"
         # collection
         # gibts schon den Brushordner
         if bpy.data.collections.find('Spray') < 0:
@@ -144,42 +149,56 @@ class AOMGeoNodesHandler:
         # self.AdvCollection.children[collection.name].exclude = True
 
     def make_spray_nodes(self, mod, node_group):
+        nh = False
+        for ng in bpy.data.node_groups:
+            if ng.name == 'Spray':
+                nh= True
+                node_group = ng
+
+        if not nh:
+            node_group = bpy.data.node_groups.new(name="Spray", type='GeometryNodeTree')
+        
+        mod.node_group = node_group
+        
         self.remove_nodes(node_group)
         nodes = node_group.nodes
         links = node_group.links
 
-        inp = node_group.inputs.new('NodeSocketFloat', 'Height')
-        inp.default_value = 0.0
-        inp.min_value = 0
+        if not nh:
+            inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
 
-        inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp = node_group.inputs.new('NodeSocketFloat', 'Contrast')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp = node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp = node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp = node_group.inputs.new(
-            'NodeSocketFloat', 'OverallParticleScale')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp = node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
-        inp.default_value = 0.0
-        inp.min_value = 0
-        inp.max_value = 1
-        inp = node_group.inputs.new(
-            'NodeSocketCollection', 'SprayPartikleCollection')
-        inp = node_group.inputs.new('NodeSocketFloat', 'foam')
-        inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat', 'spray')
-        #inp.default_value = (0, 0, 0)
-        inp = node_group.inputs.new('NodeSocketFloat', 'wetmap')
-        inp.default_value = 0.0
+            inp = node_group.inputs.new('NodeSocketFloat', 'Height')
+            inp.default_value = 0.0
+            inp.min_value = 0
+
+            inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp = node_group.inputs.new('NodeSocketFloat', 'Contrast')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp = node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp = node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp = node_group.inputs.new(
+                'NodeSocketFloat', 'OverallParticleScale')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp = node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
+            inp.default_value = 0.0
+            inp.min_value = 0
+            inp.max_value = 1
+            inp = node_group.inputs.new(
+                'NodeSocketCollection', 'SprayPartikleCollection')
+            inp = node_group.inputs.new('NodeSocketFloat', 'foam')
+            inp.default_value = 0.0
+            inp = node_group.inputs.new('NodeSocketFloat', 'spray')
+            #inp.default_value = (0, 0, 0)
+            inp = node_group.inputs.new('NodeSocketFloat', 'wetmap')
+            inp.default_value = 0.0
 
         node = nodes.new("NodeGroupInput")
         node.name = "Group Input"
@@ -354,7 +373,7 @@ class AOMGeoNodesHandler:
         links.new(nodes['Map Range'].outputs['Result'],
                   nodes['Mix'].inputs['Color1'])
         links.new(nodes['Join Geometry'].outputs['Geometry'],
-                  nodes['Group Output'].inputs['Geometry'])
+                  nodes['Group Output'].inputs[0])
         links.new(nodes['Mix'].outputs['Color'],
                   nodes['Distribute Points on Faces'].inputs['Selection'])
         links.new(nodes['Distribute Points on Faces'].outputs['Points'],
@@ -383,35 +402,37 @@ class AOMGeoNodesHandler:
         links.new(nodes['Reroute.001'].outputs['Output'],
                   nodes['Join Geometry'].inputs['Geometry'])
 
-        mod['Input_2'] = 2.42
+        mod['Input_1'] = 2.42
+        mod['Input_1_use_attribute'] = False
+        mod['Input_2'] = 50.0
         mod['Input_2_use_attribute'] = False
-        mod['Input_3'] = 50.0
+        mod['Input_3'] = 1.0
         mod['Input_3_use_attribute'] = False
-        mod['Input_4'] = 1.0
+        mod['Input_4'] = 0.5
         mod['Input_4_use_attribute'] = False
-        mod['Input_5'] = 0.5
+        mod['Input_5'] = 0.01
         mod['Input_5_use_attribute'] = False
-        mod['Input_6'] = 0.01
+        mod['Input_6'] = 0.06
         mod['Input_6_use_attribute'] = False
-        mod['Input_7'] = 0.06
+        mod['Input_7'] = 0.00
         mod['Input_7_use_attribute'] = False
-        mod['Input_8'] = 0.00
+        mod['Input_8'] = None
         mod['Input_8_use_attribute'] = False
-        mod['Input_9'] = None
-        mod['Input_9_use_attribute'] = False
+        mod['Input_9'] = 0.06
+        mod['Input_9_use_attribute'] = True
+        mod['Input_9_attribute_name'] = 'foam'
+        mod['Input_10'] = 0.06
+        mod['Input_11_use_attribute'] = True
+        mod['Input_11_attribute_name'] = 'dp_wetmap'
+
         mod['Input_10'] = 0.06
         mod['Input_10_use_attribute'] = True
-        mod['Input_10_attribute_name'] = 'foam'
-        mod['Input_12'] = 0.06
-        mod['Input_12_use_attribute'] = True
-        mod['Input_12_attribute_name'] = 'dp_wetmap'
-
-        mod['Input_11'] = 0.06
-        mod['Input_11_use_attribute'] = True
-        mod['Input_11_attribute_name'] = 'spray'
+        mod['Input_10_attribute_name'] = 'spray'
 
         nodes['Reroute.001'].location = (-85.0324, 503)
         nodes['CombHeight'].location = (55, 174)
+        
+        return node_group
 
         # for inp in node_group.inputs:
         #    if inp.bl_socket_idname != 'NodeSocketGeometry':
@@ -425,15 +446,21 @@ class AOMGeoNodesHandler:
         context.view_layer.objects.active = ocean
         if ocean == None:
             return None
+        
+                
         # make mod and name
         mod, nodegroup = self.new_geonodes_mod(ocean)
         mod.name = "Ripples"
-        nodegroup.name = "Ripples"
+        #make node group
+        nodegroup = self.make_rippels_nodes(mod, mod.node_group)
+        
+        #nodegroup.name = "Ripples"
         #self.move_mod_one_up(ocean, mod)
 
         self.make_rippels_nodes(mod, mod.node_group)
+        #print(f'ob.name {ob.name}')
         if ob != None:
-            mod['Input_7'] = ob
+            mod['Input_6'] = ob
             ob.aom_data.ripple_parent = ocean
 
         ocean.modifiers.active = mod
@@ -450,22 +477,45 @@ class AOMGeoNodesHandler:
             node.label = node.name
 
     def make_rippels_nodes(self, mod, node_group):
+        nh = False
+        for ng in bpy.data.node_groups:
+            if ng.name == 'Ripples':
+                nh= True
+                node_group = ng
+
+        if not nh:
+            node_group = bpy.data.node_groups.new(name ='Ripples', type='GeometryNodeTree')
+        
+        mod.node_group = node_group
+        
         self.remove_nodes(node_group)
         nodes = node_group.nodes
         links = node_group.links
 
-        inp = node_group.inputs.new('NodeSocketFloat', 'Wavelength')
-        inp.default_value = 0.31
-        inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
-        inp.default_value = 2.0
-        inp = node_group.inputs.new('NodeSocketFloat', 'OuterFalloff')
-        inp.default_value = 20.0
-        inp = node_group.inputs.new('NodeSocketFloat', 'Innercut')
-        inp.default_value = 25.0
-        inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
-        inp.default_value = 10.0
-        inp = node_group.inputs.new('NodeSocketObject', 'Object')
-
+        if not nh:
+            inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
+            
+            inp = node_group.inputs.new('NodeSocketFloat', 'Wavelength')
+            inp.default_value = 0.31
+            wlid= inp.identifier 
+            inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
+            inp.default_value = 2.0
+            ampid= inp.identifier 
+            inp = node_group.inputs.new('NodeSocketFloat', 'OuterFalloff')
+            outerid= inp.identifier 
+            inp.default_value = 20.0
+            inp = node_group.inputs.new('NodeSocketFloat', 'Innercut')
+            inp.default_value = 25.0
+            innerid = inp.identifier 
+            inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
+            inp.default_value = 10.0
+            speedid = inp.identifier
+            inp = node_group.inputs.new('NodeSocketObject', 'Object') #NodeSocketObject
+            obsockid = inp.identifier 
+        
+      
+        #######################
+        
         node = nodes.new("NodeGroupInput")
         node.name = "Group Input"
         node.location = (-1488, 413)
@@ -698,7 +748,7 @@ class AOMGeoNodesHandler:
         links.new(nodes['Map Range'].outputs['Result'],
                   nodes['Math.014'].inputs[1])
         links.new(nodes['Set Position'].outputs['Geometry'],
-                  nodes['Group Output'].inputs['Geometry'])
+                  nodes['Group Output'].inputs[0])
         links.new(nodes['Math.014'].outputs['Value'],
                   nodes['Combine XYZ'].inputs['Z'])
         links.new(nodes['Combine XYZ'].outputs['Vector'],
@@ -708,18 +758,18 @@ class AOMGeoNodesHandler:
         links.new(nodes['Math.005'].outputs['Value'],
                   nodes['Math.006'].inputs[1])
 
-        mod['Input_2'] = 0.31
+        mod['Input_1'] = 0.31
+        mod['Input_1_use_attribute'] = False
+        mod['Input_2'] = 1.0
         mod['Input_2_use_attribute'] = False
-        mod['Input_3'] = 1.0
+        mod['Input_3'] = 17.35
         mod['Input_3_use_attribute'] = False
-        mod['Input_4'] = 17.35
+        mod['Input_4'] = 20.0
         mod['Input_4_use_attribute'] = False
-        mod['Input_5'] = 20.0
+        mod['Input_5'] = 10.0
         mod['Input_5_use_attribute'] = False
-        mod['Input_6'] = 10.0
-        mod['Input_6_use_attribute'] = False
-        mod['Input_7'] = None
-        mod['Input_7_use_attribute'] = False
+        mod['Input_6'] = None
+        
 
         source = nodes['Time'].outputs[0]
         target = bpy.context.scene
@@ -728,13 +778,14 @@ class AOMGeoNodesHandler:
         id_type = 'SCENE'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="-", id_type=id_type)
+        return node_group 
 
     def remove_ripples(self, context, ocean, ob):
         # object selected
         if ob != None:
             for mod in ocean.modifiers[:]:
                 if 'Ripples' in mod.name:
-                    if ob == mod['Input_7']:
+                    if ob == mod['Input_6']:
                         ocean.modifiers.remove(mod)
                         ob.aom_data.ripple_parent = None
                     else:
@@ -744,7 +795,7 @@ class AOMGeoNodesHandler:
         else:
             for mod in reversed(ocean.modifiers[:]):
                 if 'Ripples' in mod.name:
-                    ob = mod['Input_7']
+                    ob = mod['Input_6']
                     if ob != None:
                         ob.aom_data.ripple_parent = None
 

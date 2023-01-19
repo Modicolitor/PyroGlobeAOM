@@ -957,6 +957,7 @@ def get_ocean_keyframes(context, ocean):
     return keyframes
 
 
+
 def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
     oriframecurrent = copy.copy(context.scene.frame_current)
     ###
@@ -1334,31 +1335,31 @@ class BE_OT_OceanRippels(bpy.types.Operator):
         return{"FINISHED"}
 
 
-class BE_OT_GeoFloat(bpy.types.Operator):
-    '''Makes objects float on a defined ocean via an Geometrynodes on an additional object (Floatcage)'''
-    bl_label = "Add GeoFloat"
-    bl_idname = "aom.geofloat"
-    bl_options = {"REGISTER", "UNDO"}
+# class BE_OT_GeoFloat(bpy.types.Operator):
+ #   '''Makes objects float on a defined ocean via an Geometrynodes on an additional object(Floatcage)'''
+#    bl_label = "Add GeoFloat"
+#    bl_idname = "aom.geofloat"
+#    bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
+    # def execute(self, context):
 
-        advcol = bpy.data.collections[MColName]
-        GN = AOMGeoNodesHandler(context, advcol)
+     #   advcol = bpy.data.collections[MColName]
+      #  GN = AOMGeoNodesHandler(context, advcol)
+#
+ #       oceans = oceanlist(context, context.selected_objects)
+  #      if len(oceans) == 0:
+   #         oceans = [get_active_ocean(context)]
+    #        # print(f"got active {oceans}")
 
-        oceans = oceanlist(context, context.selected_objects)
-        if len(oceans) == 0:
-            oceans = [get_active_ocean(context)]
-            # print(f"got active {oceans}")
+     #   obs = floatablelist(context, context.selected_objects)
 
-        obs = floatablelist(context, context.selected_objects)
-
-        for oc in oceans:
-            print(f"oc.name {oc.name}")
-            if len(obs) != 0:
-                for ob in obs:
-                    # GN.remove_geofloat(context, ob)
-                    GN.make_geofloat(context, ob,  ob, oc)
-        return{"FINISHED"}
+      #  for oc in oceans:
+       #     print(f"oc.name {oc.name}")
+        #    if len(obs) != 0:
+        #       for ob in obs:
+        #          # GN.remove_geofloat(context, ob)
+        #         GN.make_geofloat(context, ob,  ob, oc)
+        # return{"FINISHED"}
 
 
 def get_all_scene_oceans(context):
