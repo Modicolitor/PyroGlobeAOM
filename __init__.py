@@ -8,6 +8,7 @@
 # You should have received a copy of the GNU General Public License along with PuzzleUrPrint. If
 # not, see <https://www.gnu.org/licenses/>.
 import bpy
+
 #from .aom_properties import FloatdataItem
 from .aom_properties import AOMPropertyGroup
 from .aom_properties import AOMObjProperties
@@ -37,7 +38,6 @@ from .aom import BE_OT_SetPreset
 from .aom import BE_OT_OceanSpray
 from .aom import BE_OT_RemoveOceanSpray
 from .aom import BE_OT_OceanRippels
-#from .aom import BE_OT_GeoFloat
 from .aom import BE_OT_RemoveOceanRippels
 from .aom import BE_OT_InitalizeAddon
 from .aom import BE_OT_DisconnectBumpWaves
@@ -54,6 +54,7 @@ from .aom import BE_OT_windripples_on
 from .aom import BE_OT_windripples_off
 from .aom import BE_OT_DynPaint_on
 from .aom import BE_OT_DynPaint_off
+from .aom import BE_OT_GeoFloat
 
 #from .modalops import PP_OT_PlanarZScaleMenu
 
@@ -66,8 +67,8 @@ from .aom import BE_OT_DynPaint_off
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (3, 3, 0),
-    "blender": (3, 3, 0),
+    "version": (3, 4, 1),
+    "blender": (3, 4, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add floating Objects, ripples, spray.",
     "category": "Object"}
@@ -101,7 +102,6 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_CageVisability,
            BE_OT_RemBtn,
            # BE_OT_GenObjFoam,
-           # BE_OT_GeoFloat,
            BE_OT_DeleteOcean,
            AOMPropertyGroup,
            AOMObjProperties,
@@ -124,7 +124,8 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_windripples_on,
            BE_OT_windripples_off,
            BE_OT_DynPaint_on,
-           BE_OT_DynPaint_off
+           BE_OT_DynPaint_off,
+           BE_OT_GeoFloat,
 
            )
 

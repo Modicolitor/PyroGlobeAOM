@@ -1788,16 +1788,17 @@ class AOMGeoNodesHandler:
                   nodes['JoinAll'].inputs['Geometry'])
         links.new(nodes['JoinDisplay'].outputs['Geometry'],
                   nodes['DisplaySwitch'].inputs[15])
-        mod['Input_3'] = 4.06
-        mod['Input_8'] = 1.0
-        mod['Input_9'] = 1.0
-        mod['Input_10'] = 1.0
-        mod['Input_11'] = 0.0
-        mod['Input_12'] = 0.0
-        mod['Input_13'] = 1
-        mod['Input_14'] = 1.0
-        mod['Input_6'] = 1.0
-        mod['Input_17'] = 1
+        mod['Input_3'] = 10.0
+        mod['Input_4'] = 1.0
+        mod['Input_5'] = 1.0 #yRotSens
+        mod['Input_6'] = 1.0  #Heightsens
+        mod['Input_7'] = 2.0    # X-detectionDistance
+        mod['Input_8'] = 2.0
+        mod['Input_9'] = 1.0 #movesens X
+        mod['Input_10'] = 1.0 
+        mod['Input_11'] = 1.0   #Xoffset
+        mod['Input_12'] = 1.0   
+        mod['Input_13'] = 1     # showfloat
 
         self.label_nodes(node_group)
         return node_group

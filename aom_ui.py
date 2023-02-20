@@ -203,8 +203,8 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 # row = layout.row(align=True)
                 # zeige button an
                 subcol.operator("float.sel", icon="MOD_OCEAN")
-                # subcol.operator(
-                #    "aom.geofloat", icon="MOD_OCEAN", text='Geofloat')
+                subcol.operator(
+                    "aom.geofloat", icon="MOD_OCEAN", text='Geofloat')
 
                 # row = layout.row(align=True)
                 subcol.operator("stat.ob", icon="PINNED")
