@@ -10,6 +10,16 @@ def is_floatcage(context, ob):
     return ob.aom_data.is_floatcage
 
 
+def is_collision(context, ob):
+  
+    return ob.aom_data.is_collision
+
+def is_collision_in_name(context, ob):
+    
+    if 'collision' in ob.name or 'COLLISION' in ob.name  or 'Collision' in ob.name :
+        return True
+    return False
+
 def is_ocean_material(context, mat):
 
     if 'AdvOceanMat' in mat.name:

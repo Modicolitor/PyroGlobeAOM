@@ -2,7 +2,7 @@ from bpy.props import *
 import bpy
 import mathutils
 import copy
-from .aom_def import is_ocean, is_floatcage
+from .aom_def import is_ocean, is_floatcage, is_collision, is_collision_in_name
 # from .aom_properties import FloatdataItem
 from .aom_materials import AOMMatHandler
 from .aom_presets import AOMPreset_Handler
@@ -266,7 +266,7 @@ def update_OceAniFrame(context, ocean):
 def floatablelist(context, list):
     floatable = []
     for ob in list:
-        if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH':
+        if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH' and not is_collision(context, ob) and not is_collision_in_name(context, ob):
             floatable.append(ob)
             print(f"Floatables are: {ob.name}")
         '''elif is_floatcage(context, ob):
@@ -399,7 +399,8 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
             if not instanceFloatobj:
                 advcol = bpy.data.collections[MColName]
                 GN = AOMGeoNodesHandler(context, advcol)
-                GN.make_geofloat(context, obj, obj, ocean)
+                
+                GN.make_geofloat(context, ocean, obj, ocean)
                 obj.aom_data.interaction_type = 'FLOAT'
                 obj.aom_data.float_parent_id = ocean.aom_data.ocean_id
                 obj.aom_data.namenum = Namenum
@@ -1358,8 +1359,75 @@ class BE_OT_GeoFloat(bpy.types.Operator):
             if len(obs) != 0:
                for ob in obs:
                   # GN.remove_geofloat(context, ob)
-                 GN.make_geofloat(context, ob,  ob, oc)
+                  ## make float Float cage
+                  cage = make_floatcage_geofloat(context, ob)
+                  collision = get_collision_from_selection(context,context.selected_objects, ob)
+                  
+
+                  GN.make_geofloat(context, oc,  ob, oc, cage, collision)
+                  
         return{"FINISHED"}
+
+def make_floatcage_geofloat(context, ob):
+    
+    bpy.ops.object.empty_add(type='CIRCLE', align='WORLD', location=(0, 0, 10), scale=(1, 1, 1), rotation = (3.14/2, 0,0))
+    empty = bpy.context.object
+    empty.name = ob.name+'_floatcage'
+    empty.aom_data.floatcage = True
+
+    return empty
+
+
+def get_collision_from_selection(context,obs, floatobj):
+    from difflib import SequenceMatcher
+    candidates = [] 
+    favorites = {}
+    
+    # find candidates with collision in name
+    for ob in obs:
+        if 'collision' in ob.name or 'COLLISION' in ob.name  or 'Collision' in ob.name :
+            candidates.append(ob)
+    
+    for ob in candidates:
+        #remove collision from name
+        if 'collision' in ob.name:
+            name = ob.name.replace('collision', '')
+        elif 'COLLISION' in ob.name:
+            name = ob.name.replace('COLLISION', '')
+        elif 'Collision' in ob.name:
+            name = ob.name.replace('Collision', '')
+        
+
+        ratio =  SequenceMatcher(lambda x: x == " ",  name,  floatobj.name).ratio()
+        favorites[ob.name] = ratio
+        
+    #find highest count
+    highest_value = 0
+    highest_enum = -1
+    
+    for i,e in enumerate(favorites): 
+        print(f'{i} und {e}')
+        if favorites[e] > highest_value:
+            highest_value = e
+            highest_enum = i 
+    
+    fav_name = None
+    #get obj from dictionary
+    for i,e in enumerate(favorites): 
+        if i == highest_enum:
+            fav_name = e
+    print (f'Higest Enum is {highest_enum} with highest value {highest_enum} belong to {fav_name}')
+    
+    collision = None
+    if fav_name != None:
+        for o in obs:
+            if o.name == fav_name:
+                collision = o
+                break
+            
+    if collision != None: 
+        collision.aom_data.is_collision = True
+    return collision
 
 
 def get_all_scene_oceans(context):

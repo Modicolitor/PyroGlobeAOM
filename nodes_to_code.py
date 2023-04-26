@@ -97,30 +97,41 @@ def nodes_to_nodecode(group):
 
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     gen_maininputs(group)
+    gen_frames(group)
     for node in nodes:
-        print('')
-        print(f'node = nodes.new("{node.bl_idname}" )')
-        print(f'node.name = "{node.name}" ')
-        #print(f'node.parent = "{node.name}" ')
-        print(
-            f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
+        if node.bl_idname != 'NodeFrame':
+            print('')
+            print(f'node = nodes.new("{node.bl_idname}" )')
+            print(f'node.name = "{node.name}" ')
+            if hasattr(node, 'parent'):
+                if hasattr(node.parent, 'name'):
+                    print(f'node.parent = node_group.nodes["{node.parent.name}"]')
+                    
+            if hasattr(node, 'rotation_type'):
+                print(f'node.rotation_type = "{node.rotation_type}"')
+            
+            print(
+                f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
 
-        if node.bl_idname == 'NodeGroupInput':
-            pass
-        elif node.bl_idname == 'NodeReroute':
-            pass
-        else:
-            special_operations(node)
-            for a, inp in enumerate(node.inputs):
-                value = get_putput(a, inp)
-                if value != '' and value != None:
-                    print(f'node.inputs[{a}].default_value = {value}')
+            if node.bl_idname == 'NodeGroupInput':
+                pass
+            elif node.bl_idname == 'NodeGroupOutput':
+                pass
+            elif node.bl_idname == 'NodeReroute':
+                pass
+            else:
+                special_operations(node)
+                for a, inp in enumerate(node.inputs):
+                    value = get_putput(a, inp)
+                    if value != '' and value != None:
+                        print(f'node.inputs[{a}].default_value = {value}')
 
-            for a, inp in enumerate(node.outputs):
-                value = get_putput(a, inp)
-                if value != '':
-                    print(f'node.outputs[{a}].default_value = {value}')
-
+                for a, inp in enumerate(node.outputs):
+                    value = get_putput(a, inp)
+                    if value != '':
+                        print(f'node.outputs[{a}].default_value = {value}')
+    
+    gen_group_outputs(group)
     gen_links(group, nodes, links)
     mod = get_mod(context, group)
     set_current_maininputs(mod)
@@ -162,7 +173,10 @@ def special_operations(node):
         print(f'node.input_type_z = "{node.input_type_z}"')
     if hasattr(node, "transform_space"):
         print(f'node.transform_space = "{node.transform_space}"')
-
+    if hasattr(node, "node_tree"):
+        print(f'node.node_tree = bpy.data.node_groups["{node.node_tree.name}"]')
+    if hasattr(node, "hide"):
+        print(f'node.hide = {node.hide}')
 
 def get_sorted_InputLinks(nodes, links):
     inplinks = []
@@ -170,41 +184,46 @@ def get_sorted_InputLinks(nodes, links):
         if 'NodeGroupInput' in l.from_node.bl_idname:
             inplinks.append(l)
 
+    
     # get input
-    innode = get_inputnode(nodes)
+    innodes = get_inputnodes(nodes)
 
     sortedlinks = []
-    for out in innode.outputs:
-        if out.bl_idname != "NodeSocketVirtual":
-            for l in inplinks:
-                if l.from_socket == out:
-                    sortedlinks.append(l)
+    for innode in innodes:
+        for out in innode.outputs:
+            if out.bl_idname != "NodeSocketVirtual":
+                for l in inplinks:
+                    if l.from_socket == out:
+                        sortedlinks.append(l)
 
     return sortedlinks
 
 
-def get_inputnode(nodes):
+def get_inputnodes(nodes):
+    innodes = []
     for node in nodes:
         if node.bl_idname == 'NodeGroupInput':
-            innode = node
-            break
-    return innode
+            innodes.append(node)
+            
+    return innodes
 
 
-def get_putput_index(node, socket, inout):
+def get_putput_index(link, node, socket, inout):
     if inout == 'OUT':
         for i, out in enumerate(node.outputs):
-            if out.name == socket.name:
-                index = i
-                break
+            for li in out.links:
+                if link ==  li:
+                    index = i
+                    break
     elif inout == 'IN':
-        for i, out in enumerate(node.inputs):
-            if out.name == socket.name:
-                index = i
-                break
+        for i, inp in enumerate(node.inputs):
+            for li in inp.links:
+                if link ==  li:
+                    index = i
+                    break
     return index
 
-# used to set the input socket idname to the target of the link
+
 
 
 def get_idname_from_targetsocket(group, inp):
@@ -221,20 +240,36 @@ def get_idname_from_targetsocket(group, inp):
 
 def gen_maininputs(group):
     for inp in group.inputs:
-        if inp.bl_socket_idname != 'NodeSocketGeometry':
-            print(
-                f"inp = node_group.inputs.new('{get_idname_from_targetsocket(group, inp)}','{inp.name}')")
-            if hasattr(inp, "default_value"):
-                if get_value(inp.default_value) != '':
-                    print(
-                        f"inp.default_value = {get_value(inp.default_value)}")
-            # max min causing problems: controller will be set to min or max (inf, ) not the default
-            '''if hasattr(inp, "min_value"):
-                print(f"inp.min_value = {inp.max_value}")
-            if hasattr(inp, "max_value"):
-                print(f"inp.max_value = {inp.max_value}")'''
+        #if inp.bl_socket_idname != 'NodeSocketGeometry':
+        print(
+            f"inp = node_group.inputs.new('{get_idname_from_targetsocket(group, inp)}','{inp.name}')")
+        if hasattr(inp, "default_value"):
+            if get_value(inp.default_value) != '':
+                print(
+                    f"inp.default_value = {get_value(inp.default_value)}")
+        # max min causing problems: controller will be set to min or max (inf, ) not the default
+        '''if hasattr(inp, "min_value"):
+            print(f"inp.min_value = {inp.max_value}")
+        if hasattr(inp, "max_value"):
+            print(f"inp.max_value = {inp.max_value}")'''
 
     # group.inputs
+
+def gen_frames(group):
+    
+    for node in group.nodes:
+        if node.bl_idname == 'NodeFrame':
+            
+            print('')
+            print(f'node = nodes.new("{node.bl_idname}" )')
+            print(f'node.name = "{node.name}" ')
+            print(f'node.label = "{node.label}" ')
+            #print(f'node.parent = "{node.name}" ')
+            if hasattr(node, 'parent'):
+                if hasattr(node.parent, 'name'):
+                    print(f'node.parent = node_group.nodes["{node.parent.name}"]')
+            print(
+                f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
 
 
 def set_current_maininputs(mod):
@@ -253,19 +288,27 @@ def gen_links(group, nodes, links):
 
     inplinks = get_sorted_InputLinks(nodes, links)
 
-    # make new input sockets
-
+    # make links from Group Input Node
     for i, l in enumerate(inplinks):
         print(
-            f"links.new( nodes['{l.from_node.name}'].outputs[{get_putput_index(l.from_node, l.from_socket, 'OUT')}],  nodes['{l.to_node.name}'].inputs[{get_putput_index(l.to_node, l.to_socket, 'IN')}])")
+            f"links.new( nodes['{l.from_node.name}'].outputs[{get_putput_index(l, l.from_node, l.from_socket, 'OUT')}],  nodes['{l.to_node.name}'].inputs[{get_putput_index(l, l.to_node, l.to_socket, 'IN')}])")
 
-    # set- input names
 
+    # set- all other links 
     for l in links:
         if 'NodeGroupInput' not in l.from_node.bl_idname:
+            #print(
+            #   f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
             print(
-                f"links.new( nodes['{l.from_node.name}'].outputs['{l.from_socket.name}'],  nodes['{l.to_node.name}'].inputs['{l.to_socket.name}'])")
-
+                f"links.new( nodes['{l.from_node.name}'].outputs[{get_putput_index(l, l.from_node, l.from_socket, 'OUT')}],  nodes['{l.to_node.name}'].inputs[{get_putput_index(l, l.to_node, l.to_socket, 'IN')}])")
+            
+            
+            
+def gen_group_outputs(group):
+    
+    for output in group.outputs:
+        print(f"node_group.outputs.new(type= '{output.bl_socket_idname}', name='{output.name}')")
+    
 
 group = bpy.data.node_groups['Spray']
 

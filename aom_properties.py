@@ -83,6 +83,7 @@ class AOMPropertyGroup(bpy.types.PropertyGroup):
 class AOMObjProperties(bpy.types.PropertyGroup):
     is_ocean: bpy.props.BoolProperty(default=False)
     is_floatcage: bpy.props.BoolProperty(default=False)
+    is_collision:bpy.props.BoolProperty(default=False)
     ocean_id: bpy.props.IntProperty(default=-1)
     interaction_type: bpy.props.StringProperty(default='')
     float_parent_id: bpy.props.IntProperty(default=-1)
