@@ -2,8 +2,19 @@
 
 bugs and test: 
 
-[] float parent id 
-[] rotate with cage didn't work in classic 
+[+] Ui for selected Float Cage
+[+] Rename Float Cage to detection marks 
+[+] look at detection marks 
+[+] bow wave is not roating with float cage
+
+[] check collection goal of new floatcage
+[] node to code Mod teil stimmt irgendwie nicht
+[] Show hide floatcage
+[] test collision selector
+
+[+] Pfeil hübscher 
+
+[+] obj wellenlänge kürzer im standard
 
 presets
 
@@ -20,7 +31,7 @@ GeoNodes Features:
 
 
 [++]nodes to code
-# [] nodegroups (rekursivly)
+# [+] nodegroups (rekursivly)
 # [] test material node trees
 # [] clean up get value section to bl_idname
 

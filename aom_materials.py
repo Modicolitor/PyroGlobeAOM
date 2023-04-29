@@ -191,14 +191,14 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
         node.name = "MaterialOutCycles"
         node.location = (2400, 000)
-        node.target = 'CYCLES'
+        node.target = 'ALL'
         links.new(nodes['MainMix'].outputs['Shader'],
                   nodes['MaterialOutCycles'].inputs['Surface'])  # EndMixer in den Surface
 
         node = nodes.new('ShaderNodeOutputMaterial')  # mixshader machen
         node.name = "MaterialOutEevee"
         node.location = (2400, -200)
-        node.target = 'EEVEE'
+        node.target = 'ALL'
         links.new(nodes['MainMix'].outputs['Shader'],
                   nodes['MaterialOutEevee'].inputs['Surface'])  # EndMixer in den Surface
 
@@ -717,6 +717,7 @@ class AOMMatHandler:
         node.location = (-1600, 3000)
         node.outputs[0].default_value = 0.0
         # lower OCean foam fine edit
+        
         node = nodes.new('ShaderNodeMath')
         node.name = 'LowerOceanFoam_Add'
         node.location = (-1300, 3000)
@@ -951,8 +952,19 @@ class AOMMatHandler:
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Wet"
-        node.location = (-250, 2450)
+        node.location = (-500, 2450)
         node.attribute_name = "dp_wetmap"
+        
+        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
+        node.name = "Obj_Foam"
+        node.location = (-500, 2650)
+        node.attribute_name = "obj_foam" 
+        
+        node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
+        node.name = "Obj_Foams_add"
+        node.location = (-250, 2450)
+        node.operation = 'ADD'
+        node.use_clamp = False
 
         node = nodes.new('ShaderNodeMapRange')
         node.name = "CRWet"
@@ -966,14 +978,22 @@ class AOMMatHandler:
         node.inputs[0].default_value = 1.0
 
         # link Attribute nodes additiv
-        links.new(nodes['Wet'].outputs['Fac'],
-                  nodes['CRWet'].inputs[0])
+        #links.new(nodes['Wet'].outputs['Fac'],
+        #          nodes['CRWet'].inputs[0])
         links.new(nodes['CRFoam'].outputs[0],
                   nodes['MixFoamWet'].inputs['Color2'])
         links.new(nodes['Foam'].outputs['Fac'],
                   nodes['CRFoam'].inputs[0])
         links.new(nodes['CRWet'].outputs[0],
                   nodes['MixFoamWet'].inputs['Color1'])
+        
+        ###obj_foam update
+        links.new(nodes['Wet'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[0])
+        links.new(nodes['Obj_Foam'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[1])
+        links.new(nodes['Obj_Foams_add'].outputs[0],
+                  nodes['CRWet'].inputs[0])
 
         node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
         node.name = "SubNoise1"
@@ -1355,9 +1375,28 @@ class AOMMatHandler:
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.location = (-250, 1250)
         node.attribute_name = "dp_wetmap"
+        
+        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
+        node.name = "Wet"
+        node.location = (-500, 2450)
+        node.attribute_name = "dp_wetmap"
+        
+        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
+        node.name = "Obj_Foam"
+        node.location = (-500, 2650)
+        node.attribute_name = "obj_foam" 
+        
+        node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
+        node.name = "Obj_Foams_add"
+        node.location = (-250, 2450)
+        node.operation = 'ADD'
+        node.use_clamp = False
+        
         node = nodes.new('ShaderNodeMapRange')
         node.name = "CRWet"
         node.location = (000, 1250)
+        
+        
 
         node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
         node.location = (400, 1275)
@@ -1702,8 +1741,21 @@ class AOMMatHandler:
         node.name = "CRFoam"
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
-        node.location = (-250, 1250)
+        node.name = "Wet"
+        node.location = (-500, 2450)
         node.attribute_name = "dp_wetmap"
+        
+        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
+        node.name = "Obj_Foam"
+        node.location = (-500, 2650)
+        node.attribute_name = "obj_foam" 
+        
+        node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
+        node.name = "Obj_Foams_add"
+        node.location = (-250, 2450)
+        node.operation = 'ADD'
+        node.use_clamp = False
+        
         node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
         node.location = (200, 1250)
         #Gamma wert wetmap##########

@@ -19,6 +19,7 @@ from .aom_ui import BE_PT_AdvOceanInteract
 from .aom_ui import BE_PT_AdvOceanWaves
 from .aom_ui import BE_PT_AdvOceanMat
 from .aom_ui import BE_PT_AdvOceanSpecial
+from .aom_ui import BE_PT_FloatObj_UI
 from .aom import BE_OT_FloatSelButt
 from .aom import BE_OT_StaticOb
 from .aom import BE_OT_GenOceanMat
@@ -88,6 +89,7 @@ classes = (BE_PT_AdvOceanMenu,
            BE_PT_AdvOceanWaves,
            BE_PT_AdvOceanMat,
            BE_PT_AdvOceanSpecial,
+           BE_PT_FloatObj_UI,
            BE_OT_FloatSelButt,
            BE_OT_StaticOb,
            BE_OT_GenOceanMat,

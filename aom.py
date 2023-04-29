@@ -1337,7 +1337,7 @@ class BE_OT_OceanRippels(bpy.types.Operator):
 
 
 class BE_OT_GeoFloat(bpy.types.Operator):
-    '''Makes objects float on a defined ocean via an Geometrynodes on additional object(Floatcage)'''
+    '''Makes objects float on a defined ocean via an Geometrynodes on additional object'''
     bl_label = "Add GeoFloat"
     bl_idname = "aom.geofloat"
     bl_options = {"REGISTER", "UNDO"}
@@ -1357,23 +1357,22 @@ class BE_OT_GeoFloat(bpy.types.Operator):
         for oc in oceans:
             print(f"oc.name {oc.name}")
             if len(obs) != 0:
-               for ob in obs:
-                  # GN.remove_geofloat(context, ob)
-                  ## make float Float cage
-                  cage = make_floatcage_geofloat(context, ob)
-                  collision = get_collision_from_selection(context,context.selected_objects, ob)
-                  
-
-                  GN.make_geofloat(context, oc,  ob, oc, cage, collision)
+                for ob in obs:
+                    # GN.remove_geofloat(context, ob)
+                    ## make float Float cage
+                    cage = make_floatcage_geofloat(context, ob)
+                    collision = get_collision_from_selection(context,context.selected_objects, ob)
+                    GN.make_geofloat(context, oc,  ob, oc, cage, collision)
                   
         return{"FINISHED"}
 
 def make_floatcage_geofloat(context, ob):
     
-    bpy.ops.object.empty_add(type='CIRCLE', align='WORLD', location=(0, 0, 10), scale=(1, 1, 1), rotation = (3.14/2, 0,0))
+    bpy.ops.object.empty_add(type='SPHERE', align='WORLD', location=(0, 0, 5), scale=(3, 3, 3), rotation = (3.14/2, 0,0))
     empty = bpy.context.object
-    empty.name = ob.name+'_floatcage'
+    empty.name = ob.name +'_floatcage'
     empty.aom_data.floatcage = True
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
 
     return empty
 
@@ -1427,6 +1426,10 @@ def get_collision_from_selection(context,obs, floatobj):
             
     if collision != None: 
         collision.aom_data.is_collision = True
+        
+    if collision == None:
+        collision = floatobj
+        
     return collision
 
 

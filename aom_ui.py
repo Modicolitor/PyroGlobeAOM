@@ -819,3 +819,106 @@ def get_dynpaint_mod(ocean):
         if mod.type == 'DYNAMIC_PAINT':
             return mod
     return None
+
+
+
+####UI float object
+
+class BE_PT_FloatObj_UI(bpy.types.Panel):
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_label = "Float Parameters"
+    bl_category = "Adv-Ocean"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @ classmethod
+    def poll(cls, context):
+        return hasattr(context.scene, "aom_props")
+
+    def get_float_mod(self, context, oc):
+        candidate = context.object
+        #print (f'in get mod {oc.name} candidate {candidate.name}')
+        for mod in oc.modifiers:
+            #print (f'in Schleife {mod.name} candidate {candidate.name}')
+            if hasattr(mod, 'node_group'):
+                #print (f'has node_group mod {mod.name} candidate {mod.node_group.name}')
+                if mod.node_group.name ==  'AOMGeoFloat':
+                    #print (f'found modifier {mod.node_group.name}')
+                    if mod["Input_4"] == candidate:
+                        #print (f'found candidate {candidate.name}')
+                        return mod 
+        return None
+        
+    '''def get_input_txt(self,k,mod):
+        #k is key string 
+        num = k.replace('Input_', '')
+        num = int(num)
+        
+        mod.node_group.nodes'''
+        
+        
+        
+        
+    
+    def draw(self, context):
+
+        if hasattr(context.scene, "aom_props"):
+            aom_props = context.scene.aom_props
+            layout = self.layout
+
+            layout.use_property_split = True
+            layout.use_property_decorate = False  # No animation.
+
+            flow = layout.grid_flow(row_major=True, columns=0,
+                                    even_columns=False, even_rows=False, align=True)
+            col = flow.column()
+
+            subcol = col.column()
+
+            ocean = get_active_ocean(context)
+            if ocean != None:
+                mods = ocean.modifiers
+
+                #subcol = subcol.box()
+                
+                mod = self.get_float_mod(context, ocean)
+                
+                
+                #for inp in mod.keys():
+                if mod != None:
+                    txt = 'fail'
+                    if mod['Input_2']:
+                        if mod['Input_3'] != None:
+                            txt = 'Settings for ' + mod['Input_3'].name
+                        else:
+                            txt = 'Add Visibile Collection'
+                    else:
+                        if mod['Input_1'] != None:
+                            txt = 'Settings for ' + mod['Input_1'].name
+                        else:
+                            txt = 'Add Visible Object'
+                        
+                    subcol.label(text=txt)
+                
+                    print(f'mod keys are{mod.keys()}')
+                    for inp in mod.node_group.inputs:
+                        if inp.bl_socket_idname != 'NodeSocketGeometry':
+                            if inp.bl_socket_idname == 'NodeSocketCollection':
+                                ##collection prop, because greyed out
+                                prop = '["' + inp.identifier +  '"]'
+                                subcol.prop_search(data= mod, property=prop, search_data = bpy.data, search_property='collections', text=inp.name)
+                            else:
+                                ###main list
+                                prop = '["' + inp.identifier +  '"]'
+                                subcol.prop(data= mod, property=prop, text=inp.name)
+                        
+                        
+                    
+                    #subcol.prop_search(data= mod, property=prop, search_data = bpy.data, search_property='collections', text='test')
+                    
+            
+
+                
+                
+                #subcol.label(text='FloatParameters')
+                #subcol.operator("aom.loop", icon="CON_FOLLOWPATH")

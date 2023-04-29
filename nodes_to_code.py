@@ -1,15 +1,17 @@
 # todo
-# [] output sockets are not always 0 (but all called value (but value don't work))
+# [+] output sockets are not always 0 (but all called value (but value don't work)) 
 # [] inputs should not be called value  but the index
-# [] reroute shouldn't have inputs
-# [] node input geometry not detected
-# [] add frames and parent
+# [+] reroute shouldn't have inputs
+# [] node input geometry not detected *?*
+# [] probably some nodes have special operation the script is not aware off, just add "mode"
+# []node.transform_space = "ELEMENT" macht error bei compare node
 # features
-# [] nodegroups
+# [+] nodegroups
+# [+] add frames and parent
 
 # [] clean up get value section to bl_idname
 
-# set last values mod[input macht probleme]
+#[+ looks done] set last values mod[input macht probleme]
 
 
 import bpy
@@ -177,6 +179,10 @@ def special_operations(node):
         print(f'node.node_tree = bpy.data.node_groups["{node.node_tree.name}"]')
     if hasattr(node, "hide"):
         print(f'node.hide = {node.hide}')
+    if hasattr(node, "mode"):
+        print(f'node.mode = "{node.mode}"')
+    if hasattr(node, "mute"):
+        print(f'node.mute = {node.mute}')
 
 def get_sorted_InputLinks(nodes, links):
     inplinks = []
