@@ -634,11 +634,25 @@ def BrushStatic(context):
 def RemoveInterAct(context):
     scene = bpy.context.scene
     data = bpy.data
-
+    sel = context.selected_objects.copy()
     sellist = floatablelist(context, context.selected_objects)
     # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
     for obj in sellist:
         RemoveInterActSingle(context, obj)
+        
+        
+    #geometry nodes version
+    oceans = get_all_scene_oceans(context)
+    for oc in oceans:
+        for mod in oc.modifiers:
+            if hasattr(mod, 'node_group'):
+                if mod.node_group.name == 'AOMGeoFloat':
+                    if mod['Input_4'] in sel: 
+                        #delete mod delete 
+                        bpy.data.objects.remove(mod['Input_4'])
+                        oc.modifiers.remove(mod)
+                        
+                    
 
 
 # remove interaction aber mit nur einem Object
@@ -1377,6 +1391,7 @@ class BE_OT_GeoFloat(bpy.types.Operator):
                     collision = get_collision_from_selection(context,selected, ob)
                     cage = make_floatcage_geofloat(context, ob)
                     GN.make_geofloat(context, oc,  ob, oc, cage, collision)
+                    ob.aom_data.interaction_type = 'FLOAT'
                   
         return{"FINISHED"}
 
