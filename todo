@@ -7,10 +7,10 @@ bugs and test:
 [+] look at detection marks 
 [+] bow wave is not roating with float cage
 
-[] check collection goal of new floatcage
-[] node to code Mod teil stimmt irgendwie nicht
-[] Show hide floatcage
-[] test collision selector
+[+] check collection goal of new floatcage --> erstmal nicht konkret, landet in aktiver collection
+[] add floatcage at original position of 
+[+] Show hide floatcage
+[] test collision selector --> make it work
 
 [+] Pfeil hübscher 
 

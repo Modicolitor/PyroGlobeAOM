@@ -756,7 +756,7 @@ def FoamAnAus(context, ocean):
     oceanmod.use_foam = OceanFoamBool
 
 
-def CageVis(Bool):
+def CageVis(context, Bool):
     objects = bpy.data.objects
 
     # print("Bool in function: " + str(Bool))
@@ -767,6 +767,19 @@ def CageVis(Bool):
                 objects[obj.name].hide_viewport = True
             else:
                 objects[obj.name].hide_viewport = False
+                
+    ###geofloat part 
+    oceans = get_all_scene_oceans(context)
+    for oc in oceans:
+        for mod in oc.modifiers:
+            if hasattr(mod, 'node_group'):
+                if mod.node_group.name == 'AOMGeoFloat':
+                    #detectionlines
+                    mod['Input_7'] = Bool
+                    #show collision object
+                    mod['Input_6'] = Bool
+                    #show front arrow
+                    mod['Input_27'] = Bool
 
     return Bool
 
@@ -810,7 +823,7 @@ class BE_OT_CageVisability(bpy.types.Operator):
 
         # print("Cage Bool im Knopf" + str(CageVisBool))
 
-        CageVisBool = CageVis(CageVisBool)
+        CageVisBool = CageVis(context, CageVisBool)
 
         return{"FINISHED"}
 
@@ -1353,24 +1366,26 @@ class BE_OT_GeoFloat(bpy.types.Operator):
             # print(f"got active {oceans}")
 
         obs = floatablelist(context, context.selected_objects)
-
-        for oc in oceans:
+        selected = context.selected_objects.copy()
+        for oc in oceans[:]:
             print(f"oc.name {oc.name}")
             if len(obs) != 0:
-                for ob in obs:
+                
+                for ob in obs[:]:
                     # GN.remove_geofloat(context, ob)
                     ## make float Float cage
+                    collision = get_collision_from_selection(context,selected, ob)
                     cage = make_floatcage_geofloat(context, ob)
-                    collision = get_collision_from_selection(context,context.selected_objects, ob)
                     GN.make_geofloat(context, oc,  ob, oc, cage, collision)
                   
         return{"FINISHED"}
 
 def make_floatcage_geofloat(context, ob):
     
-    bpy.ops.object.empty_add(type='SPHERE', align='WORLD', location=(0, 0, 5), scale=(3, 3, 3), rotation = (3.14/2, 0,0))
+    
+    bpy.ops.object.empty_add(type='SPHERE', align='WORLD', location=(ob.location[0], ob.location[1], 5), scale=(3, 3, 3), rotation = (3.14/2, 0,0))
     empty = bpy.context.object
-    empty.name = ob.name +'_floatcage'
+    empty.name = ob.name +'_FloatAnimCage'
     empty.aom_data.floatcage = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
 
@@ -1382,11 +1397,13 @@ def get_collision_from_selection(context,obs, floatobj):
     candidates = [] 
     favorites = {}
     
+    print(f'obs are {obs}')
     # find candidates with collision in name
     for ob in obs:
-        if 'collision' in ob.name or 'COLLISION' in ob.name  or 'Collision' in ob.name :
+        if 'collision' in ob.name or 'COLLISION' in ob.name  or 'Collision' in ob.name:
+            
             candidates.append(ob)
-    
+    print(f'candidates are {candidates}')
     for ob in candidates:
         #remove collision from name
         if 'collision' in ob.name:
@@ -1399,7 +1416,7 @@ def get_collision_from_selection(context,obs, floatobj):
 
         ratio =  SequenceMatcher(lambda x: x == " ",  name,  floatobj.name).ratio()
         favorites[ob.name] = ratio
-        
+    print(f'favorites are {favorites}')
     #find highest count
     highest_value = 0
     highest_enum = -1
@@ -1407,9 +1424,9 @@ def get_collision_from_selection(context,obs, floatobj):
     for i,e in enumerate(favorites): 
         print(f'{i} und {e}')
         if favorites[e] > highest_value:
-            highest_value = e
+            highest_value = favorites[e]
             highest_enum = i 
-    
+    print(f'') 
     fav_name = None
     #get obj from dictionary
     for i,e in enumerate(favorites): 

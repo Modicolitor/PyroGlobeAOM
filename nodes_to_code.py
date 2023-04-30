@@ -281,13 +281,13 @@ def gen_frames(group):
 def set_current_maininputs(mod):
     if mod != None:
         for inp in mod.node_group.inputs:
-            try:
+            if inp.bl_socket_idname != 'NodeSocketGeometry':
                 if get_value(mod[inp.identifier]):
                     print(
                         f"mod['{inp.identifier}'] = {get_value(mod[inp.identifier])}")
-            except:
-                #print(f"Mööp {inp.name} ")
-                pass
+
+            #print(f"Mööp {inp.name} ")
+
 
 
 def gen_links(group, nodes, links):

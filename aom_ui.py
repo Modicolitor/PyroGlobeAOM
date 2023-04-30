@@ -202,9 +202,9 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
             #  subcol.label(text="Interacting Objects")
                 # row = layout.row(align=True)
                 # zeige button an
-                subcol.operator("float.sel", icon="MOD_OCEAN")
+                #subcol.operator("float.sel", icon="MOD_OCEAN")
                 subcol.operator(
-                    "aom.geofloat", icon="MOD_OCEAN", text='Geofloat')
+                    "aom.geofloat", icon="MOD_OCEAN", text='Geofloat Object(s)')
 
                 # row = layout.row(align=True)
                 subcol.operator("stat.ob", icon="PINNED")

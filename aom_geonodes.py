@@ -1591,7 +1591,7 @@ class AOMGeoNodesHandler:
             mod['Input_4'] = cage
             #obj.aom_data.ripple_parent = ocean
         if collision != None:
-            mod['Input_6'] = collision
+            mod['Input_5'] = collision
         #obj.modifiers.active = mod
 
         ##buggy
@@ -3885,6 +3885,8 @@ class AOMGeoNodesHandler:
         inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
         inp = node_group.inputs.new('NodeSocketObject','Floatcage')
         inp = node_group.inputs.new('NodeSocketObject','Collision Object')
+        inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
+        inp.default_value = False
         inp = node_group.inputs.new('NodeSocketBool','Show Detection Marks')
         inp.default_value = True
         inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
@@ -3909,12 +3911,10 @@ class AOMGeoNodesHandler:
         inp.default_value = 0.0
         inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
-        inp.default_value = False
         inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
         inp.default_value = True
         inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
-        inp.default_value = 83.52
+        inp.default_value = 65
         inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
         inp.default_value = True
         inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
@@ -3922,7 +3922,7 @@ class AOMGeoNodesHandler:
         inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
         inp.default_value = 3.0
         inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
-        inp.default_value = 6.0
+        inp.default_value = 3.0
         inp = node_group.inputs.new('NodeSocketFloat','Innercut')
         inp.default_value = 20.0
         inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
@@ -3933,7 +3933,7 @@ class AOMGeoNodesHandler:
         inp.default_value = 0.0
         inp.min_value = 0.0
         inp.max_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloatAngle','Set Front Direction')
+        inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
         inp.default_value = 0.0
         inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
         inp.default_value = 1.0
@@ -4071,20 +4071,20 @@ class AOMGeoNodesHandler:
         node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
         links.new( nodes['Group Input'].outputs[0],  nodes['Group.001'].inputs[0])
         links.new( nodes['Group Input'].outputs[4],  nodes['Reroute'].inputs[0])
-        links.new( nodes['Group Input'].outputs[6],  nodes['Group.001'].inputs[12])
-        links.new( nodes['Group Input'].outputs[7],  nodes['Group.001'].inputs[5])
-        links.new( nodes['Group Input'].outputs[8],  nodes['Group.001'].inputs[6])
-        links.new( nodes['Group Input'].outputs[9],  nodes['Group.001'].inputs[1])
-        links.new( nodes['Group Input'].outputs[10],  nodes['Group.001'].inputs[2])
-        links.new( nodes['Group Input'].outputs[11],  nodes['Group.001'].inputs[3])
-        links.new( nodes['Group Input'].outputs[12],  nodes['Group.001'].inputs[7])
-        links.new( nodes['Group Input'].outputs[13],  nodes['Group.001'].inputs[8])
-        links.new( nodes['Group Input'].outputs[14],  nodes['Group.001'].inputs[4])
-        links.new( nodes['Group Input'].outputs[15],  nodes['Group.001'].inputs[9])
-        links.new( nodes['Group Input'].outputs[16],  nodes['Group.001'].inputs[10])
-        links.new( nodes['Group Input'].outputs[17],  nodes['Group.001'].inputs[11])
+        links.new( nodes['Group Input'].outputs[7],  nodes['Group.001'].inputs[12])
+        links.new( nodes['Group Input'].outputs[8],  nodes['Group.001'].inputs[5])
+        links.new( nodes['Group Input'].outputs[9],  nodes['Group.001'].inputs[6])
+        links.new( nodes['Group Input'].outputs[10],  nodes['Group.001'].inputs[1])
+        links.new( nodes['Group Input'].outputs[11],  nodes['Group.001'].inputs[2])
+        links.new( nodes['Group Input'].outputs[12],  nodes['Group.001'].inputs[3])
+        links.new( nodes['Group Input'].outputs[13],  nodes['Group.001'].inputs[7])
+        links.new( nodes['Group Input'].outputs[14],  nodes['Group.001'].inputs[8])
+        links.new( nodes['Group Input'].outputs[15],  nodes['Group.001'].inputs[4])
+        links.new( nodes['Group Input'].outputs[16],  nodes['Group.001'].inputs[9])
+        links.new( nodes['Group Input'].outputs[17],  nodes['Group.001'].inputs[10])
+        links.new( nodes['Group Input'].outputs[18],  nodes['Group.001'].inputs[11])
         links.new( nodes['Group Input.001'].outputs[5],  nodes['Group.002'].inputs[7])
-        links.new( nodes['Group Input.001'].outputs[18],  nodes['Group.002'].inputs[8])
+        links.new( nodes['Group Input.001'].outputs[6],  nodes['Group.002'].inputs[8])
         links.new( nodes['Group Input.001'].outputs[19],  nodes['Group.002'].inputs[1])
         links.new( nodes['Group Input.001'].outputs[20],  nodes['Group.002'].inputs[9])
         links.new( nodes['Group Input.002'].outputs[21],  nodes['Group.005'].inputs[3])
@@ -4125,23 +4125,25 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.003'].outputs[0],  nodes['Group.005'].inputs[1])
         links.new( nodes['Group.001'].outputs[2],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Reroute.001'].outputs[0],  nodes['Group.005'].inputs[2])
-        mod['Input_18'] = True
-        mod['Input_11'] = 2.0
-        mod['Input_12'] = 2.0
-        mod['Input_8'] = 1.0
-        mod['Input_9'] = 1.0
+        '''mod['Input_18'] = True
+        mod['Input_6'] = True
+        mod['Input_7'] = 2.0
+        mod['Input_8'] = 2.0
         mod['Input_10'] = 1.0
-        mod['Input_20'] = True
-        mod['Input_22'] = True
-        mod['Input_21'] = 65.0
-        mod['Input_23'] = True
+        mod['Input_11'] = 1.0
+        mod['Input_12'] = 0.5
+        mod['Input_13'] = 0.5
+        mod['Input_14'] = 0.5
+        mod['Input_19'] = True
+        mod['Input_20'] = 65.0
+        mod['Input_21'] = True
+        mod['Input_22'] = 0.1
+        mod['Input_23'] = 3.0
         mod['Input_24'] = 0.1
         mod['Input_25'] = 3.0
         mod['Input_26'] = 6.0
-        mod['Input_27'] = 20.0
-        mod['Input_28'] = 10.0
-        mod['Input_32'] = 1.0
-        mod['Input_31'] = 1.0
+        mod['Input_30'] = 1.0
+        mod['Input_31'] = 1.0'''
         
         return node_group
 
