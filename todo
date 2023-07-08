@@ -29,6 +29,36 @@ GeoNodes Features:
 [] wetmap cahce needs name
 
 
+[] GeoFloat in documentation
+[] short video
+    -video about the new float system
+    -old system buggy and end of life
+    -new system based on Geometry nodes lets go through the process
+    - select objects (yacht) and Geofloat 
+    - first difference: Object is instanced --> hide original object/collection
+    -lets use the collection instead of the object
+    Here the addon already assigned the correct Float animation cage and set the object as collision object which will be important for foam and object ripple creation. You can make your specific collision object when you need to and set it here. 
+    -modifier lifes on the ocean, each float object will get its own modifier 
+    -select paperboat --> Geofloat show modifier
+    -a lot of settings;
+    -to make it more comfortable, panel shows the modifier settings when the floatanimation cage is selected 
+    -Floatanimation cage for moving rotating and scaling the object  --> object moves in the waves
+    -Working: The lines show where the ocean surface is detected along X and y 
+    -this is information is used to rotate and adjust the height of the object to make it appear to float
+    - with x and y detection distance you can adjust this to your model 
+    - You only need to change the detection height when you work with extremly high waves, otherwise the detection height will always be above the ocean.
+    -With the rotation sensitivity you can adjust how much your boats rotation is affected by the waves. The yacht will rotate more from side to side then between front and back 
+    -In addition we can set a Motion sensitivity. The higher the value the more the boat tries to slide down a wave or resist moving upwards. For the yacht we can set that down. On the other hand the paper boat should be moved around more. 
+    -with the xyz Offset you can OFfset the boat, who would have quest ...
+
+    Lets get to foam and ripples. Originally they where simulated effects. It still works with the static object mode. [add ball, static, render eevee, move around]. Since geometry nodes doesn't have simulation nodes in 3.5 I needed to fake both object generated waves and foam. 
+    The foam is generated simply by the distance and changes with the magic in the material editor. 
+    The ripples are similar to ripples from the specials menu. However, a bit further developed. 
+    On the one hand you can have these circular waves around the object moving outwards. Adjust the wavelength Amplitude, and the falloffs as well as the speed. But you can change it into a bow wave for moving objects.  Show front shows this arrow pointing to the front direction. you can rotate it with "set front direction". The Offset moves the bow waves forward and backwards. The Turbulence makes some movement behind the boat. I know its not realistic, but for some shots its might just enough. 
+
+    That's it so far. Lets see what happens in Blender 3.6, simulation nodes and some other stuff I'm working on. Exciting times ... until soon ... Enjoy
+
+
 
 [++]nodes to code
 # [+] nodegroups (rekursivly)

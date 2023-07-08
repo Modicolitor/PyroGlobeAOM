@@ -830,6 +830,7 @@ class AOMMatHandler:
         #nodes["Voronoi Texture"].inputs[1].default_value = 100
 
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (-000, 875)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 0, 0, 0, 1
@@ -1364,8 +1365,11 @@ class AOMMatHandler:
     def FoamFac_legacy_improve(self, node_tree):
         nodes = node_tree.nodes
         links = node_tree.links
+        
+        yoffset = 1000
 
         node = nodes.new('ShaderNodeAttribute')  # Attribute foam
+        node.name = "Foam"
         node.location = (-250, 1400)
         node.attribute_name = "foam"
         node = nodes.new('ShaderNodeMapRange')
@@ -1373,22 +1377,18 @@ class AOMMatHandler:
         node.location = (000, 1500)
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
-        node.location = (-250, 1250)
-        node.attribute_name = "dp_wetmap"
-        
-        node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Wet"
-        node.location = (-500, 2450)
+        node.location = (-500, 2450-yoffset)
         node.attribute_name = "dp_wetmap"
         
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Obj_Foam"
-        node.location = (-500, 2650)
+        node.location = (-500, 2650-yoffset)
         node.attribute_name = "obj_foam" 
         
         node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
         node.name = "Obj_Foams_add"
-        node.location = (-250, 2450)
+        node.location = (-250, 2450-yoffset)
         node.operation = 'ADD'
         node.use_clamp = False
         
@@ -1399,19 +1399,33 @@ class AOMMatHandler:
         
 
         node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
+        node.name = "MixFoams"
         node.location = (400, 1275)
         node.blend_type = 'ADD'
         node.use_clamp = True
         node.inputs[0].default_value = 1.0
 
         # link Attribute notes additiv
-        links.new(nodes['Attribute.001'].outputs['Fac'],
+        links.new(nodes['Obj_Foam'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[1])
+        links.new(nodes['Wet'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[0])
+        links.new(nodes['Obj_Foams_add'].outputs[0],
+                  nodes['CRWet'].inputs[0])
+        links.new(nodes['CRWet'].outputs[0],
+                  nodes['MixFoams'].inputs[1])
+        links.new(nodes['Foam'].outputs[0],
+                  nodes['CRFoam'].inputs[0])
+        links.new(nodes['CRFoam'].outputs[0],
+                  nodes['MixFoams'].inputs[2])
+        
+        """links.new(nodes['Attribute.001'].outputs['Fac'],
                   nodes['CRWet'].inputs[0])
         links.new(nodes['CRFoam'].outputs[0], nodes['Mix'].inputs['Color2'])
         links.new(nodes['Attribute'].outputs['Fac'],
                   nodes['CRFoam'].inputs[0])
         links.new(nodes['CRWet'].outputs[0],
-                  nodes['Mix'].inputs['Color1'])
+                  nodes['Mix'].inputs['Color1'])"""
 
         node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
         node.location = (800, 1175)
@@ -1444,7 +1458,7 @@ class AOMMatHandler:
         node.inputs[0].default_value = 0.6
         '''
         # link Add notes to Subtract
-        links.new(nodes['Mix'].outputs['Color'],
+        links.new(nodes['MixFoams'].outputs['Color'],
                   nodes['SubNoise1'].inputs['Color1'])
         links.new(nodes['SubNoise1'].outputs['Color'],
                   nodes['SubNoise2'].inputs['Color1'])
@@ -1574,6 +1588,7 @@ class AOMMatHandler:
         node.location = (400, 675)
         nodes["Voronoi Texture"].inputs[1].default_value = 100
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 675)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1584,6 +1599,7 @@ class AOMMatHandler:
         node.location = (400, 450)
         nodes["Voronoi Texture.001"].inputs[1].default_value = 50
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 450)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1594,6 +1610,7 @@ class AOMMatHandler:
         node.location = (400, 200)
         nodes["Voronoi Texture.002"].inputs[1].default_value = 30
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 200)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1732,52 +1749,70 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
+        yoffset = 1000
+
         node = nodes.new('ShaderNodeAttribute')  # Attribute foam
+        node.name = "Foam"
         node.location = (-250, 1400)
         node.attribute_name = "foam"
-        node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-        node.location = (200, 1400)
-        node.inputs[1].default_value = 0.3
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRFoam"
+        node.location = (000, 1500)
 
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Wet"
-        node.location = (-500, 2450)
+        node.location = (-500, 2450-yoffset)
         node.attribute_name = "dp_wetmap"
         
         node = nodes.new('ShaderNodeAttribute')  # attribute wetmap
         node.name = "Obj_Foam"
-        node.location = (-500, 2650)
+        node.location = (-500, 2650-yoffset)
         node.attribute_name = "obj_foam" 
         
         node = nodes.new('ShaderNodeMath')  # RGB Mix für Noise 1
         node.name = "Obj_Foams_add"
-        node.location = (-250, 2450)
+        node.location = (-250, 2450-yoffset)
         node.operation = 'ADD'
         node.use_clamp = False
         
-        node = nodes.new('ShaderNodeGamma')  # gamma für wetmap
-        node.location = (200, 1250)
-        #Gamma wert wetmap##########
-        node.inputs[1].default_value = 5
+        node = nodes.new('ShaderNodeMapRange')
         node.name = "CRWet"
+        node.location = (000, 1250)
+        
+        
 
         node = nodes.new('ShaderNodeMixRGB')  # rgb mixshader machen
+        node.name = "MixFoams"
         node.location = (400, 1275)
         node.blend_type = 'ADD'
         node.use_clamp = True
         node.inputs[0].default_value = 1.0
 
         # link Attribute notes additiv
-        links.new(nodes['Attribute.001'].outputs['Fac'],
+        links.new(nodes['Obj_Foam'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[1])
+        links.new(nodes['Wet'].outputs[0],
+                  nodes['Obj_Foams_add'].inputs[0])
+        links.new(nodes['Obj_Foams_add'].outputs[0],
+                  nodes['CRWet'].inputs[0])
+        links.new(nodes['Foam'].outputs[0],
+                  nodes['CRFoam'].inputs[0])
+        links.new(nodes['CRWet'].outputs[0],
+                  nodes['MixFoams'].inputs[1])
+        
+        links.new(nodes['CRFoam'].outputs[0],
+                  nodes['MixFoams'].inputs[2])
+        
+        """links.new(nodes['Attribute.001'].outputs['Fac'],
                   nodes['CRWet'].inputs[0])
         links.new(nodes['CRFoam'].outputs[0], nodes['Mix'].inputs['Color2'])
         links.new(nodes['Attribute'].outputs['Fac'],
                   nodes['CRFoam'].inputs[0])
         links.new(nodes['CRWet'].outputs[0],
-                  nodes['Mix'].inputs['Color1'])
+                  nodes['Mix'].inputs['Color1'])"""
 
         node = nodes.new('ShaderNodeMixRGB')  # RGB Mix für Noise 1
+        node.name = "Mix.001"
         node.location = (800, 1175)
         node.blend_type = 'SUBTRACT'
         node.use_clamp = True
@@ -1785,13 +1820,14 @@ class AOMMatHandler:
 
         # RGB mixshader für zweite Noise Texture
         node = nodes.new('ShaderNodeMixRGB')
+        node.name = "Mix.002"
         node.location = (1000, 975)
         node.blend_type = 'SUBTRACT'
         node.use_clamp = True
         node.inputs[0].default_value = 0.6
 
         # link Add notes to Subtract
-        links.new(nodes['Mix'].outputs['Color'],
+        links.new(nodes['MixFoams'].outputs['Color'],
                   nodes['Mix.001'].inputs['Color1'])
         links.new(nodes['Mix.001'].outputs['Color'],
                   nodes['Mix.002'].inputs['Color1'])
@@ -1807,6 +1843,7 @@ class AOMMatHandler:
         node.location = (000, 850)
         # Hue Saturation 000 für noise texture2
         node = nodes.new('ShaderNodeHueSaturation')
+        node.name = "Hue Saturation Value"
         node.location = (600, 1075)
         #    nodes["Hue Saturation Value"].inputs[2].default_value = 0.1
         node.inputs['Value'].default_value = 1.3
@@ -1821,6 +1858,7 @@ class AOMMatHandler:
         # node.location = (000,150)
         # Hue Saturation 001 für noise texture2
         node = nodes.new('ShaderNodeHueSaturation')
+        node.name = "Hue Saturation Value.001"
         node.location = (600, 900)
         node.inputs['Value'].default_value = 1.3
         node.inputs['Saturation'].default_value = 0.0
@@ -1874,6 +1912,7 @@ class AOMMatHandler:
         node.location = (400, 675)
         nodes["Voronoi Texture"].inputs[1].default_value = 100
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 675)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1884,6 +1923,7 @@ class AOMMatHandler:
         node.location = (400, 450)
         nodes["Voronoi Texture.001"].inputs[1].default_value = 50
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 450)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1894,6 +1934,7 @@ class AOMMatHandler:
         node.location = (400, 200)
         nodes["Voronoi Texture.002"].inputs[1].default_value = 30
         node = nodes.new('ShaderNodeValToRGB')
+        node.name = 'ColorRamp'
         node.location = (600, 200)
         node.color_ramp.interpolation = 'B_SPLINE'
         node.color_ramp.elements[0].color = 1, 1, 1, 1
@@ -1911,10 +1952,12 @@ class AOMMatHandler:
 
      # mix die bubbles zu einander und nutze die noise pattern als factor
         node = nodes.new('ShaderNodeMixRGB')
+        node.name = "Mix.003"
         node.location = (1400, 475)
         node.blend_type = "LIGHTEN"
 
         node = nodes.new('ShaderNodeMixRGB')
+        node.name = "Mix.004"
         node.location = (1600, 275)
         node.blend_type = "LIGHTEN"
 
@@ -1993,6 +2036,8 @@ class AOMMatHandler:
 
         nodes['Noise Texture'].name = 'Noise1'
         nodes['Noise Texture.001'].name = 'Noise2'
+        
+        
 
     def FoamFac_legacy_improve_TransBub(self, node_tree):
         nodes = node_tree.nodes
@@ -2498,6 +2543,9 @@ class AOMMatHandler:
             nodes['Patchiness'].outputs[0].default_value = 0.2
             Ocean.foam_coverage = 0.3
 
+        nodes['LowerObjectCut'].outputs[0].default_value = 0
+        
+        
     def disconnect_bumpwaves(self, context, ocean):
         mat = ocean.material_slots[0].material
         node_tree = mat.node_tree
