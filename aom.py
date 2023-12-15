@@ -647,9 +647,9 @@ def RemoveInterAct(context):
         for mod in oc.modifiers:
             if hasattr(mod, 'node_group'):
                 if mod.node_group.name == 'AOMGeoFloat':
-                    if mod['Input_4'] in sel: 
+                    if mod['Socket_4'] in sel: 
                         #delete mod delete 
-                        bpy.data.objects.remove(mod['Input_4'])
+                        bpy.data.objects.remove(mod['Socket_4'])
                         oc.modifiers.remove(mod)
                         
                     
@@ -789,11 +789,11 @@ def CageVis(context, Bool):
             if hasattr(mod, 'node_group'):
                 if mod.node_group.name == 'AOMGeoFloat':
                     #detectionlines
-                    mod['Input_7'] = Bool
+                    mod['Socket_7'] = Bool
                     #show collision object
-                    mod['Input_6'] = Bool
+                    mod['Socket_6'] = Bool
                     #show front arrow
-                    mod['Input_27'] = Bool
+                    mod['Socket_27'] = Bool
 
     return Bool
 

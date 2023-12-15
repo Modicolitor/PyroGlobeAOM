@@ -136,10 +136,11 @@ class AOMGeoNodesHandler:
 
         self.ob_to_collection(context, collection, context.object)
 
-        # it will be only one but more flexible
-        for inp in mod.node_group.inputs:
+        # it will be only one but more flexible    #  double check
+        '''for inp in mod.node_group.nodes['Group Input'].inputs:
             if inp.bl_socket_idname == 'NodeSocketCollection':
-                self.add_collection_to_modinp(collection, mod, inp)
+                self.add_collection_to_modinp(collection, mod, inp)'''
+        mod['Socket_8'] = collection
 
         context.layer_collection.children['Spray'].exclude = True
         dg = bpy.context.evaluated_depsgraph_get()
@@ -165,39 +166,48 @@ class AOMGeoNodesHandler:
         links = node_group.links
 
         if not nh:
-            inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
-
-            inp = node_group.inputs.new('NodeSocketFloat', 'Height')
+            #inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
+            inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Height')
+            inp = node_group.interface.new_socket(name='Height', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
 
-            inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Density Max')
+            inp = node_group.interface.new_socket(name='Density Max', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
-            inp = node_group.inputs.new('NodeSocketFloat', 'Contrast')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Contrast')
+            inp = node_group.interface.new_socket(name='Contrast', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
-            inp = node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'MaxParticleScale')
+            inp = node_group.interface.new_socket(name='MaxParticleScale', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
-            inp = node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'MinParticleScale')
+            inp = node_group.interface.new_socket(name='MinParticleScale', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
-            inp = node_group.inputs.new(
-                'NodeSocketFloat', 'OverallParticleScale')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'OverallParticleScale')
+            inp = node_group.interface.new_socket(name='OverallParticleScale', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
-            inp = node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
+            #inp = node_group.inputs.new('NodeSocketFloatFactor', 'ObjectSpray')
+            inp = node_group.interface.new_socket(name='ObjectSpray', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
             inp.min_value = 0
             inp.max_value = 1
-            inp = node_group.inputs.new(
-                'NodeSocketCollection', 'SprayPartikleCollection')
-            inp = node_group.inputs.new('NodeSocketFloat', 'foam')
+            #inp = node_group.inputs.new('NodeSocketCollection', 'SprayPartikleCollection')
+            inp = node_group.interface.new_socket(name='SprayPartikleCollection', in_out='INPUT', socket_type = 'NodeSocketCollection')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'foam')
+            inp = node_group.interface.new_socket(name='foam', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
-            inp = node_group.inputs.new('NodeSocketFloat', 'spray')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'spray')
+            inp = node_group.interface.new_socket(name='spray', in_out='INPUT', socket_type = 'NodeSocketFloat')
             #inp.default_value = (0, 0, 0)
-            inp = node_group.inputs.new('NodeSocketFloat', 'wetmap')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'wetmap')
+            inp = node_group.interface.new_socket(name='wetmap', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.0
 
         node = nodes.new("NodeGroupInput")
@@ -342,7 +352,8 @@ class AOMGeoNodesHandler:
         node.name = "Group Output"
         node.location = (1467, 364)
         
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry') 
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry') 
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         
         
         links.new(nodes['Group Input'].outputs[0],
@@ -406,32 +417,32 @@ class AOMGeoNodesHandler:
         links.new(nodes['Reroute.001'].outputs['Output'],
                   nodes['Join Geometry'].inputs['Geometry'])
 
-        mod['Input_1'] = 0.2
-        mod['Input_1_use_attribute'] = False
-        mod['Input_2'] = 50.0
-        mod['Input_2_use_attribute'] = False
-        mod['Input_3'] = 1.0
-        mod['Input_3_use_attribute'] = False
-        mod['Input_4'] = 0.1
-        mod['Input_4_use_attribute'] = False
-        mod['Input_5'] = 0.01
-        mod['Input_5_use_attribute'] = False
-        mod['Input_6'] = 0.06
-        mod['Input_6_use_attribute'] = False
-        mod['Input_7'] = 0.00
-        mod['Input_7_use_attribute'] = False
-        mod['Input_8'] = None
-        mod['Input_8_use_attribute'] = False
-        mod['Input_9'] = 0.06
-        mod['Input_9_use_attribute'] = True
-        mod['Input_9_attribute_name'] = 'foam'
-        mod['Input_10'] = 0.06
-        mod['Input_11_use_attribute'] = True
-        mod['Input_11_attribute_name'] = 'dp_wetmap'
+        mod['Socket_1'] = 0.2
+        mod['Socket_1_use_attribute'] = False
+        mod['Socket_2_use_attribute'] = False
+        mod['Socket_3'] = 1.0
+        mod['Socket_2'] = 50.0
+        mod['Socket_3_use_attribute'] = False
+        mod['Socket_4'] = 0.1
+        mod['Socket_4_use_attribute'] = False
+        mod['Socket_5'] = 0.01
+        mod['Socket_5_use_attribute'] = False
+        mod['Socket_6'] = 0.06
+        mod['Socket_6_use_attribute'] = False
+        mod['Socket_7'] = 0.00
+        mod['Socket_7_use_attribute'] = False
+        mod['Socket_8'] = None
+        mod['Socket_8_use_attribute'] = False
+        mod['Socket_9'] = 0.06
+        mod['Socket_9_use_attribute'] = True
+        mod['Socket_9_attribute_name'] = 'foam'
+        mod['Socket_10'] = 0.06
+        mod['Socket_11_use_attribute'] = True
+        mod['Socket_11_attribute_name'] = 'dp_wetmap'
 
-        mod['Input_10'] = 0.06
-        mod['Input_10_use_attribute'] = True
-        mod['Input_10_attribute_name'] = 'spray'
+        mod['Socket_10'] = 0.06
+        mod['Socket_10_use_attribute'] = True
+        mod['Socket_10_attribute_name'] = 'spray'
 
         nodes['Reroute.001'].location = (-85.0324, 503)
         nodes['CombHeight'].location = (55, 174)
@@ -464,7 +475,7 @@ class AOMGeoNodesHandler:
         self.make_rippels_nodes(mod, mod.node_group)
         #print(f'ob.name {ob.name}')
         if ob != None:
-            mod['Input_6'] = ob
+            mod['Socket_6'] = ob
             ob.aom_data.ripple_parent = ocean
 
         ocean.modifiers.active = mod
@@ -497,24 +508,31 @@ class AOMGeoNodesHandler:
         links = node_group.links
 
         if not nh:
-            inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
+            #inp = node_group.inputs.new('NodeSocketGeometry', 'Geometry')
+            inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
             
-            inp = node_group.inputs.new('NodeSocketFloat', 'Wavelength')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Wavelength')
+            inp = node_group.interface.new_socket(name='Wavelength', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 0.31
             wlid= inp.identifier 
-            inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Amplitude')
+            inp = node_group.interface.new_socket(name='Amplitude', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 2.0
             ampid= inp.identifier 
-            inp = node_group.inputs.new('NodeSocketFloat', 'OuterFalloff')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'OuterFalloff')
+            inp = node_group.interface.new_socket(name='OuterFalloff', in_out='INPUT', socket_type = 'NodeSocketFloat')
             outerid= inp.identifier 
             inp.default_value = 20.0
-            inp = node_group.inputs.new('NodeSocketFloat', 'Innercut')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Innercut')
+            inp = node_group.interface.new_socket(name='Innercut', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 25.0
             innerid = inp.identifier 
-            inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
+            #inp = node_group.inputs.new('NodeSocketFloat', 'Speed')
+            inp = node_group.interface.new_socket(name='Speed', in_out='INPUT', socket_type = 'NodeSocketFloat')
             inp.default_value = 10.0
             speedid = inp.identifier
-            inp = node_group.inputs.new('NodeSocketObject', 'Object') #NodeSocketObject
+            #inp = node_group.inputs.new('NodeSocketObject', 'Object') #NodeSocketObject
+            inp = node_group.interface.new_socket(name='Object', in_out='INPUT', socket_type = 'NodeSocketObject')
             obsockid = inp.identifier 
         
       
@@ -706,7 +724,8 @@ class AOMGeoNodesHandler:
         node.name = "Group Output"
         node.location = (1308, 338)
         
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry') 
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry') 
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         
         links.new(nodes['Group Input'].outputs[0],
                   nodes['Set Position'].inputs[0])
@@ -767,17 +786,17 @@ class AOMGeoNodesHandler:
         links.new(nodes['Math.005'].outputs['Value'],
                   nodes['Math.006'].inputs[1])
 
-        mod['Input_1'] = 0.31
-        mod['Input_1_use_attribute'] = False
-        mod['Input_2'] = 1.0
-        mod['Input_2_use_attribute'] = False
-        mod['Input_3'] = 17.35
-        mod['Input_3_use_attribute'] = False
-        mod['Input_4'] = 20.0
-        mod['Input_4_use_attribute'] = False
-        mod['Input_5'] = 10.0
-        mod['Input_5_use_attribute'] = False
-        mod['Input_6'] = None
+        mod['Socket_1'] = 0.31
+        mod['Socket_1_use_attribute'] = False
+        mod['Socket_2'] = 1.0
+        mod['Socket_2_use_attribute'] = False
+        mod['Socket_3'] = 17.35
+        mod['Socket_3_use_attribute'] = False
+        mod['Socket_4'] = 20.0
+        mod['Socket_4_use_attribute'] = False
+        mod['Socket_5'] = 10.0
+        mod['Socket_5_use_attribute'] = False
+        mod['Socket_6'] = None
         
 
         source = nodes['Time'].outputs[0]
@@ -794,7 +813,7 @@ class AOMGeoNodesHandler:
         if ob != None:
             for mod in ocean.modifiers[:]:
                 if 'Ripples' in mod.name:
-                    if ob == mod['Input_6']:
+                    if ob == mod['Socket_6']:
                         ocean.modifiers.remove(mod)
                         ob.aom_data.ripple_parent = None
                     else:
@@ -804,7 +823,7 @@ class AOMGeoNodesHandler:
         else:
             for mod in reversed(ocean.modifiers[:]):
                 if 'Ripples' in mod.name:
-                    ob = mod['Input_6']
+                    ob = mod['Socket_6']
                     if ob != None:
                         ob.aom_data.ripple_parent = None
 
@@ -821,24 +840,34 @@ class AOMGeoNodesHandler:
         nodes = node_group.nodes
         links = node_group.links
 
-        inp = node_group.inputs.new('NodeSocketGeometry','Target Geometry')
-        inp = node_group.inputs.new('NodeSocketVector','DetectionPositon')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Target Geometry')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        #inp = node_group.inputs.new('NodeSocketVector','DetectionPositon')
+        inp = node_group.interface.new_socket(name='DetectionPositon', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketFloat','XDistance')
-        inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','YDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','XDistance')
+        inp = node_group.interface.new_socket(name='XDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        #inp.default_value = 1.0
+        #inp = node_group.inputs.new('NodeSocketFloat','YDistance')
+        inp = node_group.interface.new_socket(name='YDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','ZDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','ZDistance')
+        inp = node_group.interface.new_socket(name='ZDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','RotSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','RotSensitivity')
+        inp = node_group.interface.new_socket(name='RotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivity')
+        inp = node_group.interface.new_socket(name='MoveSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloatAngle','Angle')
+        #inp = node_group.inputs.new('NodeSocketFloatAngle','Angle')
+        inp = node_group.interface.new_socket(name='Angle', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','ScaleX')
+        #inp = node_group.inputs.new('NodeSocketFloat','ScaleX')
+        inp = node_group.interface.new_socket(name='ScaleX', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        inp = node_group.inputs.new('NodeSocketFloat','ScaleY')
+        #inp = node_group.inputs.new('NodeSocketFloat','ScaleY')
+        inp = node_group.interface.new_socket(name='ScaleY', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
 
         node = nodes.new("NodeFrame" )
@@ -1233,15 +1262,16 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["Detection"]
         node.location = (-66, 480)
         node.data_type = "FLOAT"
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = 0.0
-        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
-        node.inputs[4].default_value = False
-        node.inputs[5].default_value = 0
-        node.inputs[6].default_value = (0.0,0.0,0.0,)
-        node.inputs[7].default_value = (0.0,0.0,-1.0,)
-        node.inputs[8].default_value = 100.0
-        node.outputs[0].default_value = False
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = 0.0
+        #node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        #node.inputs[4].default_value = False
+        #node.inputs[5].default_value = 0
+        #node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,-1.0,)
+        node.inputs[9].default_value = 100.0
+        
+        '''node.outputs[0].default_value = False
         node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = 0.0
@@ -1249,7 +1279,7 @@ class AOMGeoNodesHandler:
         node.outputs[5].default_value = 0.0
         node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[7].default_value = False
-        node.outputs[8].default_value = 0
+        node.outputs[8].default_value = 0'''
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.007"
@@ -1267,23 +1297,24 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["Detection"]
         node.location = (-61, 71)
         node.data_type = "FLOAT"
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[4].default_value = False
         node.inputs[5].default_value = 0
-        node.inputs[6].default_value = (0.0,0.0,0.0,)
-        node.inputs[7].default_value = (0.0,0.0,-1.0,)
-        node.inputs[8].default_value = 100.0
-        node.outputs[0].default_value = False
-        node.outputs[1].default_value = (0.0,0.0,0.0,)
-        node.outputs[2].default_value = (0.0,0.0,0.0,)
-        node.outputs[3].default_value = 0.0
-        node.outputs[4].default_value = (0.0,0.0,0.0,)
-        node.outputs[5].default_value = 0.0
-        node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
-        node.outputs[7].default_value = False
-        node.outputs[8].default_value = 0
+        node.inputs[6].default_value = (0.0,0.0,0.0,)'''
+        node.inputs[8].default_value = (0.0,0.0,-1.0,)  ##### double check
+        node.inputs[9].default_value = 100.0
+        
+        '''#node.outputs[0].default_value = False
+        #node.outputs[1].default_value = (0.0,0.0,0.0,)
+        #node.outputs[2].default_value = (0.0,0.0,0.0,)
+        #node.outputs[3].default_value = 0.0
+        #node.outputs[4].default_value = (0.0,0.0,0.0,)
+        #node.outputs[5].default_value = 0.0
+        #node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[8].default_value = False
+        node.outputs[9].default_value = 0'''
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.002"
@@ -1437,10 +1468,14 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (1631, -13)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Detectlines')
-        node_group.outputs.new(type= 'NodeSocketFloat', name='Rotation')
-        node_group.outputs.new(type= 'NodeSocketFloat', name='Move')
-        node_group.outputs.new(type= 'NodeSocketFloat', name='Height')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Detectlines')
+        out = node_group.interface.new_socket(name='Detectlines', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        #node_group.outputs.new(type= 'NodeSocketFloat', name='Rotation')
+        out = node_group.interface.new_socket(name='Rotation', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        #node_group.outputs.new(type= 'NodeSocketFloat', name='Move')
+        out = node_group.interface.new_socket(name='Move', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        #node_group.outputs.new(type= 'NodeSocketFloat', name='Height')
+        out = node_group.interface.new_socket(name='Height', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.004'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['Separate XYZ'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['Vector Rotate.001'].inputs[1])
@@ -1568,7 +1603,7 @@ class AOMGeoNodesHandler:
         
         mod.node_group = node_group
         
-        #mod['Input_1'] = obj
+        #mod['Socket_1'] = obj
         
         
         
@@ -1584,14 +1619,14 @@ class AOMGeoNodesHandler:
         
 
         if obj != None:
-            mod['Input_1'] = obj
+            mod['Socket_1'] = obj
             # float_parent_id
             #obj.aom_data.ripple_parent = ocean
         if cage != None:
-            mod['Input_4'] = cage
+            mod['Socket_4'] = cage
             #obj.aom_data.ripple_parent = ocean
         if collision != None:
-            mod['Input_5'] = collision
+            mod['Socket_5'] = collision
         #obj.modifiers.active = mod
 
         ##buggy
@@ -1613,32 +1648,46 @@ class AOMGeoNodesHandler:
         links = node_group.links
         
         
-        inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
-        inp = node_group.inputs.new('NodeSocketFloat','DetectionHeight')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        #inp = node_group.inputs.new('NodeSocketFloat','DetectionHeight')
+        inp = node_group.interface.new_socket(name='DetectionHeight', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 10.0
-        inp = node_group.inputs.new('NodeSocketFloat','XRotSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','XRotSensitivity')
+        inp = node_group.interface.new_socket(name='XRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','YRotSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','YRotSensitivity')
+        inp = node_group.interface.new_socket(name='YRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','HeightSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','HeightSensitivity')
+        inp = node_group.interface.new_socket(name='HeightSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
+        inp = node_group.interface.new_socket(name='XDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        inp = node_group.inputs.new('NodeSocketFloat','YDetectionDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','YDetectionDistance')
+        inp = node_group.interface.new_socket(name='YDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 3.0
-        inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityX')
+        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityX')
+        inp = node_group.interface.new_socket(name='MoveSensitivityX', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.2
-        inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityY')
+        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityY')
+        inp = node_group.interface.new_socket(name='MoveSensitivityY', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.2
-        inp = node_group.inputs.new('NodeSocketFloat','XOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','XOffset')
+        inp = node_group.interface.new_socket(name='XOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','YOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','YOffset')
+        inp = node_group.interface.new_socket(name='YOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
+        inp = node_group.interface.new_socket(name='ZOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketBool','ShowFloatCage')
+        #inp = node_group.inputs.new('NodeSocketBool','ShowFloatCage')
+        inp = node_group.interface.new_socket(name='ShowFloatCage', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        inp = node_group.inputs.new('NodeSocketObject','Floatcage')
+        #inp = node_group.inputs.new('NodeSocketObject','Floatcage')
+        inp = node_group.interface.new_socket(name='Floatcage', in_out='INPUT', socket_type = 'NodeSocketObject')
 
         node = nodes.new("NodeFrame" )
         node.name = "Frame.002"
@@ -1842,12 +1891,12 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT_VECTOR"
         node.hide = False
         node.inputs[0].default_value = "UVMap"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
-        node.outputs[5].default_value = False
+        node.outputs[5].default_value = False'''
 
         node = nodes.new("GeometryNodeSampleNearest" )
         node.name = "Sample Nearest"
@@ -1958,7 +2007,8 @@ class AOMGeoNodesHandler:
         node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[5].default_value = False
-        node.inputs[6].default_value = 0
+        #node.inputs[6].default_value = 0
+        
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0
         node.outputs[2].default_value = (0.0,0.0,0.0,)
@@ -2076,11 +2126,16 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (3521, -251)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
-        node_group.outputs.new(type= 'NodeSocketVector', name='XY-Rotation')
-        node_group.outputs.new(type= 'NodeSocketVector', name='Z-Rotation')
-        node_group.outputs.new(type= 'NodeSocketVector', name='Position')
-        node_group.outputs.new(type= 'NodeSocketVector', name='Scale')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        #node_group.outputs.new(type= 'NodeSocketVector', name='XY-Rotation')
+        out = node_group.interface.new_socket(name='XY-Rotation', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        #node_group.outputs.new(type= 'NodeSocketVector', name='Z-Rotation')
+        out = node_group.interface.new_socket(name='Z-Rotation', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        #node_group.outputs.new(type= 'NodeSocketVector', name='Position')
+        out = node_group.interface.new_socket(name='Position', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        #node_group.outputs.new(type= 'NodeSocketVector', name='Scale')
+        out = node_group.interface.new_socket(name='Scale', in_out='OUTPUT', socket_type = 'NodeSocketVector')
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.003'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['PToHeight'].inputs[2])
         links.new( nodes['Group Input'].outputs[1],  nodes['NewCoordinatesAfterMove'].inputs[2])
@@ -2179,25 +2234,37 @@ class AOMGeoNodesHandler:
         links = node_group.links
         
         
-        inp = node_group.inputs.new('NodeSocketGeometry','Input')
-        inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Input')
+        inp = node_group.interface.new_socket(name='Input', in_out='INPUT', socket_type='NodeSocketGeometry')
+        
+        #inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
+        inp = node_group.interface.new_socket(name='Use Object Foam', in_out='INPUT', socket_type='NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketVectorTranslation','Position')
+        #inp = node_group.inputs.new('NodeSocketVectorTranslation','Position')
+        inp = node_group.interface.new_socket(name='Position', in_out='INPUT', socket_type='NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVector','Rotation')
+        #inp = node_group.inputs.new('NodeSocketVector','Rotation')
+        inp = node_group.interface.new_socket(name='Rotation', in_out='INPUT', socket_type='NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVectorEuler','Z-Rotation')
+        #inp = node_group.inputs.new('NodeSocketVectorEuler','Z-Rotation')
+        inp = node_group.interface.new_socket(name='Z-Rotation', in_out='INPUT', socket_type='NodeSocketRotation') #######double check Euler before, could be Vector
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVectorXYZ','Scale')
+        #inp = node_group.inputs.new('NodeSocketVectorXYZ','Scale')
+        inp = node_group.interface.new_socket(name='Scale', in_out='INPUT', socket_type='NodeSocketVector')
         inp.default_value = (1.0,1.0,1.0,)
-        inp = node_group.inputs.new('NodeSocketString','Foam Attribute')
+        #inp = node_group.inputs.new('NodeSocketString','Foam Attribute')
+        inp = node_group.interface.new_socket(name='Foam Attribute', in_out='INPUT', socket_type='NodeSocketString')
         inp.default_value = "foam"
-        inp = node_group.inputs.new('NodeSocketObject','Collision Object')
-        inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
+        #inp = node_group.inputs.new('NodeSocketObject','Collision Object')
+        inp = node_group.interface.new_socket(name='Collision Object', in_out='INPUT', socket_type='NodeSocketObject')
+        #inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
+        inp = node_group.interface.new_socket(name='Show CollisionObject', in_out='INPUT', socket_type='NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
+        inp = node_group.interface.new_socket(name='FoamDistance', in_out='INPUT', socket_type='NodeSocketFloat')
         inp.default_value = 11.0
-        inp = node_group.inputs.new('NodeSocketFloat','FoamAmount?')
+        #inp = node_group.inputs.new('NodeSocketFloat','FoamAmount?')
+        inp = node_group.interface.new_socket(name='FoamAmount?', in_out='INPUT', socket_type='NodeSocketFloat')
         inp.default_value = 0.2
 
         node = nodes.new("NodeFrame" )
@@ -2299,7 +2366,7 @@ class AOMGeoNodesHandler:
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
-        node.outputs[5].default_value = False
+        #node.outputs[5].default_value = False
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.005"
@@ -2468,8 +2535,11 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (1488, -58)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
-        node_group.outputs.new(type= 'NodeSocketFloat', name='Distance')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        node_group.interface.new_socket(name='Geometry', in_out = 'OUTPUT', socket_type='NodeSocketGeometry')
+        #node_group.outputs.new(type= 'NodeSocketFloat', name='Distance')
+        node_group.interface.new_socket(name='Distance', in_out = 'OUTPUT', socket_type='NodeSocketFloat')
+        
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute'].inputs[0])
         links.new( nodes['Group Input'].outputs[2],  nodes['Reroute.003'].inputs[0])
         links.new( nodes['Group Input'].outputs[3],  nodes['Vector Math.002'].inputs[0])
@@ -2526,34 +2596,49 @@ class AOMGeoNodesHandler:
         links = node_group.links
         
         
-        inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
-        inp = node_group.inputs.new('NodeSocketVector','Position')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        #inp = node_group.inputs.new('NodeSocketVector','Position')
+        inp = node_group.interface.new_socket(name='Position', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVector','Z-Rotation')
+        #inp = node_group.inputs.new('NodeSocketVector','Z-Rotation')
+        inp = node_group.interface.new_socket(name='Z-Rotation', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
+        #inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
+        inp = node_group.interface.new_socket(name='Use Ripples', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        inp = node_group.inputs.new('NodeSocketFloat','Distance')
+        #inp = node_group.inputs.new('NodeSocketFloat','Distance')
+        inp = node_group.interface.new_socket(name='Distance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
+        #inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
+        inp = node_group.interface.new_socket(name='Wavelength', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.31
-        inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
+        #inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
+        inp = node_group.interface.new_socket(name='Amplitude', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
+        #inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
+        inp = node_group.interface.new_socket(name='OuterFalloff', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 20.0
-        inp = node_group.inputs.new('NodeSocketFloat','Innercut')
+        #inp = node_group.inputs.new('NodeSocketFloat','Innercut')
+        inp = node_group.interface.new_socket(name='Innercut', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 25.0
-        inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
+        #inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
+        inp = node_group.interface.new_socket(name='Wave Speed', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 10.0
-        inp = node_group.inputs.new('NodeSocketBool','Show Front Arrow')
+        #inp = node_group.inputs.new('NodeSocketBool','Show Front Arrow')
+        inp = node_group.interface.new_socket(name='Show Front Arrow', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
+        #inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.16
-        inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
+        #inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
+        inp = node_group.interface.new_socket(name='Bow-Wave Offset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.6
-        inp = node_group.inputs.new('NodeSocketFloatFactor','Circular <--> Bow Wave')
+        #inp = node_group.inputs.new('NodeSocketFloatFactor','Circular <--> Bow Wave')
+        inp = node_group.interface.new_socket(name='Circular <--> Bow Wave', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','Turbulence')
+        #inp = node_group.inputs.new('NodeSocketFloat','Turbulence')
+        inp = node_group.interface.new_socket(name='Turbulence', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 7.4
 
         node = nodes.new("NodeFrame" )
@@ -3548,7 +3633,8 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (5196, 599)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['Vector Math'].inputs[1])
         links.new( nodes['Group Input'].outputs[1],  nodes['Vector Math.002'].inputs[0])
@@ -3685,18 +3771,26 @@ class AOMGeoNodesHandler:
         nodes = node_group.nodes
         links = node_group.links
         
-        inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
-        inp = node_group.inputs.new('NodeSocketVectorEuler','XY-Rotation')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        #inp = node_group.inputs.new('NodeSocketVectorEuler','XY-Rotation')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVector','Z-Rotation')
+        #inp = node_group.inputs.new('NodeSocketVector','Z-Rotation')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVectorTranslation','Position')
+        #inp = node_group.inputs.new('NodeSocketVectorTranslation','Position')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketVector','Scale')
+        #inp = node_group.inputs.new('NodeSocketVector','Scale')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        inp = node_group.inputs.new('NodeSocketObject','Visible Object')
-        inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
-        inp = node_group.inputs.new('NodeSocketBool','Use Collection')
+        #inp = node_group.inputs.new('NodeSocketObject','Visible Object')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketObject')
+        #inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketCollection')
+        #inp = node_group.inputs.new('NodeSocketBool','Use Collection')
+        inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
 
         node = nodes.new("NodeFrame" )
@@ -3840,7 +3934,8 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (1395, -24)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['InstanceOnPoint'].inputs[5])
         links.new( nodes['Group Input'].outputs[2],  nodes['Reroute.007'].inputs[0])
@@ -3878,66 +3973,98 @@ class AOMGeoNodesHandler:
         
                
         
-        inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
-        inp = node_group.inputs.new('NodeSocketObject','Visible Object')
-        inp = node_group.inputs.new('NodeSocketBool','Use Collection')
+        #inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        #inp = node_group.inputs.new('NodeSocketObject','Visible Object')
+        inp = node_group.interface.new_socket(name='Visible Object', in_out='INPUT', socket_type = 'NodeSocketObject')
+        #inp = node_group.inputs.new('NodeSocketBool','Use Collection')
+        inp = node_group.interface.new_socket(name='Use Collection', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
-        inp = node_group.inputs.new('NodeSocketObject','Floatcage')
-        inp = node_group.inputs.new('NodeSocketObject','Collision Object')
-        inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
+        #inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
+        inp = node_group.interface.new_socket(name='Visible Collection', in_out='INPUT', socket_type = 'NodeSocketCollection')
+        #inp = node_group.inputs.new('NodeSocketObject','Floatcage')
+        inp = node_group.interface.new_socket(name='Floatcage', in_out='INPUT', socket_type = 'NodeSocketObject')
+        #inp = node_group.inputs.new('NodeSocketObject','Collision Object')
+        inp = node_group.interface.new_socket(name='Collision Object', in_out='INPUT', socket_type = 'NodeSocketObject')
+        #inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
+        inp = node_group.interface.new_socket(name='Show CollisionObject', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketBool','Show Detection Marks')
+        #inp = node_group.inputs.new('NodeSocketBool','Show Detection Marks')
+        inp = node_group.interface.new_socket(name='Show Detection Marks', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
+        inp = node_group.interface.new_socket(name='XDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        inp = node_group.inputs.new('NodeSocketFloat','YDetectionDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','YDetectionDistance')
+        inp = node_group.interface.new_socket(name='YDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        inp = node_group.inputs.new('NodeSocketFloat','DetectionHeight')
+        #inp = node_group.inputs.new('NodeSocketFloat','DetectionHeight')
+        inp = node_group.interface.new_socket(name='DetectionHeight', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','XRotSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','XRotSensitivity')
+        inp = node_group.interface.new_socket(name='XRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','YRotSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','YRotSensitivity')
+        inp = node_group.interface.new_socket(name='YRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityX')
+        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityX')
+        inp = node_group.interface.new_socket(name='MoveSensitivityX', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityY')
+        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityY')
+        inp = node_group.interface.new_socket(name='MoveSensitivityY', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        inp = node_group.inputs.new('NodeSocketFloat','HeightSensitivity')
+        #inp = node_group.inputs.new('NodeSocketFloat','HeightSensitivity')
+        inp = node_group.interface.new_socket(name='HeightSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','XOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','XOffset')
+        inp = node_group.interface.new_socket(name='XOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','YOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','YOffset')
+        inp = node_group.interface.new_socket(name='YOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
+        #inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
+        inp = node_group.interface.new_socket(name='ZOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
+        #inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
+        inp = node_group.interface.new_socket(name='Use Object Foam', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
+        #inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
+        inp = node_group.interface.new_socket(name='FoamDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 65
-        inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
+        #inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
+        inp = node_group.interface.new_socket(name='Use Ripples', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
+        #inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
+        inp = node_group.interface.new_socket(name='Wavelength', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.1
-        inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
+        #inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
+        inp = node_group.interface.new_socket(name='Amplitude', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 3.0
-        inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
+        #inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
+        inp = node_group.interface.new_socket(name='OuterFalloff', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 3.0
-        inp = node_group.inputs.new('NodeSocketFloat','Innercut')
+        #inp = node_group.inputs.new('NodeSocketFloat','Innercut')
+        inp = node_group.interface.new_socket(name='Innercut', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 20.0
-        inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
+        #inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
+        inp = node_group.interface.new_socket(name='Wave Speed', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 10.0
-        inp = node_group.inputs.new('NodeSocketBool','Show Front')
+        #inp = node_group.inputs.new('NodeSocketBool','Show Front')
+        inp = node_group.interface.new_socket(name='Show Front', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        inp = node_group.inputs.new('NodeSocketFloatFactor','Circular <--> Bow Wave')
+        #inp = node_group.inputs.new('NodeSocketFloatFactor','Circular <--> Bow Wave')
+        inp = node_group.interface.new_socket(name='Circular <--> Bow Wave', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
         inp.min_value = 0.0
         inp.max_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
+        #inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
+        inp = node_group.interface.new_socket(name='Set Front Direction', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
+        #inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
+        inp = node_group.interface.new_socket(name='Bow-Wave Offset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        inp = node_group.inputs.new('NodeSocketFloat','Turbulence')
+        #inp = node_group.inputs.new('NodeSocketFloat','Turbulence')
+        inp = node_group.interface.new_socket(name='Turbulence', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
 
         node = nodes.new("NodeGroupInput" )
@@ -4068,7 +4195,8 @@ class AOMGeoNodesHandler:
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
         node.location = (1981, 697)
-        node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
+        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         links.new( nodes['Group Input'].outputs[0],  nodes['Group.001'].inputs[0])
         links.new( nodes['Group Input'].outputs[4],  nodes['Reroute'].inputs[0])
         links.new( nodes['Group Input'].outputs[7],  nodes['Group.001'].inputs[12])
@@ -4125,25 +4253,25 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.003'].outputs[0],  nodes['Group.005'].inputs[1])
         links.new( nodes['Group.001'].outputs[2],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Reroute.001'].outputs[0],  nodes['Group.005'].inputs[2])
-        '''mod['Input_18'] = True
-        mod['Input_6'] = True
-        mod['Input_7'] = 2.0
-        mod['Input_8'] = 2.0
-        mod['Input_10'] = 1.0
-        mod['Input_11'] = 1.0
-        mod['Input_12'] = 0.5
-        mod['Input_13'] = 0.5
-        mod['Input_14'] = 0.5
-        mod['Input_19'] = True
-        mod['Input_20'] = 65.0
-        mod['Input_21'] = True
-        mod['Input_22'] = 0.1
-        mod['Input_23'] = 3.0
-        mod['Input_24'] = 0.1
-        mod['Input_25'] = 3.0
-        mod['Input_26'] = 6.0
-        mod['Input_30'] = 1.0
-        mod['Input_31'] = 1.0'''
+        '''mod['Socket_18'] = True
+        mod['Socket_6'] = True
+        mod['Socket_7'] = 2.0
+        mod['Socket_8'] = 2.0
+        mod['Socket_10'] = 1.0
+        mod['Socket_11'] = 1.0
+        mod['Socket_12'] = 0.5
+        mod['Socket_13'] = 0.5
+        mod['Socket_14'] = 0.5
+        mod['Socket_19'] = True
+        mod['Socket_20'] = 65.0
+        mod['Socket_21'] = True
+        mod['Socket_22'] = 0.1
+        mod['Socket_23'] = 3.0
+        mod['Socket_24'] = 0.1
+        mod['Socket_25'] = 3.0
+        mod['Socket_26'] = 6.0
+        mod['Socket_30'] = 1.0
+        mod['Socket_31'] = 1.0'''
         
         return node_group
 
