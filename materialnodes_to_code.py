@@ -7,7 +7,7 @@ import bpy
 # group input Output
 
 context = bpy.context
-sel = [x for x in bpy.data.materials['AdvOceanMat_Ocean 3.0Windpatch'].node_tree.nodes if x.select]
+sel = [x for x in bpy.data.materials['AdvOceanMat_Ocean 3.0'].node_tree.nodes if x.select]
 
 
 for s in sel:
@@ -19,10 +19,15 @@ for s in sel:
     print("node.label= '" + s.label + "'")
     print("node.name= '" + s.label + "'")
 
+    if hasattr(s, 'data_type'):
+        print("node.data_type = '"+str(s.data_type)"'")
+              
     print("node.hide= " + str(s.hide))
     for n, inp in enumerate(s.inputs):
-        print("node.inputs[" + str(n) +
-              "].default_value = " + str(inp.default_value))
+        if hasattr(inp, 'default_value'):
+            if '<' not in str(inp.default_value):
+                print("node.inputs[" + str(n) +
+                    "].default_value = " + str(inp.default_value))
     print('')
     print("##################################################")
 

@@ -227,6 +227,91 @@ class AOMMatHandler:
 
         xoff = -400
         yoff = 500
+        
+        
+        #################################################################
+        #################################################################
+        node =  nodes.new('ShaderNodeBsdfPrincipled')
+        #node.parent=
+        node.location= (-841+xoff,405+yoff)
+        node.label= 'OceanOut'
+        node.name= 'OceanOut'
+        node.hide= False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.036363635212183
+        node.inputs[3].default_value = 1.3329999446868896
+        node.inputs[4].default_value = 1.0
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = 1.0
+        node.inputs[9].default_value = 0.10000000149011612
+        node.inputs[10].default_value = 1.3329999446868896
+        node.inputs[11].default_value = 0.0
+        node.inputs[12].default_value = 0.1818181872367859
+        node.inputs[14].default_value = 0.0
+        node.inputs[15].default_value = 0.0
+        node.inputs[17].default_value = 0.3787878751754761
+        node.inputs[18].default_value = 0.0
+        node.inputs[19].default_value = 0.029999999329447746
+        node.inputs[20].default_value = 1.5
+        node.inputs[23].default_value = 0.0
+        node.inputs[24].default_value = 0.5
+        #node.inputs[26].default_value = (0.000000, 0.000000, 0.000000, 1.000000)
+        node.inputs[27].default_value = 0
+
+        ##################################################
+        node =  nodes.new('ShaderNodeLayerWeight')
+        #node.parent=
+        node.location= (-1865+xoff,599+yoff)
+        node.label= 'LW_Water'
+        node.name= 'LW_Water'
+        node.hide= False
+        node.inputs[0].default_value = 0.09999999403953552
+        
+
+        ##################################################
+        node =  nodes.new('ShaderNodeMixRGB')
+        #node.parent=
+        node.location= (-1432+xoff,678+yoff)
+        node.label= 'OceanColMix'
+        node.name= 'OceanColMix'
+        node.hide= False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = (0,0,0,1)
+        ##################################################
+        node =  nodes.new('ShaderNodeMix')
+        #node.parent=
+        node.location= (-1180+xoff,664+yoff)
+        node.label= 'Mix4Adj'
+        node.name= 'Mix4Adj'
+        node.hide= False
+        node.data_type = 'RGBA'
+        node.inputs[0].default_value = 0.10000000149011612
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 0.0
+
+        
+        ###added later bei Programmer
+        self.make_water_ctl(node_tree)
+        
+        node = nodes.new('NodeReroute')
+        node.name = "WaterNormalIn"
+        node.location = (-1600+xoff, -600+yoff)
+        ##################################################
+        links.new( nodes['Mix4Adj'].outputs['Result'],  nodes['OceanOut'].inputs[0])
+        links.new( nodes['Roughness'].outputs['Value'],  nodes['OceanOut'].inputs['Roughness'])
+        links.new( nodes['IOR'].outputs['Value'],  nodes['OceanOut'].inputs['IOR'])
+        links.new( nodes['Transparency'].outputs['Value'],  nodes['OceanOut'].inputs['Alpha'])
+        links.new( nodes['WaterNormalIn'].outputs['Output'],  nodes['OceanOut'].inputs['Normal'])
+        links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['OceanOut'].inputs['Subsurface Scale'])
+        links.new( nodes['Transmission'].outputs['Value'],  nodes['OceanOut'].inputs['Transmission Weight'])
+        links.new( nodes['LW_Water'].outputs['Fresnel'],  nodes['OceanColMix'].inputs['Fac'])
+        links.new( nodes['OceanTint'].outputs['Color'],  nodes['OceanColMix'].inputs['Color2'])
+        links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['Mix4Adj'].inputs['Factor'])
+        links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['OceanOut'].inputs[7])
+        links.new( nodes['OceanColMix'].outputs['Color'],  nodes['Mix4Adj'].inputs['A'])
+        links.new( nodes['OceanTint'].outputs['Color'],  nodes['Mix4Adj'].inputs['B'])
+        #################################################################
+        #################################################################
 
         '''node = nodes.new('NodeFrame')
         # node.parent=
@@ -235,7 +320,7 @@ class AOMMatHandler:
         node.name = 'Watermaterial'
         node.hide = False'''
 
-        ##################################################
+        '''##################################################4.0
         node = nodes.new('ShaderNodeBsdfPrincipled')
         # node.parent=
         node.location = (-582+xoff, -122+yoff)
@@ -243,27 +328,27 @@ class AOMMatHandler:
         node.name = 'OceanOut'
         node.hide = False
         # node.inputs[0].default_value = <bpy_float[4], NodeSocketColor.default_value >
-        node.inputs[1].default_value = 0.10000000149011612
+        node.inputs[7].default_value = 0.10000000149011612
         # node.inputs[2].default_value = <bpy_float[3], NodeSocketVector.default_value >
         # node.inputs[3].default_value = <bpy_float[4], NodeSocketColor.default_value >
-        node.inputs[4].default_value = 1.3329999446868896
-        node.inputs[5].default_value = 0.0
-        node.inputs[6].default_value = 0.0
-        node.inputs[7].default_value = 0.1818181872367859
-        node.inputs[8].default_value = 0.0
-        node.inputs[9].default_value = 0.036363635212183
-        node.inputs[10].default_value = 0.0
+        node.inputs[10].default_value = 1.3329999446868896
         node.inputs[11].default_value = 0.0
-        node.inputs[12].default_value = 0.0
-        node.inputs[13].default_value = 0.5
+        node.inputs[1].default_value = 0.0
+        #node.inputs[7].default_value = 0.1818181872367859
+        #node.inputs[13].default_value = 0.0
+        node.inputs[2].default_value = 0.036363635212183
         node.inputs[14].default_value = 0.0
-        node.inputs[15].default_value = 0.029999999329447746
-        node.inputs[16].default_value = 1.3329999446868896
-        node.inputs[17].default_value = 0.3787878751754761
+        node.inputs[15].default_value = 0.0
+        node.inputs[23].default_value = 0.0
+        #node.inputs[25].default_value = 0.5
         node.inputs[18].default_value = 0.0
+        node.inputs[19].default_value = 0.029999999329447746
+        node.inputs[3].default_value = 1.3329999446868896
+        node.inputs[17].default_value = 0.3787878751754761
+        #node.inputs[18].default_value = 0.0
         # node.inputs[19].default_value = <bpy_float[4], NodeSocketColor.default_value >
-        node.inputs[20].default_value = 1.0
-        node.inputs[21].default_value = 1.0
+        node.inputs[27].default_value = 1.0
+        node.inputs[4].default_value = 1.0
         # node.inputs[22].default_value = <bpy_float[3], NodeSocketVector.default_value >
         # node.inputs[23].default_value = <bpy_float[3], NodeSocketVector.default_value >
         # node.inputs[24].default_value = <bpy_float[3], NodeSocketVector.default_value >
@@ -298,7 +383,7 @@ class AOMMatHandler:
         links.new(nodes['OceanColMix'].outputs['Color'],
                   nodes['OceanOut'].inputs['Base Color'])
         links.new(nodes['OceanSubsurface'].outputs['Value'],
-                  nodes['OceanOut'].inputs['Subsurface'])
+                  nodes['OceanOut'].inputs[7])
         links.new(nodes['OceanTint'].outputs['Color'],
                   nodes['OceanOut'].inputs['Subsurface Color'])
         links.new(nodes['Roughness'].outputs['Value'],
@@ -320,7 +405,7 @@ class AOMMatHandler:
         links.new(nodes['WaterNormalIn'].outputs[0],
                   nodes['OceanOut'].inputs['Normal'])
         #################################################################
-        #################################################################
+        #################################################################'''
 
     def make_water_ctl(self, node_tree):
         nodes = node_tree.nodes
@@ -658,10 +743,129 @@ class AOMMatHandler:
         nodes = node_tree.nodes
         links = node_tree.links
 
-        offsetx = 0
-        offsety = 0
+        xoff = 0
+        yoff = 0
         # Foam material
+        
+        node =  nodes.new('ShaderNodeBump')
+        #node.parent=
+        node.location= (-165+xoff,-1500+yoff)
+        node.label= 'FoamBump'
+        node.name= 'FoamBump'
+        node.hide= False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 1.0
 
+        ##################################################
+        node =  nodes.new('ShaderNodeMapRange')
+        #node.parent=
+        node.location= (-165+xoff,-600+yoff)
+        node.label= 'MRSubsurface'
+        node.name= 'MRSubsurface'
+        node.hide= False
+        node.data_type = 'FLOAT'
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 1.600000023841858
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0.20000000298023224
+        node.inputs[5].default_value = 4.0
+
+        ##################################################
+        node =  nodes.new('ShaderNodeMapRange')
+        #node.parent=
+        node.location= (-168+xoff,-925+yoff)
+        node.label= 'CRFoamRough'
+        node.name= 'CRFoamRough'
+        node.hide= False
+        node.data_type = 'FLOAT'
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 1.5
+        node.inputs[2].default_value = 0.15000000596046448
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0.8999999761581421
+        node.inputs[5].default_value = 4.0
+
+        ##################################################
+        node =  nodes.new('ShaderNodeMapRange')
+        #node.parent=
+        node.location= (-165+xoff,-1200+yoff)
+        node.label= 'CRFoamTransmission'
+        node.name= 'CRFoamTransmission'
+        node.hide= False
+        node.data_type = 'FLOAT'
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 2.700000047683716
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0.4000000059604645
+        node.inputs[5].default_value = 4.0
+
+        ##################################################
+        node =  nodes.new('ShaderNodeMix')
+        #node.parent=
+        node.location= (28+xoff,-686+yoff)
+        node.label= 'Mix40AdjFoam'
+        node.name= 'Mix40AdjFoam'
+        node.hide= False
+        node.data_type = 'RGBA'
+        node.inputs[0].default_value = 0.30000001192092896
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 0.0
+
+        ##################################################
+        node =  nodes.new('ShaderNodeBsdfPrincipled')
+        #node.parent=
+        node.location= (234+xoff,-700+yoff)
+        node.label= 'FoamOut'
+        node.name= 'FoamOut'
+        node.hide= False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.5
+        node.inputs[3].default_value = 1.4500000476837158
+        node.inputs[4].default_value = 1.0
+        node.inputs[6].default_value = 0.0
+        node.inputs[7].default_value = 1.0
+        node.inputs[9].default_value = 0.30000001192092896
+        node.inputs[10].default_value = 1.399999976158142
+        node.inputs[11].default_value = 0.0
+        node.inputs[12].default_value = 0.20000000298023224
+        node.inputs[14].default_value = 0.0
+        node.inputs[15].default_value = 0.0
+        node.inputs[17].default_value = 0.0
+        node.inputs[18].default_value = 0.33250001072883606
+        node.inputs[19].default_value = 0.20000000298023224
+        node.inputs[20].default_value = 1.5
+        node.inputs[23].default_value = 0.0
+        node.inputs[24].default_value = 0.5
+        node.inputs[27].default_value = 1.0
+
+        
+        self.foam_ctl(node_tree)
+        ##################################################nötig???? im ursprungscode nicht drin
+        #links.new( nodes['FoamBumpCtl'].outputs['Value'],  nodes['FoamBump'].inputs['Strength'])
+        #links.new( nodes['FoamMatInfo'].outputs['Color'],  nodes['FoamBump'].inputs['Height'])
+        #links.new( nodes['FoamMatInfo'].outputs['Color'],  nodes['MRSubsurface'].inputs['Value'])
+        #links.new( nodes['FoamSubsurf'].outputs['Value'],  nodes['MRSubsurface'].inputs['To Max'])
+        #links.new( nodes['FoamMatInfo'].outputs['Color'],  nodes['CRFoamRough'].inputs['Value'])
+        #links.new( nodes['FoamRoughness'].outputs['Value'],  nodes['CRFoamRough'].inputs['To Max'])
+        #links.new( nodes['FoamMatInfo'].outputs['Color'],  nodes['CRFoamTransmission'].inputs['Value'])
+        #links.new( nodes['FoamTransmission'].outputs['Value'],  nodes['CRFoamTransmission'].inputs['To Max'])
+        links.new( nodes['MRSubsurface'].outputs['Result'],  nodes['Mix40AdjFoam'].inputs['Factor'])
+        links.new( nodes['FoamColor'].outputs['Color'],  nodes['Mix40AdjFoam'].inputs['A'])
+        links.new( nodes['FoamColor'].outputs['Color'],  nodes['Mix40AdjFoam'].inputs['B'])
+        links.new( nodes['Mix40AdjFoam'].outputs['Result'],  nodes['FoamOut'].inputs['Base Color'])
+        #links.new( nodes['CRFoamRough'].outputs['Result'],  nodes['FoamOut'].inputs['Roughness'])
+        #links.new( nodes['FoamBump'].outputs['Normal'],  nodes['FoamOut'].inputs['Normal'])
+        #links.new( nodes['MRSubsurface'].outputs['Result'],  nodes['FoamOut'].inputs['Subsurface Scale'])
+        #links.new( nodes['CRFoamTransmission'].outputs['Result'],  nodes['FoamOut'].inputs['Transmission Weight'])
+        #################################################################
+        #################################################################
+        
+        
+        
+        '''
         node = nodes.new('ShaderNodeBump')
         node.name = "FoamBump"
         node.location = (-200, -1500)
@@ -704,7 +908,7 @@ class AOMMatHandler:
         node.inputs[3].default_value = (1, 1, 1, 1)
         node.inputs[14].default_value = 1.33
         node.inputs[15].default_value = 0.2
-        node.inputs[7].default_value = 0.2
+        node.inputs[7].default_value = 0.2'''
 
         self.foam_ctl(node_tree)
 
@@ -816,11 +1020,16 @@ class AOMMatHandler:
         # create group inputs
         group_inputs = ng.nodes.new('NodeGroupInput')
         group_inputs.location = (-850, 0)
-        ng.inputs.new('NodeSocketVector', 'Vector')
-        ng.inputs.new('NodeSocketFloat', 'Scale')
-        ng.inputs.new('NodeSocketFloat', 'Convexness')
-        ng.inputs.new('NodeSocketFloat', 'Min')
-        ng.inputs.new('NodeSocketFloat', 'Amount')
+        #ng.inputs.new('NodeSocketVector', 'Vector')
+        inp = ng.interface.new_socket(name= 'Vector', in_out = 'INPUT', socket_type = 'NodeSocketVector')
+        #ng.inputs.new('NodeSocketFloat', 'Scale')
+        inp = ng.interface.new_socket(name= 'Scale', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
+        #ng.inputs.new('NodeSocketFloat', 'Convexness')
+        inp = ng.interface.new_socket(name= 'Convexness', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
+        #ng.inputs.new('NodeSocketFloat', 'Min')
+        inp = ng.interface.new_socket(name= 'Min', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
+        #ng.inputs.new('NodeSocketFloat', 'Amount')
+        inp = ng.interface.new_socket(name= 'Amount', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
 
         nodes = ng.nodes
         links = ng.links
@@ -917,8 +1126,10 @@ class AOMMatHandler:
 
         group_inputs = ng.nodes.new('NodeGroupOutput')
         group_inputs.location = (1250, 0)
-        ng.outputs.new('NodeSocketColor', 'SoftShape')
-        ng.outputs.new('NodeSocketColor', 'HardShape')
+        #ng.outputs.new('NodeSocketColor', 'SoftShape')
+        out = ng.interface.new_socket(name= 'SoftShape', in_out = 'OUTPUT', socket_type = 'NodeSocketColor')
+        #ng.outputs.new('NodeSocketColor', 'HardShape')
+        out = ng.interface.new_socket(name= 'HardShape', in_out = 'OUTPUT', socket_type = 'NodeSocketColor')
 
         links.new(nodes['Map Range'].outputs[0],
                   nodes['ArcSin'].inputs[0])
@@ -2117,14 +2328,14 @@ class AOMMatHandler:
         links.new(nodes['FoamFacOut'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs['Subsurface'])
+                  nodes['FoamOut'].inputs[7])
         links.new(nodes['FoamFacOut'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs['Transmission'])
+                  nodes['FoamOut'].inputs[17])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
@@ -2135,6 +2346,8 @@ class AOMMatHandler:
 
         links.new(nodes['FoamSubsurf'].outputs[0],
                   nodes['MRSubsurface'].inputs[4])
+        links.new(nodes['FoamSubsurf'].outputs[0],
+                  nodes['FoamOut'].inputs[7])
 
         links.new(nodes['FoamColor'].outputs[0],
                   nodes['FoamOut'].inputs[0])
@@ -2202,14 +2415,16 @@ class AOMMatHandler:
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs['Subsurface'])
+                  nodes['FoamOut'].inputs[7])
+        links.new(nodes['MRSubsurface'].outputs[0],
+                  nodes['FoamOut'].inputs[9])
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs['Transmission'])
+                  nodes['FoamOut'].inputs[17])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
@@ -2309,14 +2524,16 @@ class AOMMatHandler:
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs['Subsurface'])
+                  nodes['FoamOut'].inputs[9])#ss scale
+        links.new(nodes['MRSubsurface'].outputs[0],
+                  nodes['FoamOut'].inputs[7])#ss scale
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs['Transmission'])
+                  nodes['FoamOut'].inputs[17])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
@@ -2330,10 +2547,10 @@ class AOMMatHandler:
         links.new(nodes['FoamSubsurf'].outputs[0],
                   nodes['MRSubsurface'].inputs[4])
 
-        links.new(nodes['FoamColor'].outputs[0],
-                  nodes['FoamOut'].inputs[0])
-        links.new(nodes['FoamColor'].outputs[0],
-                  nodes['FoamOut'].inputs[3])
+        #links.new(nodes['FoamColor'].outputs[0],
+        #          nodes['FoamOut'].inputs[0])
+        #links.new(nodes['FoamColor'].outputs[0],
+        #          nodes['FoamOut'].inputs[3])
 
         links.new(nodes['FoamRoughness'].outputs[0],
                   nodes['CRFoamRough'].inputs[4])
@@ -2694,39 +2911,52 @@ class AOMMatHandler:
         # create group inputs
         group_inputs = ng.nodes.new('NodeGroupInput')
         group_inputs.location = (-1850+xoff, 500+yoff)
-        ng.inputs.new('NodeSocketVector', 'Vector')
-        ng.inputs.new('NodeSocketFloat', 'Time')
-
-        inp = ng.inputs.new('NodeSocketFloat', 'PatchSize')
+        #inp =  ng.inputs.new('NodeSocketVector', 'Vector')
+        inp = ng.interface.new_socket(name= 'Vector', in_out = 'INPUT', socket_type = 'NodeSocketVector')
+        
+        #inp = ng.inputs.new('NodeSocketFloat', 'Time')
+        inp = ng.interface.new_socket(name= 'Time', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
+        
+        #inp = ng.inputs.new('NodeSocketFloat', 'PatchSize')
+        inp = ng.interface.new_socket(name= 'PatchSize', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 6.3
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'Coverage')
+        #inp = ng.inputs.new('NodeSocketFloat', 'Coverage')
+        inp = ng.interface.new_socket(name= 'Coverage', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
         inp.min_value = 0
         inp.max_value = 1
-        inp = ng.inputs.new('NodeSocketFloat', 'RipplesDeform')
+        #inp = ng.inputs.new('NodeSocketFloat', 'RipplesDeform')
+        inp = ng.interface.new_socket(name= 'RipplesDeform', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.2
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'Direction')
+        #inp = ng.inputs.new('NodeSocketFloat', 'Direction')
+        inp = ng.interface.new_socket(name= 'Direction', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0
 
-        inp = ng.inputs.new('NodeSocketFloat', 'RippleTexScale')  #
+        #inp = ng.inputs.new('NodeSocketFloat', 'RippleTexScale')  #
+        inp = ng.interface.new_socket(name= 'RippleTexScale', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 34.1
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'Morphspeed')
+        #inp = ng.inputs.new('NodeSocketFloat', 'Morphspeed')
+        inp = ng.interface.new_socket(name= 'Morphspeed', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 5
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'RippleHeight')
+        #inp = ng.inputs.new('NodeSocketFloat', 'RippleHeight')
+        inp = ng.interface.new_socket(name= 'RippleHeight', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.8
         inp.min_value = 0
 
-        inp = ng.inputs.new('NodeSocketFloat', 'Ripplespeed')  # 714
+       # inp = ng.inputs.new('NodeSocketFloat', 'Ripplespeed')  # 714
+        inp = ng.interface.new_socket(name= 'Ripplespeed', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 714
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'MappingMoveSpeed')  # 0.001
+        #inp = ng.inputs.new('NodeSocketFloat', 'MappingMoveSpeed')  # 0.001
+        inp = ng.interface.new_socket(name= 'MappingMoveSpeed', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.10
         inp.min_value = 0
-        inp = ng.inputs.new('NodeSocketFloat', 'Roughness')
+        #inp = ng.inputs.new('NodeSocketFloat', 'Roughness')
+        inp = ng.interface.new_socket(name= 'Roughness', in_out = 'INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.95
         inp.min_value = 0
 
@@ -3327,7 +3557,8 @@ class AOMMatHandler:
         group_ouputs = ng.nodes.new('NodeGroupOutput')
         group_ouputs.name = "Group Output"
         group_ouputs.location = (00, 400)
-        ng.outputs.new('NodeSocketColor', 'Fac')
+        #ng.outputs.new('NodeSocketColor', 'Fac')
+        out = ng.interface.new_socket(name= 'Fac', in_out = 'OUTPUT', socket_type = 'NodeSocketColor')
 
         links.new(nodes['WindScaleHeigt'].outputs[0],
                   nodes['Group Output'].inputs[0])
