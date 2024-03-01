@@ -241,6 +241,19 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
     def poll(cls, context):
         return hasattr(context.scene, "aom_props")
 
+    def get_waveSim_mod(self, context, oc):
+        #print (f'in get mod {oc.name} candidate {candidate.name}')
+        for mod in oc.modifiers:
+            #print (f'in Schleife {mod.name} candidate {candidate.name}')
+            if hasattr(mod, 'node_group'):
+                #print (f'has node_group mod {mod.name} candidate {mod.node_group.name}')
+                if mod.node_group.name ==  'AOM_ObjectWaveSim':
+                    #print (f'found modifier {mod.node_group.name}')
+                    return mod 
+        return None
+    
+    
+    
     def draw(self, context):
         layout = self.layout
 
@@ -265,18 +278,27 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
                 if dp_mod != None:
                     subcol = col.column()
                     canvas_settings = dp_mod.canvas_settings
-                    subcol.prop(
-                        canvas_settings.canvas_surfaces["Waves"], "wave_timescale")
+                    #subcol.prop(
+                    #    canvas_settings.canvas_surfaces["Waves"], "wave_timescale")
 
-                    subcol.prop(
-                        canvas_settings.canvas_surfaces["Waves"], "wave_speed", text="Speed")
-                    subcol.prop(
-                        canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
-                    subcol.prop(
-                        canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
-                    subcol.prop(
-                        canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
-                    # row = layout.row(align=True)
+                    #subcol.prop(
+                    #    canvas_settings.canvas_surfaces["Waves"], "wave_speed", text="Speed")
+                    oc = get_active_ocean(context)
+                    mod = self.get_waveSim_mod(context, oc)
+                    
+                    for inp in mod.node_group.interface.items_tree:
+                        if inp.bl_socket_idname != 'NodeSocketGeometry':
+                            prop = '["' + inp.identifier +  '"]'
+                            subcol.prop(data= mod, property=prop, text=inp.name)
+                            '''subcol.prop(
+                                mod['Socket_1'], "wave_damping", text="Displacement Strength")
+                            subcol.prop(
+                                canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")'''
+                            #subcol.prop(
+                            #    canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
+                            #subcol.prop(
+                            #    canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
+                            # row = layout.row(align=True)
 
 
 class BE_PT_AdvOceanMat(bpy.types.Panel):
@@ -844,17 +866,23 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
                 #print (f'has node_group mod {mod.name} candidate {mod.node_group.name}')
                 if mod.node_group.name ==  'AOMGeoFloat':
                     #print (f'found modifier {mod.node_group.name}')
-                    if mod["Input_4"] == candidate:
+                    if mod["Socket_4"] == candidate:
                         #print (f'found candidate {candidate.name}')
                         return mod 
         return None
         
-    '''def get_input_txt(self,k,mod):
-        #k is key string 
-        num = k.replace('Input_', '')
-        num = int(num)
-        
-        mod.node_group.nodes'''
+    def get_waveSim_mod(self, context, oc):
+        candidate = context.object
+        #print (f'in get mod {oc.name} candidate {candidate.name}')
+        for mod in oc.modifiers:
+            #print (f'in Schleife {mod.name} candidate {candidate.name}')
+            if hasattr(mod, 'node_group'):
+                #print (f'has node_group mod {mod.name} candidate {mod.node_group.name}')
+                if mod.node_group.name ==  'AOM_ObjectWaveSim':
+                    #print (f'found modifier {mod.node_group.name}')
+                    return mod 
+        return None
+    
         
         
         
@@ -887,21 +915,21 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
                 #for inp in mod.keys():
                 if mod != None:
                     txt = 'fail'
-                    if mod['Input_2']:
-                        if mod['Input_3'] != None:
-                            txt = 'Settings for ' + mod['Input_3'].name
+                    if mod['Socket_2']:
+                        if mod['Socket_3'] != None:
+                            txt = 'Settings for ' + mod['Socket_3'].name
                         else:
                             txt = 'Add Visibile Collection'
                     else:
-                        if mod['Input_1'] != None:
-                            txt = 'Settings for ' + mod['Input_1'].name
+                        if mod['Socket_1'] != None:
+                            txt = 'Settings for ' + mod['Socket_1'].name
                         else:
                             txt = 'Add Visible Object'
                         
                     subcol.label(text=txt)
                 
                     print(f'mod keys are{mod.keys()}')
-                    for inp in mod.node_group.inputs:
+                    for inp in mod.node_group.interface.items_tree:
                         if inp.bl_socket_idname != 'NodeSocketGeometry':
                             if inp.bl_socket_idname == 'NodeSocketCollection':
                                 ##collection prop, because greyed out
@@ -911,8 +939,16 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
                                 ###main list
                                 prop = '["' + inp.identifier +  '"]'
                                 subcol.prop(data= mod, property=prop, text=inp.name)
-                        
-                        
+                
+                
+                
+                '''mod = self.get_waveSim_mod(context, ocean)    
+                if mod != None:
+                    subcol.label(text=)
+                    for inp in mod.node_group.interface.items_tree:
+                        if inp.bl_socket_idname != 'NodeSocketGeometry':        
+                            prop = '["' + inp.identifier +  '"]'
+                            subcol.prop(data= mod, property=prop, text=inp.name)'''
                     
                     #subcol.prop_search(data= mod, property=prop, search_data = bpy.data, search_property='collections', text='test')
                     

@@ -62,6 +62,8 @@ def get_value(ob):
             vecstring = vecstring + str(d)+","
         vecstring = vecstring + ")"
         return vecstring  # return vector values
+    elif 'Material' in str(type(ob)):
+        return "ocean.material_slots[0].material"
     else:
 
         print(f'#MöpMöp {type(ob)}')
@@ -114,12 +116,17 @@ def nodes_to_nodecode(group):
             
             print(
                 f'node.location = ({int(node.location[0])}, {int(node.location[1])})')
-
+            check_for_Paired(node, nodes, group)
+            
             if node.bl_idname == 'NodeGroupInput':
                 pass
             elif node.bl_idname == 'NodeGroupOutput':
                 pass
             elif node.bl_idname == 'NodeReroute':
+                pass
+            elif node.type == 'SIMULATION_INPUT':
+                pass
+            elif node.type == 'REPEAT_INPUT':
                 pass
             else:
                 special_operations(node)
@@ -132,13 +139,41 @@ def nodes_to_nodecode(group):
                     value = get_putput(a, inp)
                     if value != '':
                         print(f'node.outputs[{a}].default_value = {value}')
+            
     
     gen_group_outputs(group)
     gen_links(group, nodes, links)
     mod = get_mod(context, group)
     set_current_maininputs(mod)
 
-
+def check_for_Paired(node, nodes, group):
+       
+    ### ist es Simulation node 
+    if node.type == 'SIMULATION_INPUT' or node.type == 'SIMULATION_OUTPUT' or node.type == 'REPEAT_INPUT' or node.type == 'REPEAT_OUTPUT':
+        print('# found PairedNodes')
+    else:
+        return
+    
+    
+    ###war schon eine Simulation node 
+    pairedbefore = []
+    for n in nodes:
+        if n == node:
+            break
+        if node.type == 'SIMULATION_INPUT' or node.type == 'SIMULATION_OUTPUT' or node.type == 'REPEAT_INPUT' or node.type == 'REPEAT_OUTPUT':
+            pairedbefore.append(n)
+    ### wenn es ein Input ist 
+    if hasattr(node,'paired_output'):
+        if node.paired_output in pairedbefore:
+            print(f'node.pair_with_output(nodes[{node.paired_output.name}])')
+    elif node.type == 'REPEAT_OUTPUT' or node.type == 'SIMULATION_OUTPUT':
+        for bro in pairedbefore:
+            if hasattr(bro,'paired_output'):
+                if bro.paired_output == node:
+                    print(f'nodes["{bro.name}"].pair_with_output(nodes["{node.name}"])')
+    
+    
+    
 def special_operations(node):
 
     if hasattr(node, "instance_type"):
@@ -245,10 +280,15 @@ def get_idname_from_targetsocket(group, inp):
 
 
 def gen_maininputs(group):
-    for inp in group.inputs:
+    inputs = group.interface.items_tree[:]
+    for n,it in enumerate(inputs[:]):
+        if it.in_out == 'OUTPUT':
+            inputs.pop(n)
+        
+    for inp in inputs:
         #if inp.bl_socket_idname != 'NodeSocketGeometry':
-        print(
-            f"inp = node_group.inputs.new('{get_idname_from_targetsocket(group, inp)}','{inp.name}')")
+        print(       
+            f"inp = node_group.interface.new_socket(name='{inp.name}', in_out='INPUT', socket_type = '{inp.socket_type}')") #{get_idname_from_targetsocket(group, inp)}
         if hasattr(inp, "default_value"):
             if get_value(inp.default_value) != '':
                 print(
@@ -279,13 +319,16 @@ def gen_frames(group):
 
 
 def set_current_maininputs(mod):
+    
+    #Socket number doesn't fit values that get evaluated, because identifier added with adding socket and is maybe later moved 
+    print("'''")
     if mod != None:
-        for inp in mod.node_group.inputs:
+        for inp in mod.node_group.interface.items_tree:
             if inp.bl_socket_idname != 'NodeSocketGeometry':
                 if get_value(mod[inp.identifier]):
                     print(
                         f"mod['{inp.identifier}'] = {get_value(mod[inp.identifier])}")
-
+    print("'''")
             #print(f"Mööp {inp.name} ")
 
 
@@ -311,9 +354,17 @@ def gen_links(group, nodes, links):
             
             
 def gen_group_outputs(group):
+    items = group.interface.items_tree[:]
+    outputs=[]
+    for n,out in enumerate(items[:]):
+        if out.in_out == 'OUTPUT':
+            outputs.append(out)
+                
+    for inp in outputs:
+        #if inp.bl_socket_idname != 'NodeSocketGeometry':
+        print(       
+            f"inp = node_group.interface.new_socket(name='{inp.name}', in_out='OUTPUT', socket_type = '{inp.socket_type}')") #{get_idname_from_targetsocket(group, inp)}
     
-    for output in group.outputs:
-        print(f"node_group.outputs.new(type= '{output.bl_socket_idname}', name='{output.name}')")
     
 
 group = bpy.data.node_groups['Spray']

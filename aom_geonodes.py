@@ -30,18 +30,29 @@ class AOMGeoNodesHandler:
         for a, mod in enumerate(mods):
             # print(a)
             # print(mod.name)
-            if "Dynamic Paint" in mod.name:
+            if mod.type == 'DYNAMIC_PAINT':
                 return a
         # wenn nicht ACHTUUNG
         print('way out')
         return len(mods)-1
+    
+    def move_mod_to_bottom(self, mod, ocean):
+        m = self.get_mod_index(ocean, mod)
+        n = len(ocean.modifiers)-1
+        ocean.modifiers.move(m,n)
+        
 
-    def move_above_DP(self, ocean, mod):
+    def move_above_DP(self, mod, ocean):
 
         m = self.get_mod_index(ocean, mod)
         n = self.get_DP_mod_index(ocean)
         print(f'DP detected {n}')
-        if n >= 1:
+        
+        #unterhalb
+        if m>>n:
+            ocean.modifiers.move(m,n)
+
+        '''if n >= 1:
             print(f'1möp {n}')
             print(mod.name)
             print(f'm {m}')
@@ -56,7 +67,7 @@ class AOMGeoNodesHandler:
                 print(f'n{n}')
         else:
             print('2möp  1')
-            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=1)
+            bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=1)'''
 
     def move_mod_one_up(self, ocean, mod):
         n = len(ocean.modifiers)
@@ -480,7 +491,7 @@ class AOMGeoNodesHandler:
 
         ocean.modifiers.active = mod
 
-        self.move_above_DP(ocean, mod)
+        self.move_above_DP(mod, ocean)
 
         # driver
 
@@ -1586,11 +1597,15 @@ class AOMGeoNodesHandler:
         
         #get geo nodes Modifier
         mod, node_group = self.new_geonodes_mod(goal)
+        mod.name = "Float_" + obj.name
+        self.move_above_DP(mod, ocean)
         
         aom_props = context.scene.aom_props
         is_GeoFloat_Smooth = aom_props.is_GeoFloat_Smooth
         instanceFloatobj = aom_props.instanceFloatobj
         
+        self.make_AOMFloat_ObjWaves_nodegroup()
+        self.make_AOM_DistributeEnergyFloat_nodegroup()
         proximity_ng = self.make_AOMFloat_ObjectFoamProximity_nodegroup()
         self.make_FloatRotMove_nodegroup()
         self.make_AOMFloat_plus_nodegroup()
@@ -1598,26 +1613,8 @@ class AOMGeoNodesHandler:
         self.make_AOMFloat_Instancing_nodegroup()
         
         node_group = self.make_AOMGeoFloat_nodegroup(mod)
-        
-        
-        
         mod.node_group = node_group
         
-        #mod['Socket_1'] = obj
-        
-        
-        
-        '''if is_GeoFloat_Smooth:
-            mod.name = "GeoFloat_hash"
-            node_group = self.make_GeoFloat_hash()  # !!!
-        else:
-            mod.name = "GeoFloat_plus"
-            node_group = self.make_GeoFloat_plus(mod)
-            #nodegroup.name = "Geoflat_plus"
-        #self.move_mod_one_up(ocean, mod)'''
-
-        
-
         if obj != None:
             mod['Socket_1'] = obj
             # float_parent_id
@@ -1627,10 +1624,22 @@ class AOMGeoNodesHandler:
             #obj.aom_data.ripple_parent = ocean
         if collision != None:
             mod['Socket_5'] = collision
-        #obj.modifiers.active = mod
-
-        ##buggy
-        #self.move_above_DP(goal, mod)
+        
+        
+        #check for object wave sim modifier
+        check = True
+        for mod in ocean.modifiers:
+            if hasattr(mod, 'node_group'):
+                if mod.node_group.name == "AOM_ObjectWaveSim": 
+                    check =False
+                    self.move_mod_to_bottom(mod, ocean)
+        if check:                    
+            mod, node_group = self.new_geonodes_mod(goal)
+            mod.node_group = self.make_AOM_ObjectWaveSim_nodegroup(mod, ocean)
+            mod.name = "AOM_ObjectWaveSim"
+            self.move_mod_to_bottom(mod, ocean)
+            
+        
 
     def make_AOMFloat_plus_nodegroup(self):
         # does it exist
@@ -2583,6 +2592,268 @@ class AOMGeoNodesHandler:
         
         return node_group
 
+    def make_AOMFloat_ObjWaves_nodegroup(self):
+        # does it exist
+        ngname = 'AOMFloat_ObjWaves'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+        
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Distance', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 1.0
+        inp = node_group.interface.new_socket(name='ContributeWaves', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = False
+        inp = node_group.interface.new_socket(name='DetectionSize', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.1
+        inp = node_group.interface.new_socket(name='InputStrength', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.4
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame"
+        node.label = "Energy Input per Object"
+        node.location = (-17, -240)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input"
+        node.location = (-540, 80)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "Named Attribute"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (-179, 178)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "EnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("ShaderNodeMapRange" )
+        node.name = "Map Range.002"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (-163, 50)
+        node.data_type = "FLOAT"
+        node.interpolation_type = "LINEAR"
+        node.clamp = True
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.1
+        node.inputs[3].default_value = 0.4
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = 4.0
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (1.0,1.0,1.0,)
+        node.inputs[9].default_value = (0.0,0.0,0.0,)
+        node.inputs[10].default_value = (1.0,1.0,1.0,)
+        node.inputs[11].default_value = (4.0,4.0,4.0,)
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "Math"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (25, 129)
+        node.operation = "ADD"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.5
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "Store Named Attribute"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (202, 186)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "EnergyInput"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeViewer" )
+        node.name = "Viewer"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (272, -63)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0
+        node.inputs[5].default_value = False
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeSwitch" )
+        node.name = "Switch"
+        node.location = (492, 159)
+        node.input_type = "GEOMETRY"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = False
+        node.inputs[1].default_value = False
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = 0.0
+        node.inputs[4].default_value = 0
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = True
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[9].default_value = (0.0,0.0,0.0,)
+        node.inputs[10].default_value = (0.800000011920929,0.800000011920929,0.800000011920929,1.0,)
+        node.inputs[11].default_value = (0.800000011920929,0.800000011920929,0.800000011920929,1.0,)
+        node.inputs[12].default_value = ""
+        node.inputs[13].default_value = ""
+        node.inputs[26].default_value = (0.0,0.0,0.0,)
+        node.inputs[27].default_value = (0.0,0.0,0.0,)
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = False
+        node.outputs[3].default_value = (0.0,0.0,0.0,)
+        node.outputs[4].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[5].default_value = ""
+        node.outputs[7].default_value = None
+        node.outputs[8].default_value = None
+        node.outputs[9].default_value = None
+        node.outputs[10].default_value = None
+        node.outputs[11].default_value = None
+        node.outputs[12].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("NodeGroupOutput" )
+        node.name = "Group Output"
+        node.location = (720, 160)
+        inp = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Distance', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        inp = node_group.interface.new_socket(name='ContributeWaves', in_out='OUTPUT', socket_type = 'NodeSocketBool')
+        inp = node_group.interface.new_socket(name='DetectionSize', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        inp = node_group.interface.new_socket(name='InputStrength', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        links.new( nodes['Group Input'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
+        links.new( nodes['Group Input'].outputs[0],  nodes['Viewer'].inputs[0])
+        links.new( nodes['Group Input'].outputs[0],  nodes['Switch'].inputs[14])
+        links.new( nodes['Group Input'].outputs[1],  nodes['Map Range.002'].inputs[0])
+        links.new( nodes['Group Input'].outputs[2],  nodes['Switch'].inputs[1])
+        links.new( nodes['Group Input'].outputs[3],  nodes['Map Range.002'].inputs[2])
+        links.new( nodes['Group Input'].outputs[4],  nodes['Map Range.002'].inputs[3])
+        links.new( nodes['Math'].outputs[0],  nodes['Store Named Attribute'].inputs[4])
+        links.new( nodes['Map Range.002'].outputs[0],  nodes['Math'].inputs[0])
+        links.new( nodes['Named Attribute'].outputs[1],  nodes['Math'].inputs[1])
+        links.new( nodes['Map Range.002'].outputs[0],  nodes['Viewer'].inputs[1])
+        links.new( nodes['Switch'].outputs[6],  nodes['Group Output'].inputs[0])
+        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[15])
+        
+        
+        
+        return node_group
+
+    def make_AOM_DistributeEnergyFloat_nodegroup(self):
+            # does it exist
+            ngname = 'AOM_DistributeEnergyFloat'
+            if ngname in bpy.data.node_groups:
+                return bpy.data.node_groups[ngname]
+
+            node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+            # self.remove_nodes(node_group)
+            nodes = node_group.nodes
+            links = node_group.links
+            
+            inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+            inp = node_group.interface.new_socket(name='Previous', in_out='INPUT', socket_type = 'NodeSocketFloat')
+            inp.default_value = 0.0
+            inp = node_group.interface.new_socket(name='Current', in_out='INPUT', socket_type = 'NodeSocketFloat')
+            inp.default_value = 2.0
+            inp = node_group.interface.new_socket(name='Damping', in_out='INPUT', socket_type = 'NodeSocketFloat')
+            inp.default_value = 0.99
+
+            node = nodes.new("NodeGroupInput" )
+            node.name = "Group Input"
+            node.location = (-507, 400)
+
+            node = nodes.new("GeometryNodeBlurAttribute" )
+            node.name = "BlurEnergy"
+            node.location = (-70, 261)
+            node.data_type = "FLOAT"
+            node.hide = False
+            node.mute = False
+            node.inputs[0].default_value = 0.0
+            node.inputs[1].default_value = 0
+            node.inputs[2].default_value = (0.0,0.0,0.0,)
+            node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+            node.inputs[4].default_value = 1
+            node.inputs[5].default_value = 1.0
+            node.outputs[0].default_value = 0.0
+            node.outputs[1].default_value = 0
+            node.outputs[2].default_value = (0.0,0.0,0.0,)
+            node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+
+            node = nodes.new("ShaderNodeMath" )
+            node.name = "BlurScaling"
+            node.location = (135, 270)
+            node.operation = "MULTIPLY"
+            node.use_clamp = False
+            node.hide = False
+            node.mute = False
+            node.inputs[0].default_value = 0.5
+            node.inputs[1].default_value = 2.0
+            node.inputs[2].default_value = 0.5
+            node.outputs[0].default_value = 0.0
+
+            node = nodes.new("ShaderNodeMath" )
+            node.name = "SubtractFormer"
+            node.location = (410, 461)
+            node.operation = "SUBTRACT"
+            node.use_clamp = False
+            node.hide = False
+            node.mute = False
+            node.inputs[0].default_value = 0.5
+            node.inputs[1].default_value = 2.0
+            node.inputs[2].default_value = 0.5
+            node.outputs[0].default_value = 0.0
+
+            node = nodes.new("ShaderNodeMath" )
+            node.name = "Damping"
+            node.location = (581, 458)
+            node.operation = "MULTIPLY"
+            node.use_clamp = False
+            node.hide = False
+            node.mute = False
+            node.inputs[0].default_value = 0.5
+            node.inputs[1].default_value = 0.99
+            node.inputs[2].default_value = 0.5
+            node.outputs[0].default_value = 0.0
+
+            node = nodes.new("NodeGroupOutput" )
+            node.name = "Group Output"
+            node.location = (810, 455)
+            inp = node_group.interface.new_socket(name='DistributedEnergy', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+            links.new( nodes['Group Input'].outputs[1],  nodes['BlurEnergy'].inputs[0])
+            links.new( nodes['Group Input'].outputs[2],  nodes['SubtractFormer'].inputs[1])
+            links.new( nodes['Group Input'].outputs[3],  nodes['Damping'].inputs[1])
+            links.new( nodes['SubtractFormer'].outputs[0],  nodes['Damping'].inputs[0])
+            links.new( nodes['Damping'].outputs[0],  nodes['Group Output'].inputs[0])
+            links.new( nodes['BlurEnergy'].outputs[0],  nodes['BlurScaling'].inputs[0])
+            links.new( nodes['BlurScaling'].outputs[0],  nodes['SubtractFormer'].inputs[0])
+            
 
     def make_AOMFloat_Ripples_nodegroup(self):
         # does it exist
@@ -3973,111 +4244,57 @@ class AOMGeoNodesHandler:
         
                
         
-        #inp = node_group.inputs.new('NodeSocketGeometry','Geometry')
         inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
-        #inp = node_group.inputs.new('NodeSocketObject','Visible Object')
         inp = node_group.interface.new_socket(name='Visible Object', in_out='INPUT', socket_type = 'NodeSocketObject')
-        #inp = node_group.inputs.new('NodeSocketBool','Use Collection')
         inp = node_group.interface.new_socket(name='Use Collection', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        #inp = node_group.inputs.new('NodeSocketCollection','Visible Collection')
         inp = node_group.interface.new_socket(name='Visible Collection', in_out='INPUT', socket_type = 'NodeSocketCollection')
-        #inp = node_group.inputs.new('NodeSocketObject','Floatcage')
         inp = node_group.interface.new_socket(name='Floatcage', in_out='INPUT', socket_type = 'NodeSocketObject')
-        #inp = node_group.inputs.new('NodeSocketObject','Collision Object')
         inp = node_group.interface.new_socket(name='Collision Object', in_out='INPUT', socket_type = 'NodeSocketObject')
-        #inp = node_group.inputs.new('NodeSocketBool','Show CollisionObject')
         inp = node_group.interface.new_socket(name='Show CollisionObject', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = False
-        #inp = node_group.inputs.new('NodeSocketBool','Show Detection Marks')
         inp = node_group.interface.new_socket(name='Show Detection Marks', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        #inp = node_group.inputs.new('NodeSocketFloat','XDetectionDistance')
         inp = node_group.interface.new_socket(name='XDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        #inp = node_group.inputs.new('NodeSocketFloat','YDetectionDistance')
         inp = node_group.interface.new_socket(name='YDetectionDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 2.0
-        #inp = node_group.inputs.new('NodeSocketFloat','DetectionHeight')
         inp = node_group.interface.new_socket(name='DetectionHeight', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','XRotSensitivity')
         inp = node_group.interface.new_socket(name='XRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','YRotSensitivity')
         inp = node_group.interface.new_socket(name='YRotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityX')
         inp = node_group.interface.new_socket(name='MoveSensitivityX', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivityY')
         inp = node_group.interface.new_socket(name='MoveSensitivityY', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        #inp = node_group.inputs.new('NodeSocketFloat','HeightSensitivity')
         inp = node_group.interface.new_socket(name='HeightSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','XOffset')
         inp = node_group.interface.new_socket(name='XOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','YOffset')
         inp = node_group.interface.new_socket(name='YOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','ZOffset')
         inp = node_group.interface.new_socket(name='ZOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketBool','Use Object Foam')
+        inp = node_group.interface.new_socket(name='ContributeWaves', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = True
+        inp = node_group.interface.new_socket(name='DetectionSize', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.1
+        inp = node_group.interface.new_socket(name='InputStrength', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.5
         inp = node_group.interface.new_socket(name='Use Object Foam', in_out='INPUT', socket_type = 'NodeSocketBool')
         inp.default_value = True
-        #inp = node_group.inputs.new('NodeSocketFloat','FoamDistance')
         inp = node_group.interface.new_socket(name='FoamDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 65
-        #inp = node_group.inputs.new('NodeSocketBool','Use Ripples')
-        inp = node_group.interface.new_socket(name='Use Ripples', in_out='INPUT', socket_type = 'NodeSocketBool')
-        inp.default_value = True
-        #inp = node_group.inputs.new('NodeSocketFloat','Wavelength')
-        inp = node_group.interface.new_socket(name='Wavelength', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 0.1
-        #inp = node_group.inputs.new('NodeSocketFloat','Amplitude')
-        inp = node_group.interface.new_socket(name='Amplitude', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 3.0
-        #inp = node_group.inputs.new('NodeSocketFloat','OuterFalloff')
-        inp = node_group.interface.new_socket(name='OuterFalloff', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 3.0
-        #inp = node_group.inputs.new('NodeSocketFloat','Innercut')
-        inp = node_group.interface.new_socket(name='Innercut', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 20.0
-        #inp = node_group.inputs.new('NodeSocketFloat','Wave Speed')
-        inp = node_group.interface.new_socket(name='Wave Speed', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 10.0
-        #inp = node_group.inputs.new('NodeSocketBool','Show Front')
-        inp = node_group.interface.new_socket(name='Show Front', in_out='INPUT', socket_type = 'NodeSocketBool')
-        inp.default_value = False
-        #inp = node_group.inputs.new('NodeSocketFloatFactor','Circular <--> Bow Wave')
-        inp = node_group.interface.new_socket(name='Circular <--> Bow Wave', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 0.0
-        inp.min_value = 0.0
-        inp.max_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','Set Front Direction')
-        inp = node_group.interface.new_socket(name='Set Front Direction', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','Bow-Wave Offset')
-        inp = node_group.interface.new_socket(name='Bow-Wave Offset', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','Turbulence')
-        inp = node_group.interface.new_socket(name='Turbulence', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        inp.default_value = 1.0
+        inp.default_value = 65.0
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input"
         node.location = (-1972, 657)
 
-        node = nodes.new("NodeReroute" )
-        node.name = "Reroute"
-        node.location = (-1314, 174)
-
         node = nodes.new("GeometryNodeGroup" )
         node.name = "Group.001"
-        node.location = (-982, 621)
+        node.location = (-1360, 660)
         node.node_tree = bpy.data.node_groups["AOMFloat_plus"]
         node.hide = False
         node.mute = False
@@ -4098,29 +4315,25 @@ class AOMGeoNodesHandler:
         node.outputs[3].default_value = (0.0,0.0,0.0,)
         node.outputs[4].default_value = (0.0,0.0,0.0,)
 
-        node = nodes.new("NodeReroute" )
-        node.name = "Reroute.009"
-        node.location = (-453, 187)
-
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.001"
-        node.location = (-386, 1411)
+        node.location = (-1060, 1560)
 
         node = nodes.new("NodeReroute" )
-        node.name = "Reroute.002"
-        node.location = (-295, 396)
-
-        node = nodes.new("NodeReroute" )
-        node.name = "Reroute.003"
-        node.location = (-162, 218)
+        node.name = "Reroute.009"
+        node.location = (-880, 200)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.001"
-        node.location = (-123, 285)
+        node.location = (-840, 320)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.003"
+        node.location = (-820, 240)
 
         node = nodes.new("GeometryNodeGroup" )
         node.name = "Group.002"
-        node.location = (68, 770)
+        node.location = (-660, 680)
         node.node_tree = bpy.data.node_groups["AOMFloat_ObjectFoamProximity"]
         node.hide = False
         node.mute = False
@@ -4135,23 +4348,34 @@ class AOMGeoNodesHandler:
         node.inputs[10].default_value = 2.54
         node.outputs[1].default_value = 0.0
 
-        node = nodes.new("NodeGroupInput" )
-        node.name = "Group Input.002"
-        node.location = (599, 1411)
-
         node = nodes.new("NodeReroute" )
-        node.name = "Reroute.007"
-        node.location = (818, 347)
+        node.name = "Reroute.002"
+        node.location = (-555, 391)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.004"
+        node.location = (-272, 1556)
+
+        node = nodes.new("GeometryNodeGroup" )
+        node.name = "Group.003"
+        node.location = (-10, 712)
+        node.node_tree = bpy.data.node_groups["AOMFloat_ObjWaves"]
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = False
+        node.inputs[3].default_value = 0.1
+        node.inputs[4].default_value = 0.5
 
         node = nodes.new("GeometryNodeGroup" )
         node.name = "Group.005"
-        node.location = (889, 715)
+        node.location = (806, 850)
         node.node_tree = bpy.data.node_groups["AOMFloat_Ripples"]
         node.hide = False
         node.mute = False
         node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = True
+        node.inputs[3].default_value = False
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = 0.23
         node.inputs[6].default_value = 0.8
@@ -4163,6 +4387,10 @@ class AOMGeoNodesHandler:
         node.inputs[12].default_value = 3.79
         node.inputs[13].default_value = 1.0
         node.inputs[14].default_value = 7.4
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.007"
+        node.location = (818, 347)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.008"
@@ -4178,11 +4406,11 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.003"
-        node.location = (1256, 1392)
+        node.location = (1200, 1560)
 
         node = nodes.new("GeometryNodeGroup" )
         node.name = "Group.006"
-        node.location = (1527, 696)
+        node.location = (1620, 680)
         node.node_tree = bpy.data.node_groups["AOMFloat_Instancing"]
         node.hide = False
         node.mute = False
@@ -4194,11 +4422,10 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
-        node.location = (1981, 697)
-        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Geometry')
-        out = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        node.location = (2060, 720)
+        inp = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
         links.new( nodes['Group Input'].outputs[0],  nodes['Group.001'].inputs[0])
-        links.new( nodes['Group Input'].outputs[4],  nodes['Reroute'].inputs[0])
+        links.new( nodes['Group Input'].outputs[4],  nodes['Group.001'].inputs[13])
         links.new( nodes['Group Input'].outputs[7],  nodes['Group.001'].inputs[12])
         links.new( nodes['Group Input'].outputs[8],  nodes['Group.001'].inputs[5])
         links.new( nodes['Group Input'].outputs[9],  nodes['Group.001'].inputs[6])
@@ -4213,24 +4440,15 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[18],  nodes['Group.001'].inputs[11])
         links.new( nodes['Group Input.001'].outputs[5],  nodes['Group.002'].inputs[7])
         links.new( nodes['Group Input.001'].outputs[6],  nodes['Group.002'].inputs[8])
-        links.new( nodes['Group Input.001'].outputs[19],  nodes['Group.002'].inputs[1])
-        links.new( nodes['Group Input.001'].outputs[20],  nodes['Group.002'].inputs[9])
-        links.new( nodes['Group Input.002'].outputs[21],  nodes['Group.005'].inputs[3])
-        links.new( nodes['Group Input.002'].outputs[22],  nodes['Group.005'].inputs[5])
-        links.new( nodes['Group Input.002'].outputs[23],  nodes['Group.005'].inputs[6])
-        links.new( nodes['Group Input.002'].outputs[24],  nodes['Group.005'].inputs[7])
-        links.new( nodes['Group Input.002'].outputs[25],  nodes['Group.005'].inputs[8])
-        links.new( nodes['Group Input.002'].outputs[26],  nodes['Group.005'].inputs[9])
-        links.new( nodes['Group Input.002'].outputs[27],  nodes['Group.005'].inputs[10])
-        links.new( nodes['Group Input.002'].outputs[28],  nodes['Group.005'].inputs[13])
-        links.new( nodes['Group Input.002'].outputs[29],  nodes['Group.005'].inputs[11])
-        links.new( nodes['Group Input.002'].outputs[30],  nodes['Group.005'].inputs[12])
-        links.new( nodes['Group Input.002'].outputs[31],  nodes['Group.005'].inputs[14])
+        links.new( nodes['Group Input.001'].outputs[22],  nodes['Group.002'].inputs[1])
+        links.new( nodes['Group Input.001'].outputs[23],  nodes['Group.002'].inputs[9])
+        links.new( nodes['Group Input.004'].outputs[19],  nodes['Group.003'].inputs[2])
+        links.new( nodes['Group Input.004'].outputs[20],  nodes['Group.003'].inputs[3])
+        links.new( nodes['Group Input.004'].outputs[21],  nodes['Group.003'].inputs[4])
         links.new( nodes['Group Input.003'].outputs[1],  nodes['Group.006'].inputs[5])
         links.new( nodes['Group Input.003'].outputs[2],  nodes['Group.006'].inputs[7])
         links.new( nodes['Group Input.003'].outputs[3],  nodes['Group.006'].inputs[6])
         links.new( nodes['Group.006'].outputs[0],  nodes['Group Output'].inputs[0])
-        links.new( nodes['Reroute'].outputs[0],  nodes['Group.001'].inputs[13])
         links.new( nodes['Group.001'].outputs[0],  nodes['Group.002'].inputs[0])
         links.new( nodes['Reroute.003'].outputs[0],  nodes['Group.002'].inputs[2])
         links.new( nodes['Reroute.002'].outputs[0],  nodes['Group.002'].inputs[3])
@@ -4238,7 +4456,6 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group.001'].outputs[3],  nodes['Reroute.003'].inputs[0])
         links.new( nodes['Reroute.009'].outputs[0],  nodes['Group.002'].inputs[5])
         links.new( nodes['Group.002'].outputs[1],  nodes['Group.005'].inputs[4])
-        links.new( nodes['Group.002'].outputs[0],  nodes['Group.005'].inputs[0])
         links.new( nodes['Group.005'].outputs[0],  nodes['Group.006'].inputs[0])
         links.new( nodes['Reroute.007'].outputs[0],  nodes['Group.006'].inputs[1])
         links.new( nodes['Reroute.002'].outputs[0],  nodes['Reroute.007'].inputs[0])
@@ -4253,27 +4470,855 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.003'].outputs[0],  nodes['Group.005'].inputs[1])
         links.new( nodes['Group.001'].outputs[2],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Reroute.001'].outputs[0],  nodes['Group.005'].inputs[2])
-        '''mod['Socket_18'] = True
+        links.new( nodes['Group.003'].outputs[0],  nodes['Group.005'].inputs[0])
+        links.new( nodes['Group.002'].outputs[0],  nodes['Group.003'].inputs[0])
+        links.new( nodes['Group.002'].outputs[1],  nodes['Group.003'].inputs[1])
+        '''
+        mod['Socket_2'] = True
         mod['Socket_6'] = True
-        mod['Socket_7'] = 2.0
-        mod['Socket_8'] = 2.0
-        mod['Socket_10'] = 1.0
+        mod['Socket_7'] = True
+        mod['Socket_8'] = 3.18
+        mod['Socket_9'] = 2.56
+        mod['Socket_10'] = 3.06
         mod['Socket_11'] = 1.0
-        mod['Socket_12'] = 0.5
-        mod['Socket_13'] = 0.5
-        mod['Socket_14'] = 0.5
+        mod['Socket_12'] = 1.0
+        mod['Socket_13'] = 1.0
+        mod['Socket_14'] = 1.0
+        mod['Socket_15'] = 0.73
+        mod['Socket_33'] = True
+        mod['Socket_34'] = 0.1
+        mod['Socket_35'] = 0.5
         mod['Socket_19'] = True
         mod['Socket_20'] = 65.0
-        mod['Socket_21'] = True
-        mod['Socket_22'] = 0.1
-        mod['Socket_23'] = 3.0
-        mod['Socket_24'] = 0.1
-        mod['Socket_25'] = 3.0
-        mod['Socket_26'] = 6.0
-        mod['Socket_30'] = 1.0
-        mod['Socket_31'] = 1.0'''
+        '''
         
         return node_group
+    
+    
+    def make_AOM_ObjectWaveSim_nodegroup(self, mod, ocean):
+        # does it exist
+        ngname = 'AOM_ObjectWaveSim'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+        
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='DisplacementStrength', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.5
+        inp = node_group.interface.new_socket(name='Damping', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.99
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.001"
+        node.label = "Transfer Attribute to Moving Ocean"
+        node.location = (-316, 717)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.003"
+        node.label = "Set Displacement"
+        node.location = (267, 378)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.006"
+        node.label = "AddEnergy"
+        node.location = (1978, -100)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.005"
+        node.label = "RememberEnergyInput"
+        node.location = (3280, 127)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.004"
+        node.label = "SwapAttributes"
+        node.location = (4264, 576)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.007"
+        node.label = "Initial"
+        node.location = (-1890, -44)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.002"
+        node.label = "Distribute Energy"
+        node.location = (1762, 256)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input"
+        node.location = (-3000, 320)
+
+        node = nodes.new("GeometryNodeSimulationInput" )
+        node.name = "Simulation Input"
+        node.location = (-1277, 350)
+        # found PairedNodes
+
+        node = nodes.new("GeometryNodeInputIndex" )
+        node.name = "PIndex"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-1003, 242)
+        node.hide = False
+        node.mute = False
+        node.outputs[0].default_value = 0
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PtoNew"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-1003, 382)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "P"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "Store Named Attribute"
+        node.parent = node_group.nodes["Frame.007"]
+        node.location = (-849, 444)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "P"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.001"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-783, 542)
+
+        node = nodes.new("GeometryNodeSampleIndex" )
+        node.name = "SIP"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-783, 402)
+        node.data_type = "FLOAT"
+        node.clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[5].default_value = False
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = 0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[4].default_value = False
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputIndex" )
+        node.name = "CIndex"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-743, 42)
+        node.hide = False
+        node.mute = False
+        node.outputs[0].default_value = 0
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "CtoNew"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-743, 182)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "C"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "Store Named Attribute.001"
+        node.parent = node_group.nodes["Frame.007"]
+        node.location = (-589, 444)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "C"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "AddAttP"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-543, 442)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "P"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeSampleIndex" )
+        node.name = "SIC"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-543, 202)
+        node.data_type = "FLOAT"
+        node.clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[5].default_value = False
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = 0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[4].default_value = False
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PtoDistE"
+        node.parent = node_group.nodes["Frame.002"]
+        node.location = (-542, 264)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "P"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "CtoDistE"
+        node.parent = node_group.nodes["Frame.002"]
+        node.location = (-542, 124)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "C"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.002"
+        node.parent = node_group.nodes["Frame.002"]
+        node.location = (-542, -16)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PntoP"
+        node.parent = node_group.nodes["Frame.004"]
+        node.location = (-524, 3)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "Pn"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "AddAttC"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-363, 442)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "C"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputIndex" )
+        node.name = "PrevEIndex"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-363, -17)
+        node.hide = False
+        node.mute = False
+        node.outputs[0].default_value = 0
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PreToNew"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-363, 122)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "PreviousEnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "StoreP"
+        node.parent = node_group.nodes["Frame.004"]
+        node.location = (-344, 163)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "P"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "Store Named Attribute.004"
+        node.parent = node_group.nodes["Frame.007"]
+        node.location = (-329, 444)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "Cn"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "Named Attribute"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (-254, 281)
+        node.data_type = "BOOLEAN"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "Detectionline"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeGroup" )
+        node.name = "Distribute Energy"
+        node.parent = node_group.nodes["Frame.002"]
+        node.location = (-222, 304)
+        node.node_tree = bpy.data.node_groups["AOM_DistributeEnergyFloat"]
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 2.0
+        node.inputs[3].default_value = 0.99
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeSampleIndex" )
+        node.name = "SIPrevE"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-183, 142)
+        node.data_type = "FLOAT"
+        node.clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[5].default_value = False
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = 0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[4].default_value = False
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.Disp"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (-156, 36)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "CntoC"
+        node.parent = node_group.nodes["Frame.004"]
+        node.location = (-144, 23)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "Cn"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "Store Named Attribute.011"
+        node.parent = node_group.nodes["Frame.007"]
+        node.location = (-109, 424)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "PreviousEnergyInput"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "InitEIn"
+        node.parent = node_group.nodes["Frame.007"]
+        node.location = (-109, 224)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "EnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "AddAttPreEIn"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-103, 442)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "PreviousEnergyInput"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "EtoPrevE"
+        node.parent = node_group.nodes["Frame.005"]
+        node.location = (-80, 473)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "EnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("FunctionNodeCompare" )
+        node.name = "Compare"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (-1, 289)
+        node.data_type = "FLOAT"
+        node.operation = "NOT_EQUAL"
+        node.hide = False
+        node.mode = "ELEMENT"
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 0
+        node.inputs[3].default_value = 0
+        node.inputs[4].default_value = (0.0,0.0,0.0,)
+        node.inputs[5].default_value = (0.0,0.0,0.0,)
+        node.inputs[6].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[7].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[8].default_value = ""
+        node.inputs[9].default_value = ""
+        node.inputs[10].default_value = 0.9
+        node.inputs[11].default_value = 0.09
+        node.inputs[12].default_value = 0.0
+        node.outputs[0].default_value = False
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (3, -23)
+
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "DispInputInvert"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (23, 36)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.hide = True
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = -1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "StoreC"
+        node.parent = node_group.nodes["Frame.004"]
+        node.location = (35, 163)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "C"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "EIn"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (101, 500)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "EnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PtoE"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (101, 640)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "P"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "PreE"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (101, 360)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "PreviousEnergyInput"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "StorePrevE"
+        node.parent = node_group.nodes["Frame.005"]
+        node.location = (120, 613)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "PreviousEnergyInput"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeInputNamedAttribute" )
+        node.name = "CDisp"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (203, -43)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = "C"
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = False
+        node.outputs[4].default_value = 0
+        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[6].default_value = False
+
+        node = nodes.new("ShaderNodeMapRange" )
+        node.name = "MRDisp"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (203, 216)
+        node.data_type = "FLOAT"
+        node.interpolation_type = "LINEAR"
+        node.clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 1.0
+        node.inputs[1].default_value = -1.0
+        node.inputs[2].default_value = 1.0
+        node.inputs[3].default_value = -0.5
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = 4.0
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (1.0,1.0,1.0,)
+        node.inputs[9].default_value = (0.0,0.0,0.0,)
+        node.inputs[10].default_value = (1.0,1.0,1.0,)
+        node.inputs[11].default_value = (4.0,4.0,4.0,)
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "SubtractPrteE"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (341, 500)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeBlurAttribute" )
+        node.name = "BlurDisp"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (392, 161)
+        node.data_type = "FLOAT_VECTOR"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[4].default_value = 1
+        node.inputs[5].default_value = 1.0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeCombineXYZ" )
+        node.name = "GetZ"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (392, 201)
+        node.hide = True
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.0
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeBlurAttribute" )
+        node.name = "BlurInputE"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (521, 500)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[4].default_value = 1
+        node.inputs[5].default_value = 1.0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeSetPosition" )
+        node.name = "Displace"
+        node.parent = node_group.nodes["Frame.003"]
+        node.location = (612, 301)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "AddE"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (721, 700)
+        node.operation = "ADD"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "StoreCn"
+        node.parent = node_group.nodes["Frame.006"]
+        node.location = (881, 840)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "Cn"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "StorePn"
+        node.location = (1823, 753)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "Pn"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = False
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeSimulationOutput" )
+        node.name = "Simulation Output"
+        node.location = (4571, 648)
+        # found PairedNodes
+        nodes["Simulation Input"].pair_with_output(nodes["Simulation Output"])
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = False
+
+        node = nodes.new("GeometryNodeSetMaterial" )
+        node.name = "Set Material"
+        node.location = (4875, 629)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = ocean.material_slots[0].material
+
+        node = nodes.new("NodeGroupOutput" )
+        node.name = "Group Output"
+        node.location = (5202, 609)
+        inp = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        links.new( nodes['Group Input'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
+        links.new( nodes['Group Input.001'].outputs[0],  nodes['AddAttP'].inputs[0])
+        links.new( nodes['Group Input.002'].outputs[2],  nodes['Distribute Energy'].inputs[3])
+        links.new( nodes['Group Input.Disp'].outputs[1],  nodes['Reroute'].inputs[0])
+        links.new( nodes['Store Named Attribute.011'].outputs[0],  nodes['Simulation Input'].inputs[0])
+        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Store Named Attribute.001'].inputs[0])
+        links.new( nodes['Store Named Attribute.001'].outputs[0],  nodes['Store Named Attribute.004'].inputs[0])
+        links.new( nodes['Set Material'].outputs[0],  nodes['Group Output'].inputs[0])
+        links.new( nodes['BlurDisp'].outputs[2],  nodes['Displace'].inputs[3])
+        links.new( nodes['MRDisp'].outputs[0],  nodes['GetZ'].inputs[2])
+        links.new( nodes['StorePn'].outputs[0],  nodes['StoreCn'].inputs[0])
+        links.new( nodes['StoreC'].outputs[0],  nodes['Simulation Output'].inputs[1])
+        links.new( nodes['PtoE'].outputs[1],  nodes['AddE'].inputs[0])
+        links.new( nodes['CtoDistE'].outputs[1],  nodes['Distribute Energy'].inputs[2])
+        links.new( nodes['PtoDistE'].outputs[1],  nodes['Distribute Energy'].inputs[1])
+        links.new( nodes['Displace'].outputs[0],  nodes['StorePn'].inputs[0])
+        links.new( nodes['Displace'].outputs[0],  nodes['Distribute Energy'].inputs[0])
+        links.new( nodes['Distribute Energy'].outputs[0],  nodes['StorePn'].inputs[4])
+        links.new( nodes['StoreP'].outputs[0],  nodes['StoreC'].inputs[0])
+        links.new( nodes['StorePrevE'].outputs[0],  nodes['StoreP'].inputs[0])
+        links.new( nodes['PntoP'].outputs[1],  nodes['StoreP'].inputs[4])
+        links.new( nodes['AddE'].outputs[0],  nodes['StoreCn'].inputs[4])
+        links.new( nodes['CDisp'].outputs[1],  nodes['MRDisp'].inputs[0])
+        links.new( nodes['CntoC'].outputs[1],  nodes['StoreC'].inputs[4])
+        links.new( nodes['AddAttP'].outputs[0],  nodes['AddAttC'].inputs[0])
+        links.new( nodes['CIndex'].outputs[0],  nodes['SIC'].inputs[7])
+        links.new( nodes['CtoNew'].outputs[1],  nodes['SIC'].inputs[1])
+        links.new( nodes['Simulation Input'].outputs[1],  nodes['SIC'].inputs[0])
+        links.new( nodes['PIndex'].outputs[0],  nodes['SIP'].inputs[7])
+        links.new( nodes['PtoNew'].outputs[1],  nodes['SIP'].inputs[1])
+        links.new( nodes['Simulation Input'].outputs[1],  nodes['SIP'].inputs[0])
+        links.new( nodes['SIP'].outputs[0],  nodes['AddAttP'].inputs[4])
+        links.new( nodes['SIC'].outputs[0],  nodes['AddAttC'].inputs[4])
+        links.new( nodes['AddAttPreEIn'].outputs[0],  nodes['Displace'].inputs[0])
+        links.new( nodes['Simulation Output'].outputs[0],  nodes['Set Material'].inputs[0])
+        links.new( nodes['StoreCn'].outputs[0],  nodes['StorePrevE'].inputs[0])
+        links.new( nodes['EtoPrevE'].outputs[1],  nodes['StorePrevE'].inputs[4])
+        links.new( nodes['EIn'].outputs[1],  nodes['SubtractPrteE'].inputs[0])
+        links.new( nodes['PreE'].outputs[1],  nodes['SubtractPrteE'].inputs[1])
+        links.new( nodes['AddAttC'].outputs[0],  nodes['AddAttPreEIn'].inputs[0])
+        links.new( nodes['PrevEIndex'].outputs[0],  nodes['SIPrevE'].inputs[7])
+        links.new( nodes['PreToNew'].outputs[1],  nodes['SIPrevE'].inputs[1])
+        links.new( nodes['SIPrevE'].outputs[0],  nodes['AddAttPreEIn'].inputs[4])
+        links.new( nodes['BlurInputE'].outputs[0],  nodes['AddE'].inputs[1])
+        links.new( nodes['Store Named Attribute.004'].outputs[0],  nodes['Store Named Attribute.011'].inputs[0])
+        links.new( nodes['InitEIn'].outputs[1],  nodes['Store Named Attribute.011'].inputs[4])
+        links.new( nodes['Simulation Input'].outputs[1],  nodes['SIPrevE'].inputs[0])
+        links.new( nodes['SubtractPrteE'].outputs[0],  nodes['BlurInputE'].inputs[0])
+        links.new( nodes['GetZ'].outputs[0],  nodes['BlurDisp'].inputs[2])
+        links.new( nodes['Reroute'].outputs[0],  nodes['MRDisp'].inputs[4])
+        links.new( nodes['Reroute'].outputs[0],  nodes['DispInputInvert'].inputs[0])
+        links.new( nodes['DispInputInvert'].outputs[0],  nodes['MRDisp'].inputs[3])
+        links.new( nodes['Named Attribute'].outputs[3],  nodes['Compare'].inputs[0])
+        links.new( nodes['Compare'].outputs[0],  nodes['Displace'].inputs[1])
+        '''
+        mod['Socket_2'] = 0.5
+        mod['Socket_3'] = 0.99
+        '''
+    
+        return node_group
+    
 
     def set_FloatNotInstanced(self, node_group):
         nodes = node_group.nodes
