@@ -851,69 +851,68 @@ class AOMGeoNodesHandler:
         nodes = node_group.nodes
         links = node_group.links
 
-        #inp = node_group.inputs.new('NodeSocketGeometry','Target Geometry')
+        
         inp = node_group.interface.new_socket(name='Target Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
-        #inp = node_group.inputs.new('NodeSocketVector','DetectionPositon')
         inp = node_group.interface.new_socket(name='DetectionPositon', in_out='INPUT', socket_type = 'NodeSocketVector')
         inp.default_value = (0.0,0.0,0.0,)
-        #inp = node_group.inputs.new('NodeSocketFloat','XDistance')
         inp = node_group.interface.new_socket(name='XDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
-        #inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','YDistance')
+        inp.default_value = 0.0
         inp = node_group.interface.new_socket(name='YDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','ZDistance')
         inp = node_group.interface.new_socket(name='ZDistance', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','RotSensitivity')
         inp = node_group.interface.new_socket(name='RotSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloat','MoveSensitivity')
         inp = node_group.interface.new_socket(name='MoveSensitivity', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 1.0
-        #inp = node_group.inputs.new('NodeSocketFloatAngle','Angle')
         inp = node_group.interface.new_socket(name='Angle', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.0
-        #inp = node_group.inputs.new('NodeSocketFloat','ScaleX')
         inp = node_group.interface.new_socket(name='ScaleX', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
-        #inp = node_group.inputs.new('NodeSocketFloat','ScaleY')
         inp = node_group.interface.new_socket(name='ScaleY', in_out='INPUT', socket_type = 'NodeSocketFloat')
         inp.default_value = 0.5
 
         node = nodes.new("NodeFrame" )
         node.name = "Detection"
-        node.location = (-820, -700)
+        node.label = "Detection"
+        node.location = (-821, -713)
 
         node = nodes.new("NodeFrame" )
         node.name = "Display Detectionline"
-        node.location = (899, 1140)
+        node.label = "Display Detectionline"
+        node.location = (897, 1127)
 
         node = nodes.new("NodeFrame" )
         node.name = "Frame"
-        node.location = (-47, -942)
+        node.label = "Frame"
+        node.location = (-48, -955)
 
         node = nodes.new("NodeFrame" )
         node.name = "Rotate"
-        node.location = (1966, -116)
+        node.label = "Rotate"
+        node.location = (1964, -129)
 
         node = nodes.new("NodeFrame" )
         node.name = "Move"
-        node.location = (1994, 131)
+        node.label = "Move"
+        node.location = (1992, 117)
 
         node = nodes.new("NodeFrame" )
         node.name = "Coordinates"
-        node.location = (-2630, -275)
+        node.label = "Coordinates"
+        node.location = (-2631, -287)
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input"
-        node.location = (-4061, -109)
+        node.location = (-4062, -122)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.006"
-        node.location = (-3758, -88)
+        node.location = (-3759, -101)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -921,9 +920,11 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.014"
-        node.location = (-3753, -274)
+        node.location = (-3754, -287)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -931,15 +932,17 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.020"
-        node.location = (-3496, -239)
+        node.location = (-3497, -252)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.021"
-        node.location = (-3486, -387)
+        node.location = (-3487, -400)
 
         node = nodes.new("ShaderNodeSeparateXYZ" )
         node.name = "Separate XYZ"
-        node.location = (-3430, 70)
+        node.location = (-3431, 56)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0.0
@@ -947,35 +950,35 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.006"
-        node.location = (-3163, -718)
+        node.location = (-3164, -731)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.007"
-        node.location = (-3148, 57)
+        node.location = (-3149, 43)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.003"
-        node.location = (-3141, -170)
+        node.location = (-3142, -183)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.008"
-        node.location = (-3140, 9)
+        node.location = (-3141, -4)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.009"
-        node.location = (-3125, -39)
+        node.location = (-3126, -52)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.005"
-        node.location = (-3094, -463)
+        node.location = (-3095, -476)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.014"
-        node.location = (-3075, -1532)
+        node.location = (-3076, -1545)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.013"
-        node.location = (-3065, -1526)
+        node.location = (-3066, -1539)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "RotMath1"
@@ -983,6 +986,8 @@ class AOMGeoNodesHandler:
         node.location = (-2205, -332)
         node.operation = "SUBTRACT"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -994,6 +999,8 @@ class AOMGeoNodesHandler:
         node.location = (-1978, -140)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = -1.0
         node.inputs[2].default_value = 0.5
@@ -1003,6 +1010,8 @@ class AOMGeoNodesHandler:
         node.name = "DispayIndex"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-1850, -924)
+        node.hide = False
+        node.mute = False
         node.outputs[0].default_value = 0
 
         node = nodes.new("ShaderNodeMath" )
@@ -1011,6 +1020,8 @@ class AOMGeoNodesHandler:
         node.location = (-1827, -531)
         node.operation = "ADD"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1028,7 +1039,7 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.004"
-        node.location = (-1651, -94)
+        node.location = (-1652, -107)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "MoveMath2"
@@ -1036,6 +1047,8 @@ class AOMGeoNodesHandler:
         node.location = (-1630, -156)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 1.0
         node.inputs[2].default_value = 0.5
@@ -1045,6 +1058,9 @@ class AOMGeoNodesHandler:
         node.name = "DisplayLine"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-1625, -395)
+        node.hide = False
+        node.mode = "OFFSET"
+        node.mute = False
         node.inputs[0].default_value = 2
         node.inputs[1].default_value = 1.0
         node.inputs[2].default_value = (0.0,0.0,0.0,)
@@ -1056,6 +1072,9 @@ class AOMGeoNodesHandler:
         node.location = (-1481, -681)
         node.data_type = "FLOAT"
         node.operation = "EQUAL"
+        node.hide = False
+        node.mode = "ELEMENT"
+        node.mute = False
         node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
@@ -1077,6 +1096,9 @@ class AOMGeoNodesHandler:
         node.location = (-1480, -860)
         node.data_type = "FLOAT"
         node.operation = "EQUAL"
+        node.hide = False
+        node.mode = "ELEMENT"
+        node.mute = False
         node.inputs[0].default_value = 1.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
@@ -1098,6 +1120,8 @@ class AOMGeoNodesHandler:
         node.location = (-1442, -329)
         node.operation = "DIVIDE"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.32
         node.inputs[2].default_value = 0.5
@@ -1107,6 +1131,8 @@ class AOMGeoNodesHandler:
         node.name = "DisplaySetP1"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-1300, -395)
+        node.hide = False
+        node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = (0.0,0.0,0.0,)
@@ -1117,6 +1143,8 @@ class AOMGeoNodesHandler:
         node.location = (-1227, -332)
         node.operation = "ARCSINE"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.32
         node.inputs[2].default_value = 0.5
@@ -1128,6 +1156,8 @@ class AOMGeoNodesHandler:
         node.location = (-1191, -926)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = -1.0
         node.inputs[2].default_value = 0.5
@@ -1135,16 +1165,18 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.016"
-        node.location = (-1055, -1492)
+        node.location = (-1056, -1505)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.015"
-        node.location = (-1048, -1472)
+        node.location = (-1049, -1485)
 
         node = nodes.new("GeometryNodeSetPosition" )
         node.name = "DisplaySetP2"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-990, -395)
+        node.hide = False
+        node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = (0.0,0.0,0.0,)
@@ -1153,6 +1185,8 @@ class AOMGeoNodesHandler:
         node.name = "DisplayExtrudeCombine"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-977, -652)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.0
@@ -1162,8 +1196,9 @@ class AOMGeoNodesHandler:
         node.name = "DisplayExtrude"
         node.parent = node_group.nodes["Display Detectionline"]
         node.location = (-760, -400)
-        node.mode = 'VERTICES'
-
+        node.hide = False
+        node.mode = "VERTICES"
+        node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = 1.0
@@ -1177,6 +1212,8 @@ class AOMGeoNodesHandler:
         node.location = (-743, -263)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.57
         node.inputs[2].default_value = 0.5
@@ -1186,6 +1223,8 @@ class AOMGeoNodesHandler:
         node.name = "Separate XYZ.002"
         node.parent = node_group.nodes["Frame"]
         node.location = (-562, -58)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0.0
@@ -1195,6 +1234,8 @@ class AOMGeoNodesHandler:
         node.name = "Separate XYZ.001"
         node.parent = node_group.nodes["Frame"]
         node.location = (-546, 80)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0.0
@@ -1206,6 +1247,8 @@ class AOMGeoNodesHandler:
         node.location = (-523, -113)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 1.0
         node.inputs[2].default_value = 0.5
@@ -1217,6 +1260,8 @@ class AOMGeoNodesHandler:
         node.location = (-314, 97)
         node.operation = "ADD"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1228,6 +1273,8 @@ class AOMGeoNodesHandler:
         node.location = (-216, -222)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1235,11 +1282,11 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.018"
-        node.location = (-167, -1293)
+        node.location = (-168, -1306)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.019"
-        node.location = (-159, -1311)
+        node.location = (-160, -1324)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.004"
@@ -1247,6 +1294,8 @@ class AOMGeoNodesHandler:
         node.location = (-153, 230)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1263,6 +1312,8 @@ class AOMGeoNodesHandler:
         node.location = (-95, 80)
         node.operation = "DIVIDE"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 2.0
         node.inputs[2].default_value = 0.5
@@ -1273,16 +1324,18 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["Detection"]
         node.location = (-66, 480)
         node.data_type = "FLOAT"
-        #node.inputs[1].default_value = (0.0,0.0,0.0,)
-        #node.inputs[2].default_value = 0.0
-        #node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
-        #node.inputs[4].default_value = False
-        #node.inputs[5].default_value = 0
-        #node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.inputs[2].default_value = 0.0
+        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[4].default_value = False
+        node.inputs[5].default_value = 0
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = (0.0,0.0,0.0,)
         node.inputs[8].default_value = (0.0,0.0,-1.0,)
         node.inputs[9].default_value = 100.0
-        
-        '''node.outputs[0].default_value = False
+        node.outputs[0].default_value = False
         node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = 0.0
@@ -1290,7 +1343,8 @@ class AOMGeoNodesHandler:
         node.outputs[5].default_value = 0.0
         node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[7].default_value = False
-        node.outputs[8].default_value = 0'''
+        node.outputs[8].default_value = 0
+        node.outputs[9].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.007"
@@ -1298,6 +1352,8 @@ class AOMGeoNodesHandler:
         node.location = (-64, -452)
         node.operation = "MULTIPLY"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1308,24 +1364,27 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["Detection"]
         node.location = (-61, 71)
         node.data_type = "FLOAT"
-        '''node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[4].default_value = False
         node.inputs[5].default_value = 0
-        node.inputs[6].default_value = (0.0,0.0,0.0,)'''
-        node.inputs[8].default_value = (0.0,0.0,-1.0,)  ##### double check
+        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,-1.0,)
         node.inputs[9].default_value = 100.0
-        
-        '''#node.outputs[0].default_value = False
-        #node.outputs[1].default_value = (0.0,0.0,0.0,)
-        #node.outputs[2].default_value = (0.0,0.0,0.0,)
-        #node.outputs[3].default_value = 0.0
-        #node.outputs[4].default_value = (0.0,0.0,0.0,)
-        #node.outputs[5].default_value = 0.0
-        #node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
-        node.outputs[8].default_value = False
-        node.outputs[9].default_value = 0'''
+        node.outputs[0].default_value = False
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = 0.0
+        node.outputs[4].default_value = (0.0,0.0,0.0,)
+        node.outputs[5].default_value = 0.0
+        node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[7].default_value = False
+        node.outputs[8].default_value = 0
+        node.outputs[9].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.002"
@@ -1353,6 +1412,8 @@ class AOMGeoNodesHandler:
         node.location = (341, -933)
         node.operation = "SUBTRACT"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1364,6 +1425,8 @@ class AOMGeoNodesHandler:
         node.location = (341, -437)
         node.operation = "SUBTRACT"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1375,6 +1438,8 @@ class AOMGeoNodesHandler:
         node.location = (341, -685)
         node.operation = "SUBTRACT"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1386,6 +1451,8 @@ class AOMGeoNodesHandler:
         node.location = (341, -189)
         node.operation = "ADD"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1397,6 +1464,8 @@ class AOMGeoNodesHandler:
         node.location = (341, 58)
         node.operation = "ADD"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1408,6 +1477,8 @@ class AOMGeoNodesHandler:
         node.location = (414, 280)
         node.operation = "ADD"
         node.use_clamp = False
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
@@ -1415,8 +1486,9 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "Store Named Attribute"
-        node.location = (682, 331)
+        node.location = (680, 317)
         node.data_type = "FLOAT"
+        node.hide = False
         node.mute = True
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "height"
@@ -1425,11 +1497,14 @@ class AOMGeoNodesHandler:
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("ShaderNodeCombineXYZ" )
         node.name = "Combine XYZ.009"
         node.parent = node_group.nodes["Coordinates"]
         node.location = (793, -459)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 1.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.0
@@ -1439,6 +1514,8 @@ class AOMGeoNodesHandler:
         node.name = "Combine XYZ.008"
         node.parent = node_group.nodes["Coordinates"]
         node.location = (866, 158)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = 1.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.0
@@ -1447,13 +1524,31 @@ class AOMGeoNodesHandler:
         node = nodes.new("ShaderNodeVectorRotate" )
         node.name = "Vector Rotate"
         node.parent = node_group.nodes["Coordinates"]
+        node.rotation_type = "AXIS_ANGLE"
         node.location = (1027, -246)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = (0.0,0.0,0.0,)
         node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = (0.0,0.0,1.0,)
         node.inputs[3].default_value = 0.0
         node.inputs[4].default_value = (0.0,0.0,0.0,)
         node.outputs[0].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("GeometryNodeStoreNamedAttribute" )
+        node.name = "MarkDetectionline"
+        node.location = (1070, 325)
+        node.data_type = "BOOLEAN"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = True
+        node.inputs[2].default_value = "Detectionline"
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = 1.0
+        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[6].default_value = True
+        node.inputs[7].default_value = 0
+        node.inputs[8].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.012"
@@ -1463,7 +1558,10 @@ class AOMGeoNodesHandler:
         node = nodes.new("ShaderNodeVectorRotate" )
         node.name = "Vector Rotate.001"
         node.parent = node_group.nodes["Coordinates"]
+        node.rotation_type = "AXIS_ANGLE"
         node.location = (1253, 197)
+        node.hide = False
+        node.mute = False
         node.inputs[0].default_value = (0.0,0.0,0.0,)
         node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = (0.0,0.0,1.0,)
@@ -1478,15 +1576,11 @@ class AOMGeoNodesHandler:
 
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
-        node.location = (1631, -13)
-        #node_group.outputs.new(type= 'NodeSocketGeometry', name='Detectlines')
-        out = node_group.interface.new_socket(name='Detectlines', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
-        #node_group.outputs.new(type= 'NodeSocketFloat', name='Rotation')
-        out = node_group.interface.new_socket(name='Rotation', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
-        #node_group.outputs.new(type= 'NodeSocketFloat', name='Move')
-        out = node_group.interface.new_socket(name='Move', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
-        #node_group.outputs.new(type= 'NodeSocketFloat', name='Height')
-        out = node_group.interface.new_socket(name='Height', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        node.location = (1629, -26)
+        inp = node_group.interface.new_socket(name='Detectlines', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Rotation', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        inp = node_group.interface.new_socket(name='Move', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        inp = node_group.interface.new_socket(name='Height', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.004'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['Separate XYZ'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['Vector Rotate.001'].inputs[1])
@@ -1540,7 +1634,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.011'].outputs[0],  nodes['RayP1'].inputs[7])
         links.new( nodes['Reroute.012'].outputs[0],  nodes['RayP2'].inputs[7])
         links.new( nodes['Reroute.010'].outputs[0],  nodes['MoveMath2'].inputs[1])
-        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Group Output'].inputs[0])
+        links.new( nodes['MarkDetectionline'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['RotMath3'].outputs[0],  nodes['Group Output'].inputs[1])
         links.new( nodes['MoveMath2'].outputs[0],  nodes['Group Output'].inputs[2])
         links.new( nodes['RotMath3.001'].outputs[0],  nodes['RotMath3'].inputs[1])
@@ -1583,6 +1677,9 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math.005'].outputs[0],  nodes['Reroute.022'].inputs[0])
         links.new( nodes['Math.006'].outputs[0],  nodes['Reroute.020'].inputs[0])
         links.new( nodes['Math.014'].outputs[0],  nodes['Reroute.021'].inputs[0])
+        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['MarkDetectionline'].inputs[0])
+        '''
+        '''
         
         
 
@@ -2589,8 +2686,9 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math.001'].outputs[0],  nodes['Switch.001'].inputs[3])
         links.new( nodes['Named Attribute'].outputs[1],  nodes['Switch.001'].inputs[2])
 
-        
+        self.label_nodes
         return node_group
+        
 
     def make_AOMFloat_ObjWaves_nodegroup(self):
         # does it exist
@@ -2763,97 +2861,100 @@ class AOMGeoNodesHandler:
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[15])
         
         
-        
+        self.label_nodes
         return node_group
+        
 
     def make_AOM_DistributeEnergyFloat_nodegroup(self):
-            # does it exist
-            ngname = 'AOM_DistributeEnergyFloat'
-            if ngname in bpy.data.node_groups:
-                return bpy.data.node_groups[ngname]
+        # does it exist
+        ngname = 'AOM_DistributeEnergyFloat'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
 
-            node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
-            # self.remove_nodes(node_group)
-            nodes = node_group.nodes
-            links = node_group.links
-            
-            inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
-            inp = node_group.interface.new_socket(name='Previous', in_out='INPUT', socket_type = 'NodeSocketFloat')
-            inp.default_value = 0.0
-            inp = node_group.interface.new_socket(name='Current', in_out='INPUT', socket_type = 'NodeSocketFloat')
-            inp.default_value = 2.0
-            inp = node_group.interface.new_socket(name='Damping', in_out='INPUT', socket_type = 'NodeSocketFloat')
-            inp.default_value = 0.99
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+        
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Previous', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='Current', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 2.0
+        inp = node_group.interface.new_socket(name='Damping', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.99
 
-            node = nodes.new("NodeGroupInput" )
-            node.name = "Group Input"
-            node.location = (-507, 400)
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input"
+        node.location = (-507, 400)
 
-            node = nodes.new("GeometryNodeBlurAttribute" )
-            node.name = "BlurEnergy"
-            node.location = (-70, 261)
-            node.data_type = "FLOAT"
-            node.hide = False
-            node.mute = False
-            node.inputs[0].default_value = 0.0
-            node.inputs[1].default_value = 0
-            node.inputs[2].default_value = (0.0,0.0,0.0,)
-            node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
-            node.inputs[4].default_value = 1
-            node.inputs[5].default_value = 1.0
-            node.outputs[0].default_value = 0.0
-            node.outputs[1].default_value = 0
-            node.outputs[2].default_value = (0.0,0.0,0.0,)
-            node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node = nodes.new("GeometryNodeBlurAttribute" )
+        node.name = "BlurEnergy"
+        node.location = (-70, 261)
+        node.data_type = "FLOAT"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.inputs[4].default_value = 1
+        node.inputs[5].default_value = 1.0
+        node.outputs[0].default_value = 0.0
+        node.outputs[1].default_value = 0
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
 
-            node = nodes.new("ShaderNodeMath" )
-            node.name = "BlurScaling"
-            node.location = (135, 270)
-            node.operation = "MULTIPLY"
-            node.use_clamp = False
-            node.hide = False
-            node.mute = False
-            node.inputs[0].default_value = 0.5
-            node.inputs[1].default_value = 2.0
-            node.inputs[2].default_value = 0.5
-            node.outputs[0].default_value = 0.0
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "BlurScaling"
+        node.location = (135, 270)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 2.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
 
-            node = nodes.new("ShaderNodeMath" )
-            node.name = "SubtractFormer"
-            node.location = (410, 461)
-            node.operation = "SUBTRACT"
-            node.use_clamp = False
-            node.hide = False
-            node.mute = False
-            node.inputs[0].default_value = 0.5
-            node.inputs[1].default_value = 2.0
-            node.inputs[2].default_value = 0.5
-            node.outputs[0].default_value = 0.0
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "SubtractFormer"
+        node.location = (410, 461)
+        node.operation = "SUBTRACT"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 2.0
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
 
-            node = nodes.new("ShaderNodeMath" )
-            node.name = "Damping"
-            node.location = (581, 458)
-            node.operation = "MULTIPLY"
-            node.use_clamp = False
-            node.hide = False
-            node.mute = False
-            node.inputs[0].default_value = 0.5
-            node.inputs[1].default_value = 0.99
-            node.inputs[2].default_value = 0.5
-            node.outputs[0].default_value = 0.0
+        node = nodes.new("ShaderNodeMath" )
+        node.name = "Damping"
+        node.location = (581, 458)
+        node.operation = "MULTIPLY"
+        node.use_clamp = False
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.5
+        node.inputs[1].default_value = 0.99
+        node.inputs[2].default_value = 0.5
+        node.outputs[0].default_value = 0.0
 
-            node = nodes.new("NodeGroupOutput" )
-            node.name = "Group Output"
-            node.location = (810, 455)
-            inp = node_group.interface.new_socket(name='DistributedEnergy', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
-            links.new( nodes['Group Input'].outputs[1],  nodes['BlurEnergy'].inputs[0])
-            links.new( nodes['Group Input'].outputs[2],  nodes['SubtractFormer'].inputs[1])
-            links.new( nodes['Group Input'].outputs[3],  nodes['Damping'].inputs[1])
-            links.new( nodes['SubtractFormer'].outputs[0],  nodes['Damping'].inputs[0])
-            links.new( nodes['Damping'].outputs[0],  nodes['Group Output'].inputs[0])
-            links.new( nodes['BlurEnergy'].outputs[0],  nodes['BlurScaling'].inputs[0])
-            links.new( nodes['BlurScaling'].outputs[0],  nodes['SubtractFormer'].inputs[0])
-            
+        node = nodes.new("NodeGroupOutput" )
+        node.name = "Group Output"
+        node.location = (810, 455)
+        inp = node_group.interface.new_socket(name='DistributedEnergy', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        links.new( nodes['Group Input'].outputs[1],  nodes['BlurEnergy'].inputs[0])
+        links.new( nodes['Group Input'].outputs[2],  nodes['SubtractFormer'].inputs[1])
+        links.new( nodes['Group Input'].outputs[3],  nodes['Damping'].inputs[1])
+        links.new( nodes['SubtractFormer'].outputs[0],  nodes['Damping'].inputs[0])
+        links.new( nodes['Damping'].outputs[0],  nodes['Group Output'].inputs[0])
+        links.new( nodes['BlurEnergy'].outputs[0],  nodes['BlurScaling'].inputs[0])
+        links.new( nodes['BlurScaling'].outputs[0],  nodes['SubtractFormer'].inputs[0])
+        
+        self.label_nodes
+        return node_group
 
     def make_AOMFloat_Ripples_nodegroup(self):
         # does it exist
@@ -4030,7 +4131,9 @@ class AOMGeoNodesHandler:
         id_type = 'SCENE'
         driver = self.add_driver(source, target, prop,
                                  data_path, -1, func="-", id_type=id_type)
-        
+        self.label_nodes
+        return node_group
+    
     def make_AOMFloat_Instancing_nodegroup(self):
         # does it exist
         ngname = 'AOMFloat_Instancing'
@@ -4230,6 +4333,9 @@ class AOMGeoNodesHandler:
         links.new( nodes['SetHeightRot'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Reroute'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Reroute.001'].outputs[0],  nodes['Reroute'].inputs[0])
+        
+        self.label_nodes(node_group)
+        return node_group
 
     def make_AOMGeoFloat_nodegroup(self, mod):
         # does it exist
@@ -4491,7 +4597,7 @@ class AOMGeoNodesHandler:
         mod['Socket_19'] = True
         mod['Socket_20'] = 65.0
         '''
-        
+        self.label_nodes(node_group)
         return node_group
     
     
@@ -5316,7 +5422,7 @@ class AOMGeoNodesHandler:
         mod['Socket_2'] = 0.5
         mod['Socket_3'] = 0.99
         '''
-    
+        self.label_nodes(node_group)
         return node_group
     
 

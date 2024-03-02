@@ -651,8 +651,8 @@ def RemoveInterAct(context):
                         #delete mod delete 
                         bpy.data.objects.remove(mod['Socket_4'])
                         oc.modifiers.remove(mod)
-                        
-                    
+                        context.scene.frame_current = 1                     
+    
 
 
 # remove interaction aber mit nur einem Object
@@ -677,14 +677,17 @@ def RemoveInterActSingle(context, obj):
                 modifier=mod.name)  # remove dynamic paint
 
     empty = obj.parent
+    deletelist = []
     if empty != None:
         emptylocation = empty.location
         obj.parent = None
         obj.location = emptylocation
-
-    deletelist = []
-    deletelist.append(empty)
-    bpy.ops.object.delete({"selected_objects": deletelist})
+        deletelist.append(empty)
+   
+   
+    print(deletelist)
+    if len(deletelist) != 0:
+        bpy.ops.object.delete({"selected_objects": deletelist})
 
  # remove colletions (2.8)
     if obj.name in bpy.data.collections['Wave'].objects:

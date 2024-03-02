@@ -1,9 +1,17 @@
 
 
-bugs and test: 
+erweiterungen:
 
-[] name des Objects im Modifier block
-[] Name Modifiers
+[] Simulate Foam (Ocean and Interaction)
+[] Simulate spray
+[] Kontroll timescale 
+[] static Dynamic Paint  [] static geonodes
+
+
+bugs and test: 
+[+] error wenn geofloated object made 
+[] füße der Detectionlines verschieben sich wenn interaction mit Static/Free
+[-] remove ObjectWaveSim Mod wenn last Geofloat removed? -- >erstmal nicht
 
 
 

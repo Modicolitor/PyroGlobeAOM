@@ -207,7 +207,7 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                     "aom.geofloat", icon="MOD_OCEAN", text='Geofloat Object(s)')
 
                 # row = layout.row(align=True)
-                subcol.operator("stat.ob", icon="PINNED")
+                subcol.operator("stat.ob", icon="PINNED", text="Free (Dynamic Paint)")
 
                 # row = layout.row(align=True)
                 subcol.operator("rmv.interac", icon="CANCEL")
@@ -216,11 +216,27 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 subcol.operator("cag.vis", icon="RESTRICT_VIEW_OFF")
                 aom_props = context.scene.aom_props
                 #subcol.prop(aom_props, 'use_GeoFloat', text='Use GeoFloat')
+                
+                box = col.box()
+                #box.operator()
+                box.label(text='Bake Interaction')
+                box.operator("object.simulation_nodes_cache_calculate_to_frame", text="Calculate to Frame").selected = True
+                
+                row = box.row(align=True)
+                row.operator("object.simulation_nodes_cache_bake", text="Bake").selected = True
+                row.operator("object.simulation_nodes_cache_delete", text="", icon='TRASH').selected = True
+
+                box.use_property_split = True
+                box.use_property_decorate = False
+                ob = get_active_ocean(context)
+                box.prop(ob, "use_simulation_cache", text="Cache")
+                
                 '''if aom_props.use_GeoFloat:
                     subcol.prop(aom_props, 'instanceFloatobj',
                                 text='Instance Object')
                     subcol.prop(aom_props, 'is_GeoFloat_Smooth',
                                 text='SmootherDetection')
+                
                 else:
                     subcol = col.column()
                     subcol.enabled = False
@@ -286,19 +302,23 @@ class BE_PT_AdvOceanWaves(bpy.types.Panel):
                     oc = get_active_ocean(context)
                     mod = self.get_waveSim_mod(context, oc)
                     
-                    for inp in mod.node_group.interface.items_tree:
-                        if inp.bl_socket_idname != 'NodeSocketGeometry':
-                            prop = '["' + inp.identifier +  '"]'
-                            subcol.prop(data= mod, property=prop, text=inp.name)
-                            '''subcol.prop(
-                                mod['Socket_1'], "wave_damping", text="Displacement Strength")
-                            subcol.prop(
-                                canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")'''
-                            #subcol.prop(
-                            #    canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
-                            #subcol.prop(
-                            #    canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
-                            # row = layout.row(align=True)
+                    if mod != None:
+                        subcol.label(text='GeoNodes Simulation')
+                        for inp in mod.node_group.interface.items_tree:
+                            if inp.bl_socket_idname != 'NodeSocketGeometry':
+                                prop = '["' + inp.identifier +  '"]'
+                                subcol.prop(data= mod, property=prop, text=inp.name)
+                        #subcol.prop(
+                        #    mod['Socket_1'], "wave_damping", text="Displacement Strength")
+                    
+                    subcol.label(text='Dynamic Paint')
+                    subcol.prop(
+                    canvas_settings.canvas_surfaces["Waves"], "wave_damping", text="Damping")
+                    subcol.prop(
+                            canvas_settings.canvas_surfaces["Waves"], "wave_spring", text="Spring")
+                    subcol.prop(
+                            canvas_settings.canvas_surfaces["Waves"], "wave_smoothness", text="Smoothness")
+                            
 
 
 class BE_PT_AdvOceanMat(bpy.types.Panel):

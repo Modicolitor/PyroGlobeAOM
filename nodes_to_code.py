@@ -280,10 +280,11 @@ def get_idname_from_targetsocket(group, inp):
 
 
 def gen_maininputs(group):
-    inputs = group.interface.items_tree[:]
-    for n,it in enumerate(inputs[:]):
-        if it.in_out == 'OUTPUT':
-            inputs.pop(n)
+    puts = group.interface.items_tree[:]
+    inputs = []
+    for n,it in enumerate(puts[:]):
+        if it.in_out == 'INPUT':
+            inputs.append(it)
         
     for inp in inputs:
         #if inp.bl_socket_idname != 'NodeSocketGeometry':
