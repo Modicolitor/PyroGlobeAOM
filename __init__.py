@@ -68,8 +68,8 @@ from .aom import BE_OT_GeoFloat
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (4, 0, 1),
-    "blender": (4, 0, 0),
+    "version": (4, 1, 1),
+    "blender": (4, 1, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add floating Objects, ripples, spray.",
     "category": "Object"}
