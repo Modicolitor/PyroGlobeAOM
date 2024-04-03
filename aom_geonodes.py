@@ -1326,17 +1326,17 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[4].default_value = False
         node.inputs[5].default_value = 0
         node.inputs[6].default_value = (0.0,0.0,0.0,)
-        node.inputs[7].default_value = (0.0,0.0,0.0,)
-        node.inputs[8].default_value = (0.0,0.0,-1.0,)
-        node.inputs[9].default_value = 100.0
+        node.inputs[7].default_value = (0.0,0.0,0.0,)'''
+        node.inputs[3].default_value = (0.0,0.0,-1.0,)
+        node.inputs[4].default_value = 100.0
         node.outputs[0].default_value = False
-        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = 0.0
         node.outputs[4].default_value = (0.0,0.0,0.0,)
@@ -1344,7 +1344,7 @@ class AOMGeoNodesHandler:
         node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[7].default_value = False
         node.outputs[8].default_value = 0
-        node.outputs[9].default_value = (0.0,0.0,0.0,)
+        node.outputs[9].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.007"
@@ -1366,16 +1366,16 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[1].default_value = (0.0,0.0,0.0,)
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[4].default_value = False
         node.inputs[5].default_value = 0
         node.inputs[6].default_value = (0.0,0.0,0.0,)
-        node.inputs[7].default_value = (0.0,0.0,0.0,)
-        node.inputs[8].default_value = (0.0,0.0,-1.0,)
-        node.inputs[9].default_value = 100.0
-        node.outputs[0].default_value = False
+        node.inputs[7].default_value = (0.0,0.0,0.0,)'''
+        node.inputs[3].default_value = (0.0,0.0,-1.0,)
+        node.inputs[4].default_value = 100.0
+        '''node.outputs[0].default_value = False
         node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = 0.0
@@ -1384,7 +1384,7 @@ class AOMGeoNodesHandler:
         node.outputs[6].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[7].default_value = False
         node.outputs[8].default_value = 0
-        node.outputs[9].default_value = (0.0,0.0,0.0,)
+        node.outputs[9].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.002"
@@ -1492,12 +1492,12 @@ class AOMGeoNodesHandler:
         node.mute = True
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "height"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("ShaderNodeCombineXYZ" )
         node.name = "Combine XYZ.009"
@@ -1543,12 +1543,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "Detectionline"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 1.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = True
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.012"
@@ -1631,8 +1631,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['DisplayFind1'].outputs[0],  nodes['DisplaySetP2'].inputs[1])
         links.new( nodes['DisplaySetP1'].outputs[0],  nodes['DisplaySetP2'].inputs[0])
         links.new( nodes['Reroute.012'].outputs[0],  nodes['DisplaySetP2'].inputs[2])
-        links.new( nodes['Reroute.011'].outputs[0],  nodes['RayP1'].inputs[7])
-        links.new( nodes['Reroute.012'].outputs[0],  nodes['RayP2'].inputs[7])
+        links.new( nodes['Reroute.011'].outputs[0],  nodes['RayP1'].inputs[2])
+        links.new( nodes['Reroute.012'].outputs[0],  nodes['RayP2'].inputs[2])
         links.new( nodes['Reroute.010'].outputs[0],  nodes['MoveMath2'].inputs[1])
         links.new( nodes['MarkDetectionline'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['RotMath3'].outputs[0],  nodes['Group Output'].inputs[1])
@@ -1671,7 +1671,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math.003'].outputs[0],  nodes['RotMath2.001'].inputs[1])
         links.new( nodes['DisplayExtrude'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
         links.new( nodes['RotMath2'].outputs[0],  nodes['RotMath3.001'].inputs[0])
-        links.new( nodes['Reroute.017'].outputs[0],  nodes['Store Named Attribute'].inputs[4])
+        links.new( nodes['Reroute.017'].outputs[0],  nodes['Store Named Attribute'].inputs[3])
         links.new( nodes['Combine XYZ.008'].outputs[0],  nodes['Vector Rotate.001'].inputs[0])
         links.new( nodes['Math.004'].outputs[0],  nodes['Reroute.023'].inputs[0])
         links.new( nodes['Math.005'].outputs[0],  nodes['Reroute.022'].inputs[0])
@@ -2108,7 +2108,7 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT_VECTOR"
         node.clamp = False
         node.hide = False
-        node.inputs[1].default_value = 0.0
+        '''node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
         node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
@@ -2119,7 +2119,7 @@ class AOMGeoNodesHandler:
         node.outputs[1].default_value = 0
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
-        node.outputs[4].default_value = False
+        node.outputs[4].default_value = False'''
 
         node = nodes.new("ShaderNodeCombineXYZ" )
         node.name = "HeightComb"
@@ -2139,11 +2139,11 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "Obj_UVCoord"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
-        node.inputs[7].default_value = 0
+        node.inputs[7].default_value = 0'''
 
         node = nodes.new("GeometryNodeSwitch" )
         node.name = "DisplaySwitch"
@@ -2151,7 +2151,7 @@ class AOMGeoNodesHandler:
         node.location = (70, 246)
         node.input_type = "GEOMETRY"
         node.hide = False
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -2175,7 +2175,7 @@ class AOMGeoNodesHandler:
         node.outputs[8].default_value = None
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
-        node.outputs[11].default_value = None
+        node.outputs[11].default_value = None'''
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.010"
@@ -2272,7 +2272,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['RotationX'].outputs[2],  nodes['NewCoordinatesAfterMove'].inputs[0])
         links.new( nodes['NewCoordinatesAfterMove'].outputs[0],  nodes['MoveXY'].inputs[0])
         links.new( nodes['Reroute.016'].outputs[0],  nodes['JoinAll'].inputs[0])
-        links.new( nodes['JoinDisplay'].outputs[0],  nodes['DisplaySwitch'].inputs[15])
+        links.new( nodes['JoinDisplay'].outputs[0],  nodes['DisplaySwitch'].inputs[2])
         links.new( nodes['Reroute.003'].outputs[0],  nodes['RotationX'].inputs[0])
         links.new( nodes['Reroute.003'].outputs[0],  nodes['RotationY'].inputs[0])
         links.new( nodes['PToHeight'].outputs[0],  nodes['Vector Math'].inputs[0])
@@ -2305,9 +2305,9 @@ class AOMGeoNodesHandler:
         links.new( nodes['MoveXY'].outputs[0],  nodes['Vector Math.003'].inputs[1])
         links.new( nodes['Vector Math.003'].outputs[0],  nodes['Sample Nearest'].inputs[1])
         links.new( nodes['Reroute.009'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
-        links.new( nodes['Named Attribute'].outputs[0],  nodes['Sample Index'].inputs[3])
-        links.new( nodes['Sample Nearest'].outputs[0],  nodes['Sample Index'].inputs[6])
-        links.new( nodes['Sample Index'].outputs[2],  nodes['Store Named Attribute'].inputs[3])
+        links.new( nodes['Named Attribute'].outputs[0],  nodes['Sample Index'].inputs[1])
+        links.new( nodes['Sample Nearest'].outputs[0],  nodes['Sample Index'].inputs[2])
+        links.new( nodes['Sample Index'].outputs[0],  nodes['Store Named Attribute'].inputs[3])
         links.new( nodes['Reroute.009'].outputs[0],  nodes['Sample Nearest'].inputs[0])
         links.new( nodes['Reroute.012'].outputs[0],  nodes['Reroute.011'].inputs[0])
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Reroute.012'].inputs[0])
@@ -2322,7 +2322,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.013'].outputs[0],  nodes['Reroute.015'].inputs[0])
         links.new( nodes['Combine XYZ'].outputs[0],  nodes['Reroute.007'].inputs[0])
         links.new( nodes['Reroute.007'].outputs[0],  nodes['Group Output'].inputs[2])
-        links.new( nodes['DisplaySwitch'].outputs[6],  nodes['Reroute.016'].inputs[0])
+        links.new( nodes['DisplaySwitch'].outputs[0],  nodes['Reroute.016'].inputs[0])
 
         self.label_nodes(node_group)
         return node_group
@@ -2467,11 +2467,11 @@ class AOMGeoNodesHandler:
         node.location = (-381, -145)
         node.data_type = "FLOAT"
         node.inputs[0].default_value = "foam"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
-        node.outputs[4].default_value = 0
+        node.outputs[4].default_value = 0'''
         #node.outputs[5].default_value = False
 
         node = nodes.new("NodeReroute" )
@@ -2517,7 +2517,7 @@ class AOMGeoNodesHandler:
         node.name = "Switch"
         node.location = (-116, -251)
         node.input_type = "GEOMETRY"
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -2541,7 +2541,7 @@ class AOMGeoNodesHandler:
         node.outputs[8].default_value = None
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
-        node.outputs[11].default_value = None
+        node.outputs[11].default_value = None'''
 
         node = nodes.new("GeometryNodeTransform" )
         node.name = "Transform Geometry.001"
@@ -2587,7 +2587,7 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["Frame"]
         node.location = (122, -151)
         node.input_type = "FLOAT"
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -2611,7 +2611,7 @@ class AOMGeoNodesHandler:
         node.outputs[8].default_value = None
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
-        node.outputs[11].default_value = None
+        node.outputs[11].default_value = None'''
 
         node = nodes.new("GeometryNodeJoinGeometry" )
         node.name = "Join Geometry"
@@ -2624,11 +2624,11 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "foam"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
-        node.inputs[7].default_value = 1
+        node.inputs[7].default_value = 1'''
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.001"
@@ -2658,7 +2658,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[9],  nodes['Map Range.001'].inputs[2])
         links.new( nodes['Group Input'].outputs[10],  nodes['Map Range.001'].inputs[4])
         links.new( nodes['Group Input.001'].outputs[1],  nodes['Switch.001'].inputs[0])
-        links.new( nodes['Switch.001'].outputs[0],  nodes['Store Named Attribute'].inputs[4])
+        links.new( nodes['Switch.001'].outputs[0],  nodes['Store Named Attribute'].inputs[3]) #4
         links.new( nodes['Named Attribute'].outputs[1],  nodes['Math.001'].inputs[1])
         links.new( nodes['Join Geometry'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Group Output'].inputs[0])
@@ -2666,8 +2666,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Transform Geometry.001'].outputs[0],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Reroute.001'].outputs[0],  nodes['Reroute.002'].inputs[0])
-        links.new( nodes['Reroute.002'].outputs[0],  nodes['Switch'].inputs[15])
-        links.new( nodes['Switch'].outputs[6],  nodes['Join Geometry'].inputs[0])
+        links.new( nodes['Reroute.002'].outputs[0],  nodes['Switch'].inputs[2])
+        links.new( nodes['Switch'].outputs[0],  nodes['Join Geometry'].inputs[0]) #output 6
         links.new( nodes['Set Position'].outputs[0],  nodes['Transform Geometry.001'].inputs[0])
         links.new( nodes['Transform Geometry.002'].outputs[0],  nodes['Set Position'].inputs[0])
         links.new( nodes['Vector Math.002'].outputs[0],  nodes['Vector Rotate'].inputs[4])
@@ -2683,7 +2683,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.007'].outputs[0],  nodes['Reroute.006'].inputs[0])
         links.new( nodes['Object Info'].outputs[3],  nodes['Transform Geometry.002'].inputs[0])
         links.new( nodes['Reroute.005'].outputs[0],  nodes['Reroute.004'].inputs[0])
-        links.new( nodes['Math.001'].outputs[0],  nodes['Switch.001'].inputs[3])
+        links.new( nodes['Math.001'].outputs[0],  nodes['Switch.001'].inputs[2]) # 3
         links.new( nodes['Named Attribute'].outputs[1],  nodes['Switch.001'].inputs[2])
 
         self.label_nodes
@@ -2728,13 +2728,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "EnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
-        node.outputs[1].default_value = 0.0
-        node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
-        node.outputs[3].default_value = False
-        node.outputs[4].default_value = 0
-        node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        #node.outputs[0].default_value = (0.0,0.0,0.0,)
+        #node.outputs[1].default_value = 0.0
+        #node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
+        #node.outputs[3].default_value = False
+        #node.outputs[4].default_value = 0
+        #node.outputs[5].default_value = (0.0,0.0,0.0,)
+        #node.outputs[6].default_value = False
 
         node = nodes.new("ShaderNodeMapRange" )
         node.name = "Map Range.002"
@@ -2757,8 +2757,8 @@ class AOMGeoNodesHandler:
         node.inputs[9].default_value = (0.0,0.0,0.0,)
         node.inputs[10].default_value = (1.0,1.0,1.0,)
         node.inputs[11].default_value = (4.0,4.0,4.0,)
-        node.outputs[0].default_value = 0.0
-        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        #node.outputs[0].default_value = 0.0
+        #node.outputs[1].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math"
@@ -2782,12 +2782,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "EnergyInput"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
-        node.inputs[4].default_value = 0.0
-        node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
-        node.inputs[6].default_value = False
-        node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (0.0,0.0,0.0,)
+        #node.inputs[4].default_value = 0.0
+        #node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
+        #node.inputs[6].default_value = False
+        #node.inputs[7].default_value = 0
+        #node.inputs[8].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("GeometryNodeViewer" )
         node.name = "Viewer"
@@ -2797,11 +2797,11 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[1].default_value = 0.0
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
-        node.inputs[4].default_value = 0
-        node.inputs[5].default_value = False
-        node.inputs[6].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        #node.inputs[4].default_value = 0
+        #node.inputs[5].default_value = False
+        #node.inputs[6].default_value = (0.0,0.0,0.0,)
 
         node = nodes.new("GeometryNodeSwitch" )
         node.name = "Switch"
@@ -2809,7 +2809,7 @@ class AOMGeoNodesHandler:
         node.input_type = "GEOMETRY"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -2817,8 +2817,8 @@ class AOMGeoNodesHandler:
         node.inputs[5].default_value = 0
         node.inputs[6].default_value = False
         node.inputs[7].default_value = True
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
-        node.inputs[9].default_value = (0.0,0.0,0.0,)
+        #node.inputs[8].default_value = (0.0,0.0,0.0,)
+        #node.inputs[9].default_value = (0.0,0.0,0.0,)
         node.inputs[10].default_value = (0.800000011920929,0.800000011920929,0.800000011920929,1.0,)
         node.inputs[11].default_value = (0.800000011920929,0.800000011920929,0.800000011920929,1.0,)
         node.inputs[12].default_value = ""
@@ -2836,7 +2836,7 @@ class AOMGeoNodesHandler:
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
         node.outputs[11].default_value = None
-        node.outputs[12].default_value = (0.0,0.0,0.0,)
+        node.outputs[12].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("NodeGroupOutput" )
         node.name = "Group Output"
@@ -2848,17 +2848,17 @@ class AOMGeoNodesHandler:
         inp = node_group.interface.new_socket(name='InputStrength', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
         links.new( nodes['Group Input'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
         links.new( nodes['Group Input'].outputs[0],  nodes['Viewer'].inputs[0])
-        links.new( nodes['Group Input'].outputs[0],  nodes['Switch'].inputs[14])
+        links.new( nodes['Group Input'].outputs[0],  nodes['Switch'].inputs[1]) ##14
         links.new( nodes['Group Input'].outputs[1],  nodes['Map Range.002'].inputs[0])
-        links.new( nodes['Group Input'].outputs[2],  nodes['Switch'].inputs[1])
+        links.new( nodes['Group Input'].outputs[2],  nodes['Switch'].inputs[0])
         links.new( nodes['Group Input'].outputs[3],  nodes['Map Range.002'].inputs[2])
         links.new( nodes['Group Input'].outputs[4],  nodes['Map Range.002'].inputs[3])
-        links.new( nodes['Math'].outputs[0],  nodes['Store Named Attribute'].inputs[4])
+        links.new( nodes['Math'].outputs[0],  nodes['Store Named Attribute'].inputs[3])
         links.new( nodes['Map Range.002'].outputs[0],  nodes['Math'].inputs[0])
         links.new( nodes['Named Attribute'].outputs[1],  nodes['Math'].inputs[1])
         links.new( nodes['Map Range.002'].outputs[0],  nodes['Viewer'].inputs[1])
-        links.new( nodes['Switch'].outputs[6],  nodes['Group Output'].inputs[0])
-        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[15])
+        links.new( nodes['Switch'].outputs[0],  nodes['Group Output'].inputs[0])
+        links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[2])
         
         
         self.label_nodes
@@ -2894,16 +2894,16 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = 0.0
+        '''node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
-        node.inputs[4].default_value = 1
-        node.inputs[5].default_value = 1.0
+        #node.inputs[4].default_value = 1
+        #node.inputs[5].default_value = 1.0
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0
         node.outputs[2].default_value = (0.0,0.0,0.0,)
-        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)'''
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "BlurScaling"
@@ -3918,7 +3918,7 @@ class AOMGeoNodesHandler:
         node.input_type = "GEOMETRY"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -3943,7 +3943,7 @@ class AOMGeoNodesHandler:
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
         node.outputs[11].default_value = None
-
+'''
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.018"
         node.location = (2858, 615)
@@ -3970,7 +3970,7 @@ class AOMGeoNodesHandler:
         node.input_type = "GEOMETRY"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -3994,7 +3994,7 @@ class AOMGeoNodesHandler:
         node.outputs[8].default_value = None
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
-        node.outputs[11].default_value = None
+        node.outputs[11].default_value = None'''
 
         node = nodes.new("GeometryNodeJoinGeometry" )
         node.name = "Join Geometry"
@@ -4044,10 +4044,10 @@ class AOMGeoNodesHandler:
         links.new( nodes['Combine XYZ'].outputs[0],  nodes['Set Position'].inputs[3])
         links.new( nodes['Math.007'].outputs[0],  nodes['Math.008'].inputs[1])
         links.new( nodes['Math.005'].outputs[0],  nodes['Math.006'].inputs[1])
-        links.new( nodes['Set Position'].outputs[0],  nodes['Switch'].inputs[15])
-        links.new( nodes['Reroute.001'].outputs[0],  nodes['Switch'].inputs[14])
+        links.new( nodes['Set Position'].outputs[0],  nodes['Switch'].inputs[2])
+        links.new( nodes['Reroute.001'].outputs[0],  nodes['Switch'].inputs[1])
         links.new( nodes['Reroute'].outputs[0],  nodes['Reroute.001'].inputs[0])
-        links.new( nodes['Reroute.004'].outputs[0],  nodes['Switch'].inputs[1])
+        links.new( nodes['Reroute.004'].outputs[0],  nodes['Switch'].inputs[0])
         links.new( nodes['Reroute.003'].outputs[0],  nodes['Reroute.004'].inputs[0])
         links.new( nodes['Math.013'].outputs[0],  nodes['Math.014'].inputs[0])
         links.new( nodes['Vector Math.001'].outputs[0],  nodes['Separate XYZ'].inputs[0])
@@ -4069,8 +4069,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math.003'].outputs[0],  nodes['Reroute.005'].inputs[0])
         links.new( nodes['Separate XYZ'].outputs[0],  nodes['Reroute.006'].inputs[0])
         links.new( nodes['Vector Math'].outputs[0],  nodes['Vector Rotate.001'].inputs[0])
-        links.new( nodes['Switch'].outputs[6],  nodes['Join Geometry'].inputs[0])
-        links.new( nodes['Switch.001'].outputs[6],  nodes['Join Geometry'].inputs[0])
+        links.new( nodes['Switch'].outputs[0],  nodes['Join Geometry'].inputs[0])
+        links.new( nodes['Switch.001'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Vector Math.002'].outputs[0],  nodes['Transform Geometry'].inputs[1])
         links.new( nodes['Cylinder'].outputs[0],  nodes['Transform Geometry'].inputs[0])
         links.new( nodes['Transform Geometry'].outputs[0],  nodes['Extrude Mesh'].inputs[0])
@@ -4121,7 +4121,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math.015'].outputs[0],  nodes['Math.016'].inputs[0])
         links.new( nodes['Separate XYZ.003'].outputs[2],  nodes['Math.025'].inputs[0])
         links.new( nodes['Math.025'].outputs[0],  nodes['Math.017'].inputs[0])
-        links.new( nodes['Set Position.004'].outputs[0],  nodes['Switch.001'].inputs[15])
+        links.new( nodes['Set Position.004'].outputs[0],  nodes['Switch.001'].inputs[2])
         
         
         source = nodes['Time'].outputs[0]
@@ -4228,7 +4228,7 @@ class AOMGeoNodesHandler:
         node.location = (-1959, -2256)
         node.input_type = "GEOMETRY"
         node.hide = False
-        node.inputs[0].default_value = False
+        '''node.inputs[0].default_value = False
         node.inputs[1].default_value = False
         node.inputs[2].default_value = 0.0
         node.inputs[3].default_value = 0.0
@@ -4252,7 +4252,7 @@ class AOMGeoNodesHandler:
         node.outputs[8].default_value = None
         node.outputs[9].default_value = None
         node.outputs[10].default_value = None
-        node.outputs[11].default_value = None
+        node.outputs[11].default_value = None'''
 
         node = nodes.new("GeometryNodeInstanceOnPoints" )
         node.name = "InstanceOnPoint"
@@ -4320,15 +4320,15 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[7],  nodes['Reroute.018'].inputs[0])
         links.new( nodes['Reroute.017'].outputs[0],  nodes['Collection Info'].inputs[0])
         links.new( nodes['Reroute.019'].outputs[0],  nodes['FloatObj'].inputs[0])
-        links.new( nodes['Switch'].outputs[6],  nodes['InstanceOnPoint'].inputs[2])
+        links.new( nodes['Switch'].outputs[0],  nodes['InstanceOnPoint'].inputs[2])
         links.new( nodes['Reroute.016'].outputs[0],  nodes['InstanceOnPoint'].inputs[6])
         links.new( nodes['Reroute.007'].outputs[0],  nodes['Transform Geometry'].inputs[2])
         links.new( nodes['Transform Geometry'].outputs[0],  nodes['SetHeightRot'].inputs[0])
         links.new( nodes['InstanceOnPoint'].outputs[0],  nodes['Transform Geometry'].inputs[0])
         links.new( nodes['Reroute.018'].outputs[0],  nodes['Switch'].inputs[1])
         links.new( nodes['InstancePoint'].outputs[0],  nodes['InstanceOnPoint'].inputs[0])
-        links.new( nodes['Collection Info'].outputs[0],  nodes['Switch'].inputs[15])
-        links.new( nodes['FloatObj'].outputs[3],  nodes['Switch'].inputs[14])
+        links.new( nodes['Collection Info'].outputs[0],  nodes['Switch'].inputs[2])
+        links.new( nodes['FloatObj'].outputs[3],  nodes['Switch'].inputs[1])
         links.new( nodes['Join Geometry'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['SetHeightRot'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Reroute'].outputs[0],  nodes['Join Geometry'].inputs[0])
@@ -4678,13 +4678,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "P"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "Store Named Attribute"
@@ -4695,12 +4695,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "P"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.001"
@@ -4715,7 +4715,7 @@ class AOMGeoNodesHandler:
         node.clamp = False
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = 0.0
+        '''node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
         node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
@@ -4727,7 +4727,7 @@ class AOMGeoNodesHandler:
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[4].default_value = False
-        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[5].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputIndex" )
         node.name = "CIndex"
@@ -4745,13 +4745,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "C"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "Store Named Attribute.001"
@@ -4762,12 +4762,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "C"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "AddAttP"
@@ -4778,12 +4778,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "P"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeSampleIndex" )
         node.name = "SIC"
@@ -4793,7 +4793,7 @@ class AOMGeoNodesHandler:
         node.clamp = False
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = 0.0
+        '''node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
         node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
@@ -4805,7 +4805,7 @@ class AOMGeoNodesHandler:
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[4].default_value = False
-        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[5].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "PtoDistE"
@@ -4815,13 +4815,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "P"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "CtoDistE"
@@ -4831,13 +4831,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "C"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.002"
@@ -4852,13 +4852,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "Pn"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "AddAttC"
@@ -4869,12 +4869,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "C"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputIndex" )
         node.name = "PrevEIndex"
@@ -4892,13 +4892,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "PreviousEnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "StoreP"
@@ -4909,12 +4909,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "P"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "Store Named Attribute.004"
@@ -4925,12 +4925,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "Cn"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "Named Attribute"
@@ -4940,13 +4940,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "Detectionline"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeGroup" )
         node.name = "Distribute Energy"
@@ -4968,7 +4968,7 @@ class AOMGeoNodesHandler:
         node.clamp = False
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = 0.0
+        '''node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0
         node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = (0.0,0.0,0.0,0.0,)
@@ -4980,7 +4980,7 @@ class AOMGeoNodesHandler:
         node.outputs[2].default_value = (0.0,0.0,0.0,)
         node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[4].default_value = False
-        node.outputs[5].default_value = (0.0,0.0,0.0,)
+        node.outputs[5].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input.Disp"
@@ -4995,13 +4995,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "Cn"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "Store Named Attribute.011"
@@ -5012,12 +5012,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "PreviousEnergyInput"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "InitEIn"
@@ -5027,13 +5027,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "EnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "AddAttPreEIn"
@@ -5044,12 +5044,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "PreviousEnergyInput"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "EtoPrevE"
@@ -5059,13 +5059,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "EnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("FunctionNodeCompare" )
         node.name = "Compare"
@@ -5118,12 +5118,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "C"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "EIn"
@@ -5133,13 +5133,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "EnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "PtoE"
@@ -5149,13 +5149,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "P"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "PreE"
@@ -5165,13 +5165,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "PreviousEnergyInput"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "StorePrevE"
@@ -5182,12 +5182,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "PreviousEnergyInput"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeInputNamedAttribute" )
         node.name = "CDisp"
@@ -5197,13 +5197,13 @@ class AOMGeoNodesHandler:
         node.hide = False
         node.mute = False
         node.inputs[0].default_value = "C"
-        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        '''node.outputs[0].default_value = (0.0,0.0,0.0,)
         node.outputs[1].default_value = 0.0
         node.outputs[2].default_value = (0.0,0.0,0.0,0.0,)
         node.outputs[3].default_value = False
         node.outputs[4].default_value = 0
         node.outputs[5].default_value = (0.0,0.0,0.0,)
-        node.outputs[6].default_value = False
+        node.outputs[6].default_value = False'''
 
         node = nodes.new("ShaderNodeMapRange" )
         node.name = "MRDisp"
@@ -5249,8 +5249,9 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT_VECTOR"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = 0.0
-        node.inputs[1].default_value = 0
+        node.inputs[1].default_value = 1
+        '''node.inputs[0].default_value = 0.0
+        
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[4].default_value = 1
@@ -5258,7 +5259,7 @@ class AOMGeoNodesHandler:
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0
         node.outputs[2].default_value = (0.0,0.0,0.0,)
-        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)'''
 
         node = nodes.new("ShaderNodeCombineXYZ" )
         node.name = "GetZ"
@@ -5278,7 +5279,7 @@ class AOMGeoNodesHandler:
         node.data_type = "FLOAT"
         node.hide = False
         node.mute = False
-        node.inputs[0].default_value = 0.0
+        '''node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0
         node.inputs[2].default_value = (0.0,0.0,0.0,)
         node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
@@ -5287,7 +5288,7 @@ class AOMGeoNodesHandler:
         node.outputs[0].default_value = 0.0
         node.outputs[1].default_value = 0
         node.outputs[2].default_value = (0.0,0.0,0.0,)
-        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeSetPosition" )
         node.name = "Displace"
@@ -5321,12 +5322,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "Cn"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeStoreNamedAttribute" )
         node.name = "StorePn"
@@ -5336,12 +5337,12 @@ class AOMGeoNodesHandler:
         node.mute = False
         node.inputs[1].default_value = True
         node.inputs[2].default_value = "Pn"
-        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        '''node.inputs[3].default_value = (0.0,0.0,0.0,)
         node.inputs[4].default_value = 0.0
         node.inputs[5].default_value = (0.0,0.0,0.0,0.0,)
         node.inputs[6].default_value = False
         node.inputs[7].default_value = 0
-        node.inputs[8].default_value = (0.0,0.0,0.0,)
+        node.inputs[8].default_value = (0.0,0.0,0.0,)'''
 
         node = nodes.new("GeometryNodeSimulationOutput" )
         node.name = "Simulation Output"
@@ -5356,7 +5357,7 @@ class AOMGeoNodesHandler:
         node.name = "Set Material"
         node.location = (4875, 629)
         node.hide = False
-        node.mute = False
+        node.mute = True
         node.inputs[1].default_value = True
         node.inputs[2].default_value = ocean.material_slots[0].material
 
@@ -5372,51 +5373,51 @@ class AOMGeoNodesHandler:
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Store Named Attribute.001'].inputs[0])
         links.new( nodes['Store Named Attribute.001'].outputs[0],  nodes['Store Named Attribute.004'].inputs[0])
         links.new( nodes['Set Material'].outputs[0],  nodes['Group Output'].inputs[0])
-        links.new( nodes['BlurDisp'].outputs[2],  nodes['Displace'].inputs[3])
+        links.new( nodes['BlurDisp'].outputs[0],  nodes['Displace'].inputs[3])
         links.new( nodes['MRDisp'].outputs[0],  nodes['GetZ'].inputs[2])
         links.new( nodes['StorePn'].outputs[0],  nodes['StoreCn'].inputs[0])
         links.new( nodes['StoreC'].outputs[0],  nodes['Simulation Output'].inputs[1])
-        links.new( nodes['PtoE'].outputs[1],  nodes['AddE'].inputs[0])
-        links.new( nodes['CtoDistE'].outputs[1],  nodes['Distribute Energy'].inputs[2])
-        links.new( nodes['PtoDistE'].outputs[1],  nodes['Distribute Energy'].inputs[1])
+        links.new( nodes['PtoE'].outputs[0],  nodes['AddE'].inputs[0])
+        links.new( nodes['CtoDistE'].outputs[0],  nodes['Distribute Energy'].inputs[2])
+        links.new( nodes['PtoDistE'].outputs[0],  nodes['Distribute Energy'].inputs[1])
         links.new( nodes['Displace'].outputs[0],  nodes['StorePn'].inputs[0])
         links.new( nodes['Displace'].outputs[0],  nodes['Distribute Energy'].inputs[0])
-        links.new( nodes['Distribute Energy'].outputs[0],  nodes['StorePn'].inputs[4])
+        links.new( nodes['Distribute Energy'].outputs[0],  nodes['StorePn'].inputs[3])
         links.new( nodes['StoreP'].outputs[0],  nodes['StoreC'].inputs[0])
         links.new( nodes['StorePrevE'].outputs[0],  nodes['StoreP'].inputs[0])
-        links.new( nodes['PntoP'].outputs[1],  nodes['StoreP'].inputs[4])
-        links.new( nodes['AddE'].outputs[0],  nodes['StoreCn'].inputs[4])
-        links.new( nodes['CDisp'].outputs[1],  nodes['MRDisp'].inputs[0])
-        links.new( nodes['CntoC'].outputs[1],  nodes['StoreC'].inputs[4])
+        links.new( nodes['PntoP'].outputs[0],  nodes['StoreP'].inputs[3])
+        links.new( nodes['AddE'].outputs[0],  nodes['StoreCn'].inputs[3])
+        links.new( nodes['CDisp'].outputs[0],  nodes['MRDisp'].inputs[0])
+        links.new( nodes['CntoC'].outputs[0],  nodes['StoreC'].inputs[3])
         links.new( nodes['AddAttP'].outputs[0],  nodes['AddAttC'].inputs[0])
-        links.new( nodes['CIndex'].outputs[0],  nodes['SIC'].inputs[7])
-        links.new( nodes['CtoNew'].outputs[1],  nodes['SIC'].inputs[1])
+        links.new( nodes['CIndex'].outputs[0],  nodes['SIC'].inputs[2])
+        links.new( nodes['CtoNew'].outputs[0],  nodes['SIC'].inputs[1])
         links.new( nodes['Simulation Input'].outputs[1],  nodes['SIC'].inputs[0])
-        links.new( nodes['PIndex'].outputs[0],  nodes['SIP'].inputs[7])
-        links.new( nodes['PtoNew'].outputs[1],  nodes['SIP'].inputs[1])
+        links.new( nodes['PIndex'].outputs[0],  nodes['SIP'].inputs[2])
+        links.new( nodes['PtoNew'].outputs[0],  nodes['SIP'].inputs[1])
         links.new( nodes['Simulation Input'].outputs[1],  nodes['SIP'].inputs[0])
-        links.new( nodes['SIP'].outputs[0],  nodes['AddAttP'].inputs[4])
-        links.new( nodes['SIC'].outputs[0],  nodes['AddAttC'].inputs[4])
+        links.new( nodes['SIP'].outputs[0],  nodes['AddAttP'].inputs[3])
+        links.new( nodes['SIC'].outputs[0],  nodes['AddAttC'].inputs[3])
         links.new( nodes['AddAttPreEIn'].outputs[0],  nodes['Displace'].inputs[0])
         links.new( nodes['Simulation Output'].outputs[0],  nodes['Set Material'].inputs[0])
         links.new( nodes['StoreCn'].outputs[0],  nodes['StorePrevE'].inputs[0])
-        links.new( nodes['EtoPrevE'].outputs[1],  nodes['StorePrevE'].inputs[4])
-        links.new( nodes['EIn'].outputs[1],  nodes['SubtractPrteE'].inputs[0])
-        links.new( nodes['PreE'].outputs[1],  nodes['SubtractPrteE'].inputs[1])
+        links.new( nodes['EtoPrevE'].outputs[0],  nodes['StorePrevE'].inputs[3])
+        links.new( nodes['EIn'].outputs[0],  nodes['SubtractPrteE'].inputs[0])
+        links.new( nodes['PreE'].outputs[0],  nodes['SubtractPrteE'].inputs[1])
         links.new( nodes['AddAttC'].outputs[0],  nodes['AddAttPreEIn'].inputs[0])
-        links.new( nodes['PrevEIndex'].outputs[0],  nodes['SIPrevE'].inputs[7])
-        links.new( nodes['PreToNew'].outputs[1],  nodes['SIPrevE'].inputs[1])
-        links.new( nodes['SIPrevE'].outputs[0],  nodes['AddAttPreEIn'].inputs[4])
+        links.new( nodes['PrevEIndex'].outputs[0],  nodes['SIPrevE'].inputs[2])
+        links.new( nodes['PreToNew'].outputs[0],  nodes['SIPrevE'].inputs[1])
+        links.new( nodes['SIPrevE'].outputs[0],  nodes['AddAttPreEIn'].inputs[3])
         links.new( nodes['BlurInputE'].outputs[0],  nodes['AddE'].inputs[1])
         links.new( nodes['Store Named Attribute.004'].outputs[0],  nodes['Store Named Attribute.011'].inputs[0])
-        links.new( nodes['InitEIn'].outputs[1],  nodes['Store Named Attribute.011'].inputs[4])
+        links.new( nodes['InitEIn'].outputs[0],  nodes['Store Named Attribute.011'].inputs[3])
         links.new( nodes['Simulation Input'].outputs[1],  nodes['SIPrevE'].inputs[0])
         links.new( nodes['SubtractPrteE'].outputs[0],  nodes['BlurInputE'].inputs[0])
-        links.new( nodes['GetZ'].outputs[0],  nodes['BlurDisp'].inputs[2])
+        links.new( nodes['GetZ'].outputs[0],  nodes['BlurDisp'].inputs[0])
         links.new( nodes['Reroute'].outputs[0],  nodes['MRDisp'].inputs[4])
         links.new( nodes['Reroute'].outputs[0],  nodes['DispInputInvert'].inputs[0])
         links.new( nodes['DispInputInvert'].outputs[0],  nodes['MRDisp'].inputs[3])
-        links.new( nodes['Named Attribute'].outputs[3],  nodes['Compare'].inputs[0])
+        links.new( nodes['Named Attribute'].outputs[0],  nodes['Compare'].inputs[0])
         links.new( nodes['Compare'].outputs[0],  nodes['Displace'].inputs[1])
         '''
         mod['Socket_2'] = 0.5

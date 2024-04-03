@@ -615,21 +615,23 @@ class AOMMatHandler:
         node.blend_type = 'ADD'
         node.inputs[0].default_value = 0.1
 
-        node = nodes.new('ShaderNodeTexMusgrave')
+        node = nodes.new('ShaderNodeTexNoise')
         node.name = "TexMusgraveL"
-        node.musgrave_dimensions = '4D'
+        node.noise_dimensions = '4D'
         node.location = (-2300+xoff, 000)
-        node.inputs[3].default_value = 2
-        node.inputs[4].default_value = 2
+        node.normalize = False
+        node.inputs[3].default_value = 0.5
+        node.inputs[4].default_value = 0.5
         node.inputs[5].default_value = 2
 
-        node = nodes.new('ShaderNodeTexMusgrave')
+        node = nodes.new('ShaderNodeTexNoise')
         node.name = "TexMusgraveS"
-        node.location = (-2300+xoff, -300)
-        node.musgrave_dimensions = '4D'
-        node.inputs[3].default_value = 1
-        node.inputs[4].default_value = 0.2
-        node.inputs[5].default_value = 1.6
+        node.location = (-2300+xoff, -400)
+        node.noise_dimensions = '4D'
+        node.normalize = False
+        node.inputs[3].default_value = 0
+        node.inputs[4].default_value = 0.5
+        node.inputs[5].default_value = 2
 
         node = nodes.new('ShaderNodeMath')
         node.name = "ScaleMultiS"

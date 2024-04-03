@@ -8,6 +8,10 @@ erweiterungen:
 [] static Dynamic Paint  [] static geonodes
 
 
+[ ] Set material affects Instanced floaties
+
+
+
 bugs and test: 
 [+] error wenn geofloated object made 
 [] füße der Detectionlines verschieben sich wenn interaction mit Static/Free
