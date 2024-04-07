@@ -1397,6 +1397,40 @@ class BE_OT_GeoFloat(bpy.types.Operator):
                     ob.aom_data.interaction_type = 'FLOAT'
                   
         return{"FINISHED"}
+    
+    
+class BE_OT_GeoFreeObj(bpy.types.Operator):
+    '''Makes objects float on a defined ocean via an Geometrynodes on additional object'''
+    bl_label = "Add GeoFree"
+    bl_idname = "aom.geofree"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+
+        advcol = bpy.data.collections[MColName]
+        GN = AOMGeoNodesHandler(context, advcol)
+
+        oceans = oceanlist(context, context.selected_objects)
+        if len(oceans) == 0:
+            oceans = [get_active_ocean(context)]
+            # print(f"got active {oceans}")
+
+        obs = floatablelist(context, context.selected_objects)
+        selected = context.selected_objects.copy()
+        for oc in oceans[:]:
+            print(f"oc.name {oc.name}")
+            if len(obs) != 0:
+                
+                for ob in obs[:]:
+                    # GN.remove_geofloat(context, ob)
+                    ## make float Float cage
+                    collision = get_collision_from_selection(context,selected, ob)
+                    cage = make_floatcage_geofloat(context, ob)
+                    GN.make_geofree(context, oc,  ob, oc, cage, collision)
+                    ob.aom_data.interaction_type = 'FLOAT'
+                  
+        return{"FINISHED"}    
+
 
 def make_floatcage_geofloat(context, ob):
     

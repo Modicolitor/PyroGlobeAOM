@@ -7,8 +7,16 @@ erweiterungen:
 [] Kontroll timescale 
 [] static Dynamic Paint  [] static geonodes
 
+[] Controller Obj
+[] Controller OBJ always in front --> Controlle in Parameter UI
 
-[ ] Set material affects Instanced floaties
+
+[+] float parameters ui
+
+
+[] Remove Interaction --> Free
+
+[+] Set material affects Instanced floaties
 
 
 

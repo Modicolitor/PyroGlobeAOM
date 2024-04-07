@@ -205,7 +205,8 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 #subcol.operator("float.sel", icon="MOD_OCEAN")
                 subcol.operator(
                     "aom.geofloat", icon="MOD_OCEAN", text='Geofloat Object(s)')
-
+                subcol.operator(
+                    "aom.geofree", icon="PINNED", text='Free Object(s)')
                 # row = layout.row(align=True)
                 subcol.operator("stat.ob", icon="PINNED", text="Free (Dynamic Paint)")
 
@@ -884,7 +885,7 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
             #print (f'in Schleife {mod.name} candidate {candidate.name}')
             if hasattr(mod, 'node_group'):
                 #print (f'has node_group mod {mod.name} candidate {mod.node_group.name}')
-                if mod.node_group.name ==  'AOMGeoFloat':
+                if mod.node_group.name ==  'AOMGeoFloat' or mod.node_group.name ==  'AOMGeoFree':
                     #print (f'found modifier {mod.node_group.name}')
                     if mod["Socket_4"] == candidate:
                         #print (f'found candidate {candidate.name}')
@@ -932,6 +933,7 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
                 mod = self.get_float_mod(context, ocean)
                 
                 
+                
                 #for inp in mod.keys():
                 if mod != None:
                     txt = 'fail'
@@ -947,8 +949,12 @@ class BE_PT_FloatObj_UI(bpy.types.Panel):
                             txt = 'Add Visible Object'
                         
                     subcol.label(text=txt)
-                
-                    print(f'mod keys are{mod.keys()}')
+                    
+                    ##controller obj visibility
+                    cage = mod["Socket_4"]
+                    subcol.prop(data=cage, property="show_in_front", text = "Controller in front")
+                    
+                    #print(f'mod keys are{mod.keys()}')
                     for inp in mod.node_group.interface.items_tree:
                         if inp.bl_socket_idname != 'NodeSocketGeometry':
                             if inp.bl_socket_idname == 'NodeSocketCollection':

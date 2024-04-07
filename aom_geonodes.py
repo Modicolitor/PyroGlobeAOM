@@ -1694,7 +1694,7 @@ class AOMGeoNodesHandler:
         
         #get geo nodes Modifier
         mod, node_group = self.new_geonodes_mod(goal)
-        mod.name = "Float_" + obj.name
+        mod.name = "FreeObj_" + obj.name
         self.move_above_DP(mod, ocean)
         
         aom_props = context.scene.aom_props
@@ -1736,7 +1736,55 @@ class AOMGeoNodesHandler:
             mod.name = "AOM_ObjectWaveSim"
             self.move_mod_to_bottom(mod, ocean)
             
+    def make_geofree(self, context, goal, obj, ocean, cage, collision):
+        print(f'make_geofree goal {goal.name} obj {obj.name} ocean {ocean.name}')
         
+        #get geo nodes Modifier
+        mod, node_group = self.new_geonodes_mod(goal)
+        mod.name = "FreeObj_" + obj.name
+        self.move_above_DP(mod, ocean)
+        
+        aom_props = context.scene.aom_props
+        is_GeoFloat_Smooth = aom_props.is_GeoFloat_Smooth
+        instanceFloatobj = aom_props.instanceFloatobj
+
+        self.make_AOMFreeObj_CageInfo_nodegroup()
+        self.make_AOMFloat_ObjWaves_nodegroup()
+        self.make_AOM_DistributeEnergyFloat_nodegroup()
+        #proximity_ng = self.make_AOMFloat_ObjectFoamProximity_nodegroup()
+        #elf.make_FloatRotMove_nodegroup()
+        #self.make_AOMFloat_plus_nodegroup()
+        #self.make_AOMFloat_Ripples_nodegroup()
+        self.make_AOMFreeObj_CageInfo_nodegroup
+        self.make_AOMFloat_Instancing_nodegroup()
+        
+        node_group = self.make_AOMGeoFree_nodegroup(mod)
+        mod.node_group = node_group
+        
+        if obj != None:
+            mod['Socket_1'] = obj
+            # float_parent_id
+            #obj.aom_data.ripple_parent = ocean
+        if cage != None:
+            mod['Socket_4'] = cage
+            #obj.aom_data.ripple_parent = ocean
+        if collision != None:
+            mod['Socket_5'] = collision
+        
+        
+        #check for object wave sim modifier
+        check = True
+        for mod in ocean.modifiers:
+            if hasattr(mod, 'node_group'):
+                if mod.node_group.name == "AOM_ObjectWaveSim": 
+                    check =False
+                    self.move_mod_to_bottom(mod, ocean)
+        if check:                    
+            mod, node_group = self.new_geonodes_mod(goal)
+            mod.node_group = self.make_AOM_ObjectWaveSim_nodegroup(mod, ocean)
+            mod.name = "AOM_ObjectWaveSim"
+            self.move_mod_to_bottom(mod, ocean)
+            
 
     def make_AOMFloat_plus_nodegroup(self):
         # does it exist
@@ -2255,7 +2303,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[9],  nodes['PToHeight'].inputs[0])
         links.new( nodes['Group Input'].outputs[10],  nodes['PToHeight'].inputs[1])
         links.new( nodes['Group Input'].outputs[11],  nodes['Reroute.006'].inputs[0])
-        links.new( nodes['Group Input'].outputs[12],  nodes['DisplaySwitch'].inputs[1])
+        links.new( nodes['Group Input'].outputs[12],  nodes['DisplaySwitch'].inputs[0])
         links.new( nodes['Group Input'].outputs[13],  nodes['Object Info'].inputs[0])
         links.new( nodes['RotationY'].outputs[0],  nodes['JoinDisplay'].inputs[0])
         links.new( nodes['JoinAll'].outputs[0],  nodes['Group Output'].inputs[0])
@@ -2864,6 +2912,286 @@ class AOMGeoNodesHandler:
         self.label_nodes
         return node_group
         
+
+    def make_AOMFreeObj_CageInfo_nodegroup(self):
+        # does it existAOMFreeObj_CageInfo
+        ngname = 'AOMFreeObj_CageInfo'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+        
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Cage', in_out='INPUT', socket_type = 'NodeSocketObject')
+        inp = node_group.interface.new_socket(name='Collision', in_out='INPUT', socket_type = 'NodeSocketObject')
+        inp = node_group.interface.new_socket(name='ShowCollisionObj', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = False
+        inp = node_group.interface.new_socket(name='X', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='Y', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='Z', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame.001"
+        node.label = "CollisionObj"
+        node.location = (821, 293)
+
+        node = nodes.new("NodeFrame" )
+        node.name = "Frame"
+        node.label = "CageInfo"
+        node.location = (-440, -312)
+
+        node = nodes.new("GeometryNodeObjectInfo" )
+        node.name = "Object Info.001"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-921, 306)
+        node.transform_space = "ORIGINAL"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = False
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input"
+        node.location = (-760, 100)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.008"
+        node.location = (-480, -20)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.009"
+        node.location = (-480, -60)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.010"
+        node.location = (-480, -40)
+
+        node = nodes.new("GeometryNodeTransform" )
+        node.name = "Transform Geometry.002"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-441, 366)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (1.0,1.0,1.0,)
+
+        node = nodes.new("ShaderNodeCombineXYZ" )
+        node.name = "Combine XYZ"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-441, 206)
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = 8.4
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.006"
+        node.location = (-264, 189)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.007"
+        node.location = (-264, 229)
+
+        node = nodes.new("GeometryNodeTransform" )
+        node.name = "Transform Geometry.003"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (-261, 366)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (1.0,1.0,1.0,)
+
+        node = nodes.new("GeometryNodeProximity" )
+        node.name = "Geometry Proximity"
+        node.parent = node_group.nodes["Frame.001"]
+        node.location = (218, 366)
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+
+        node = nodes.new("GeometryNodeObjectInfo" )
+        node.name = "Object Info"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (221, 133)
+        node.transform_space = "ORIGINAL"
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = False
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeCombineXYZ" )
+        node.name = "Combine XYZ.001"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (322, -245)
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = 0.0
+        node.inputs[1].default_value = 0.0
+        node.inputs[2].default_value = -0.75
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+
+        node = nodes.new("ShaderNodeVectorMath" )
+        node.name = "Vector Math"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (560, 272)
+        node.operation = "MULTIPLY"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = (0.0,0.0,0.0,)
+        node.inputs[1].default_value = (1.0,1.0,0.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = 1.0
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+
+        node = nodes.new("ShaderNodeVectorMath" )
+        node.name = "Vector Math.001"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (560, 72)
+        node.operation = "MULTIPLY"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = (0.0,0.0,0.0,)
+        node.inputs[1].default_value = (0.0,0.0,1.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = 1.0
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.004"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (560, -127)
+
+        node = nodes.new("ShaderNodeVectorMath" )
+        node.name = "Vector Math.002"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (560, -167)
+        node.operation = "ADD"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = (0.0,0.0,0.0,)
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = 1.0
+        node.outputs[0].default_value = (0.0,0.0,0.0,)
+        node.outputs[1].default_value = 0.0
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.003"
+        node.location = (580, 200)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.005"
+        node.location = (580, 240)
+
+        node = nodes.new("GeometryNodeJoinGeometry" )
+        node.name = "Join Geometry"
+        node.location = (820, 160)
+        node.hide = False
+        node.mute = False
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.011"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (886, -130)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.001"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (900, 232)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute.002"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (900, 32)
+
+        node = nodes.new("NodeReroute" )
+        node.name = "Reroute"
+        node.parent = node_group.nodes["Frame"]
+        node.location = (900, -207)
+
+        node = nodes.new("GeometryNodeSwitch" )
+        node.name = "Switch"
+        node.location = (1080, 274)
+        node.input_type = "GEOMETRY"
+        node.hide = False
+        node.mute = False
+        node.inputs[0].default_value = False
+
+        node = nodes.new("NodeGroupOutput" )
+        node.name = "Group Output"
+        node.location = (1520, 240)
+        inp = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='XYRotation', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        inp = node_group.interface.new_socket(name='ZRotation', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        inp = node_group.interface.new_socket(name='Location', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        inp = node_group.interface.new_socket(name='Scale', in_out='OUTPUT', socket_type = 'NodeSocketVector')
+        inp = node_group.interface.new_socket(name='Distance', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
+        links.new( nodes['Group Input'].outputs[0],  nodes['Join Geometry'].inputs[0])
+        links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.006'].inputs[0])
+        links.new( nodes['Group Input'].outputs[1],  nodes['Object Info'].inputs[0])
+        links.new( nodes['Group Input'].outputs[2],  nodes['Object Info.001'].inputs[0])
+        links.new( nodes['Group Input'].outputs[3],  nodes['Reroute.007'].inputs[0])
+        links.new( nodes['Group Input'].outputs[4],  nodes['Reroute.008'].inputs[0])
+        links.new( nodes['Group Input'].outputs[5],  nodes['Reroute.010'].inputs[0])
+        links.new( nodes['Group Input'].outputs[6],  nodes['Reroute.009'].inputs[0])
+        links.new( nodes['Object Info'].outputs[1],  nodes['Vector Math.001'].inputs[0])
+        links.new( nodes['Object Info'].outputs[1],  nodes['Vector Math'].inputs[0])
+        links.new( nodes['Reroute'].outputs[0],  nodes['Group Output'].inputs[3])
+        links.new( nodes['Reroute.011'].outputs[0],  nodes['Group Output'].inputs[4])
+        links.new( nodes['Reroute.001'].outputs[0],  nodes['Group Output'].inputs[1])
+        links.new( nodes['Reroute.002'].outputs[0],  nodes['Group Output'].inputs[2])
+        links.new( nodes['Geometry Proximity'].outputs[1],  nodes['Group Output'].inputs[5])
+        links.new( nodes['Vector Math'].outputs[0],  nodes['Reroute.001'].inputs[0])
+        links.new( nodes['Vector Math.001'].outputs[0],  nodes['Reroute.002'].inputs[0])
+        links.new( nodes['Object Info'].outputs[2],  nodes['Reroute.004'].inputs[0])
+        links.new( nodes['Object Info'].outputs[2],  nodes['Transform Geometry.002'].inputs[3])
+        links.new( nodes['Object Info'].outputs[1],  nodes['Transform Geometry.002'].inputs[2])
+        links.new( nodes['Object Info'].outputs[0],  nodes['Transform Geometry.002'].inputs[1])
+        links.new( nodes['Object Info.001'].outputs[3],  nodes['Transform Geometry.002'].inputs[0])
+        links.new( nodes['Transform Geometry.003'].outputs[0],  nodes['Geometry Proximity'].inputs[0])
+        links.new( nodes['Join Geometry'].outputs[0],  nodes['Switch'].inputs[2])
+        links.new( nodes['Reroute.003'].outputs[0],  nodes['Switch'].inputs[1])
+        links.new( nodes['Reroute.005'].outputs[0],  nodes['Switch'].inputs[0])
+        links.new( nodes['Reroute.006'].outputs[0],  nodes['Reroute.003'].inputs[0])
+        links.new( nodes['Reroute.007'].outputs[0],  nodes['Reroute.005'].inputs[0])
+        links.new( nodes['Transform Geometry.002'].outputs[0],  nodes['Transform Geometry.003'].inputs[0])
+        links.new( nodes['Combine XYZ'].outputs[0],  nodes['Transform Geometry.003'].inputs[1])
+        links.new( nodes['Object Info'].outputs[0],  nodes['Vector Math.002'].inputs[0])
+        links.new( nodes['Combine XYZ.001'].outputs[0],  nodes['Vector Math.002'].inputs[1])
+        links.new( nodes['Reroute.008'].outputs[0],  nodes['Combine XYZ.001'].inputs[0])
+        links.new( nodes['Reroute.010'].outputs[0],  nodes['Combine XYZ.001'].inputs[1])
+        links.new( nodes['Reroute.009'].outputs[0],  nodes['Combine XYZ.001'].inputs[2])
+        links.new( nodes['Reroute.008'].outputs[0],  nodes['Combine XYZ'].inputs[0])
+        links.new( nodes['Reroute.010'].outputs[0],  nodes['Combine XYZ'].inputs[1])
+        links.new( nodes['Reroute.009'].outputs[0],  nodes['Combine XYZ'].inputs[2])
+        links.new( nodes['Reroute.004'].outputs[0],  nodes['Reroute.011'].inputs[0])
+        links.new( nodes['Vector Math.002'].outputs[0],  nodes['Reroute'].inputs[0])
+        links.new( nodes['Transform Geometry.003'].outputs[0],  nodes['Join Geometry'].inputs[0])
+        links.new( nodes['Switch'].outputs[0],  nodes['Group Output'].inputs[0])
+        
+        
+        
+        self.label_nodes
+        return node_group
+
 
     def make_AOM_DistributeEnergyFloat_nodegroup(self):
         # does it exist
@@ -4336,6 +4664,138 @@ class AOMGeoNodesHandler:
         
         self.label_nodes(node_group)
         return node_group
+    
+    
+    def make_AOMGeoFree_nodegroup(self, mod):
+        # does it exist
+        ngname = 'AOMGeoFree'
+        if ngname in bpy.data.node_groups:
+            return bpy.data.node_groups[ngname]
+
+        node_group = bpy.data.node_groups.new(ngname, 'GeometryNodeTree')
+        # self.remove_nodes(node_group)
+        nodes = node_group.nodes
+        links = node_group.links
+        
+        
+        
+        inp = node_group.interface.new_socket(name='Geometry', in_out='INPUT', socket_type = 'NodeSocketGeometry')
+        inp = node_group.interface.new_socket(name='Visible Object', in_out='INPUT', socket_type = 'NodeSocketObject')
+        inp = node_group.interface.new_socket(name='Use Collection', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = False
+        inp = node_group.interface.new_socket(name='Visible Collection', in_out='INPUT', socket_type = 'NodeSocketCollection')
+        inp = node_group.interface.new_socket(name='Floatcage', in_out='INPUT', socket_type = 'NodeSocketObject')
+        inp = node_group.interface.new_socket(name='Collision Object', in_out='INPUT', socket_type = 'NodeSocketObject')
+        inp = node_group.interface.new_socket(name='Show CollisionObject', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = False
+        inp = node_group.interface.new_socket(name='XOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='YOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='ZOffset', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.0
+        inp = node_group.interface.new_socket(name='ContributeWaves', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = True
+        inp = node_group.interface.new_socket(name='DetectionSize', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.1
+        inp = node_group.interface.new_socket(name='InputStrength', in_out='INPUT', socket_type = 'NodeSocketFloat')
+        inp.default_value = 0.5
+        inp = node_group.interface.new_socket(name='Use Object Foam', in_out='INPUT', socket_type = 'NodeSocketBool')
+        inp.default_value = True
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.002"
+        node.location = (-640, 800)
+
+        node = nodes.new("GeometryNodeGroup" )
+        node.name = "CageInfo"
+        node.location = (-220, 820)
+        node.node_tree = bpy.data.node_groups["AOMFreeObj_CageInfo"]
+        node.hide = False
+        node.mute = False
+        node.inputs[3].default_value = False
+        node.inputs[4].default_value = 0.0
+        node.inputs[5].default_value = 0.0
+        node.inputs[6].default_value = -0.75
+        node.outputs[1].default_value = (0.0,0.0,0.0,)
+        node.outputs[2].default_value = (0.0,0.0,0.0,)
+        node.outputs[3].default_value = (0.0,0.0,0.0,)
+        node.outputs[4].default_value = (0.0,0.0,0.0,)
+        node.outputs[5].default_value = 0.0
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.004"
+        node.location = (140, 1260)
+
+        node = nodes.new("GeometryNodeGroup" )
+        node.name = "ObjWaves"
+        node.location = (460, 1060)
+        node.node_tree = bpy.data.node_groups["AOMFloat_ObjWaves"]
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = 1.0
+        node.inputs[2].default_value = False
+        node.inputs[3].default_value = 0.1
+        node.inputs[4].default_value = 0.5
+        node.outputs[1].default_value = 0.0
+        node.outputs[2].default_value = False
+        node.outputs[3].default_value = 0.0
+        node.outputs[4].default_value = 0.0
+
+        node = nodes.new("NodeGroupInput" )
+        node.name = "Group Input.003"
+        node.location = (840, 620)
+
+        node = nodes.new("GeometryNodeGroup" )
+        node.name = "Instancing"
+        node.location = (1240, 820)
+        node.node_tree = bpy.data.node_groups["AOMFloat_Instancing"]
+        node.hide = False
+        node.mute = False
+        node.inputs[1].default_value = (0.0,0.0,0.0,)
+        node.inputs[2].default_value = (0.0,0.0,0.0,)
+        node.inputs[3].default_value = (0.0,0.0,0.0,)
+        node.inputs[4].default_value = (0.0,0.0,0.0,)
+        node.inputs[7].default_value = True
+
+        node = nodes.new("NodeGroupOutput" )
+        node.name = "Group Output"
+        node.location = (1680, 820)
+        inp = node_group.interface.new_socket(name='Geometry', in_out='OUTPUT', socket_type = 'NodeSocketGeometry')
+        links.new( nodes['Group Input.002'].outputs[0],  nodes['CageInfo'].inputs[0])
+        links.new( nodes['Group Input.002'].outputs[4],  nodes['CageInfo'].inputs[1])
+        links.new( nodes['Group Input.002'].outputs[5],  nodes['CageInfo'].inputs[2])
+        links.new( nodes['Group Input.002'].outputs[6],  nodes['CageInfo'].inputs[3])
+        links.new( nodes['Group Input.002'].outputs[7],  nodes['CageInfo'].inputs[4])
+        links.new( nodes['Group Input.002'].outputs[8],  nodes['CageInfo'].inputs[5])
+        links.new( nodes['Group Input.002'].outputs[9],  nodes['CageInfo'].inputs[6])
+        links.new( nodes['Group Input.004'].outputs[10],  nodes['ObjWaves'].inputs[2])
+        links.new( nodes['Group Input.004'].outputs[11],  nodes['ObjWaves'].inputs[3])
+        links.new( nodes['Group Input.004'].outputs[12],  nodes['ObjWaves'].inputs[4])
+        links.new( nodes['Group Input.003'].outputs[1],  nodes['Instancing'].inputs[5])
+        links.new( nodes['Group Input.003'].outputs[2],  nodes['Instancing'].inputs[7])
+        links.new( nodes['Group Input.003'].outputs[3],  nodes['Instancing'].inputs[6])
+        links.new( nodes['Instancing'].outputs[0],  nodes['Group Output'].inputs[0])
+        links.new( nodes['ObjWaves'].outputs[0],  nodes['Instancing'].inputs[0])
+        links.new( nodes['CageInfo'].outputs[1],  nodes['Instancing'].inputs[1])
+        links.new( nodes['CageInfo'].outputs[4],  nodes['Instancing'].inputs[4])
+        links.new( nodes['CageInfo'].outputs[3],  nodes['Instancing'].inputs[3])
+        links.new( nodes['CageInfo'].outputs[2],  nodes['Instancing'].inputs[2])
+        links.new( nodes['CageInfo'].outputs[5],  nodes['ObjWaves'].inputs[1])
+        links.new( nodes['CageInfo'].outputs[0],  nodes['ObjWaves'].inputs[0])
+        '''
+        mod['Socket_18'] = -2.5
+        mod['Socket_19'] = True
+        mod['Socket_20'] = 0.1
+        mod['Socket_21'] = 0.5
+        mod['Socket_22'] = True
+        '''
+        
+        
+        
+        self.label_nodes(node_group)
+        return node_group
+        
 
     def make_AOMGeoFloat_nodegroup(self, mod):
         # does it exist

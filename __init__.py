@@ -56,6 +56,7 @@ from .aom import BE_OT_windripples_off
 from .aom import BE_OT_DynPaint_on
 from .aom import BE_OT_DynPaint_off
 from .aom import BE_OT_GeoFloat
+from .aom import BE_OT_GeoFreeObj
 
 #from .modalops import PP_OT_PlanarZScaleMenu
 
@@ -68,7 +69,7 @@ from .aom import BE_OT_GeoFloat
 bl_info = {  # für export als addon
     "name": "Advanced Ocean Modifier",
     "author": "Modicolitor",
-    "version": (4, 1, 1),
+    "version": (4, 1, 2),
     "blender": (4, 1, 0),
     "location": "View3D > Tools",
     "description": "Create an Ocean with all Material properties set and add floating Objects, ripples, spray.",
@@ -128,7 +129,7 @@ classes = (BE_PT_AdvOceanMenu,
            BE_OT_DynPaint_on,
            BE_OT_DynPaint_off,
            BE_OT_GeoFloat,
-
+           BE_OT_GeoFreeObj
            )
 
 register, unregister = bpy.utils.register_classes_factory(classes)
