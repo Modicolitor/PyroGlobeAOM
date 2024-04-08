@@ -1694,7 +1694,7 @@ class AOMGeoNodesHandler:
         
         #get geo nodes Modifier
         mod, node_group = self.new_geonodes_mod(goal)
-        mod.name = "FreeObj_" + obj.name
+        mod.name = "FloatObj_" + obj.name
         self.move_above_DP(mod, ocean)
         
         aom_props = context.scene.aom_props
@@ -1741,7 +1741,7 @@ class AOMGeoNodesHandler:
         
         #get geo nodes Modifier
         mod, node_group = self.new_geonodes_mod(goal)
-        mod.name = "FreeObj_" + obj.name
+        mod.name = "AOMFreeObj_" + obj.name
         self.move_above_DP(mod, ocean)
         
         aom_props = context.scene.aom_props

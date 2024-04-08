@@ -275,6 +275,18 @@ def floatablelist(context, list):
                 floatable.append(ob)'''
     return floatable
 
+def cagelist(context, list):
+    floatable = []
+    for ob in list:
+        if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH' and not is_collision(context, ob) and not is_collision_in_name(context, ob):
+            floatable.append(ob)
+            print(f"Floatables are: {ob.name}")
+        '''elif is_floatcage(context, ob):
+            obj = get_object_from_cage(context, ob)
+            if not obj in floatable:
+                floatable.append(ob)'''
+    return floatable
+
 
 def get_object_from_cage(context, cage):
     obs = context.view_layer.objects
@@ -636,17 +648,18 @@ def RemoveInterAct(context):
     data = bpy.data
     sel = context.selected_objects.copy()
     sellist = floatablelist(context, context.selected_objects)
-    # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
+    # #####################
+    # When Legacy Static object removed , finally obsolette
     for obj in sellist:
         RemoveInterActSingle(context, obj)
-        
+    #####################
         
     #geometry nodes version
     oceans = get_all_scene_oceans(context)
     for oc in oceans:
         for mod in oc.modifiers:
             if hasattr(mod, 'node_group'):
-                if mod.node_group.name == 'AOMGeoFloat':
+                if mod.node_group.name == 'AOMGeoFloat' or mod.node_group.name == 'AOMGeoFree':
                     if mod['Socket_4'] in sel: 
                         #delete mod delete 
                         bpy.data.objects.remove(mod['Socket_4'])
@@ -655,14 +668,21 @@ def RemoveInterAct(context):
     
 
 
-# remove interaction aber mit nur einem Object
 
 
+#### nearly obsolete, only used to remove legacy static (free) object
 def RemoveInterActSingle(context, obj):
     if obj.aom_data.interaction_type == '':
         print('stop without action')
         return obj
-
+    
+    
+    
+    obj.aom_data.interaction_type='STATIC'
+    
+    
+    ############################old code for the DP stuff should only be nessecary for legacy Static Object
+    
     context.view_layer.objects.active = obj
     bpy.ops.object.constraints_clear()
 
@@ -672,7 +692,7 @@ def RemoveInterActSingle(context, obj):
 
     print(obj.name+'before geofloat remove')
     for mod in obj.modifiers:
-        if "GeoFloat" in mod.name:
+        if "AOMGeoFloat" in mod.name or "AOMGeoFree" in mod.name:
             bpy.ops.object.modifier_remove(
                 modifier=mod.name)  # remove dynamic paint
 
@@ -1439,6 +1459,7 @@ def make_floatcage_geofloat(context, ob):
     empty = bpy.context.object
     empty.name = ob.name +'_FloatAnimCage'
     empty.aom_data.floatcage = True
+    empty.show_in_front = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
 
     return empty

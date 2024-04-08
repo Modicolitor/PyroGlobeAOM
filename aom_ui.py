@@ -208,7 +208,7 @@ class BE_PT_AdvOceanInteract(bpy.types.Panel):
                 subcol.operator(
                     "aom.geofree", icon="PINNED", text='Free Object(s)')
                 # row = layout.row(align=True)
-                subcol.operator("stat.ob", icon="PINNED", text="Free (Dynamic Paint)")
+                subcol.operator("stat.ob", icon="PINNED", text="Free (Legacy)")
 
                 # row = layout.row(align=True)
                 subcol.operator("rmv.interac", icon="CANCEL")

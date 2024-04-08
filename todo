@@ -8,7 +8,7 @@ erweiterungen:
 [] static Dynamic Paint  [] static geonodes
 
 [] Controller Obj
-[] Controller OBJ always in front --> Controlle in Parameter UI
+[+] Controller OBJ always in front --> Controlle in Parameter UI
 
 
 [+] float parameters ui
