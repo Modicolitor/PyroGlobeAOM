@@ -275,17 +275,7 @@ def floatablelist(context, list):
                 floatable.append(ob)'''
     return floatable
 
-def cagelist(context, list):
-    floatable = []
-    for ob in list:
-        if not is_ocean(context, ob) and not is_floatcage(context, ob) and ob.type == 'MESH' and not is_collision(context, ob) and not is_collision_in_name(context, ob):
-            floatable.append(ob)
-            print(f"Floatables are: {ob.name}")
-        '''elif is_floatcage(context, ob):
-            obj = get_object_from_cage(context, ob)
-            if not obj in floatable:
-                floatable.append(ob)'''
-    return floatable
+
 
 
 def get_object_from_cage(context, cage):
@@ -315,7 +305,7 @@ def get_new_namenum(context):
 
 # lasse soviele objecte wie du willst auf einmal floaten
 # def GeoFloatSel():
-
+'''
 def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
 
     data = bpy.data
@@ -478,7 +468,7 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         print(name)
         bpy.ops.mesh.primitive_uv_sphere_add(location=obj.location)
         cage = context.object
-        cage.name = name + ".FloatAnimCage"
+        cage.name = name + ".Controller" #################
         cage.aom_data.is_floatcage = True
 
         cage.aom_data.namenum = Namenum
@@ -577,7 +567,7 @@ def FloatSel(context, ocean):  # fügt dann ein Ei hinzu das zum Brush wird
         cage.aom_data.float_parent_id = ocean.aom_data.ocean_id
         cage.aom_data.namenum = Namenum
 
-        # setting zrotation on empty to cage on legacy float
+        # setting zrotation on empty to cage on legacy float'''
 
 
 def remove_floats(context, ocean):
@@ -604,15 +594,7 @@ def BrushStatic(context):
 
     sellist = floatablelist(context, sellistori)
 
-    '''
-    for obj in sellistori:
-        if obj.name == "AdvOcean" or ".FloatAnimCage" in obj.name or obj.type != 'MESH':
-            print(str(obj.name) +
-                  " does not float!!, wird nicht in die Staticliste aufgenommen")
-        else:
-            sellist.append(obj)
-            print(str(obj.name) + " wurde in die staticliste zugefügt")
-    '''
+    
     # print("sellist: " +str(sellist) )
 
     # for schleife; range = in der reinfolge; len = zähle alle objekte in Array
@@ -723,13 +705,13 @@ def RemoveInterActSingle(context, obj):
 
     ocean_id = obj.aom_data.float_parent_id
     ocean = get_ocean_from_id(context, ocean_id)
-    if obj.name + ".FloatAnimCage" in bpy.data.objects:
+    if obj.name + ".Controller" in bpy.data.objects:
         for col in bpy.data.collections:
             print("Suche" + str(obj.name) + " in Collection" + str(col.name))
-            if obj.name + ".FloatAnimCage" in col.objects:
+            if obj.name + ".Controller" in col.objects:
                 print(str(obj.name) + "gefunden in " + str(col.name))
                 bpy.data.objects.remove(
-                    bpy.data.objects[obj.name + ".FloatAnimCage"], do_unlink=True)
+                    bpy.data.objects[obj.name + ".Controller"], do_unlink=True)
                 ocean.modifiers['Dynamic Paint'].canvas_settings.canvas_surfaces[col.name].is_active = False
                 bpy.data.collections.remove(col)
 
@@ -795,11 +777,11 @@ def FoamAnAus(context, ocean):
 
 def CageVis(context, Bool):
     objects = bpy.data.objects
-
+    
     # print("Bool in function: " + str(Bool))
     for obj in objects:
         # wenn obj name hat FloatAnimCage im namen mach es aus
-        if "FloatAnimCage" in obj.name:
+        if obj.is_floatcage:       # "FloatAnimCage" in obj.name:
             if Bool == False:
                 objects[obj.name].hide_viewport = True
             else:
@@ -816,7 +798,7 @@ def CageVis(context, Bool):
                     #show collision object
                     mod['Socket_6'] = Bool
                     #show front arrow
-                    mod['Socket_27'] = Bool
+                    #mod['Socket_27'] = Bool
 
     return Bool
 
@@ -855,7 +837,7 @@ class BE_OT_CageVisability(bpy.types.Operator):
         CageVisBool = True
 
         for obj in objects:
-            if "FloatAnimCage" in obj.name:
+            if obj.is_floatcage:
                 CageVisBool = objects[obj.name].hide_viewport
 
         # print("Cage Bool im Knopf" + str(CageVisBool))
@@ -1457,7 +1439,7 @@ def make_floatcage_geofloat(context, ob):
     
     bpy.ops.object.empty_add(type='SPHERE', align='WORLD', location=(ob.location[0], ob.location[1], 5), scale=(3, 3, 3), rotation = (3.14/2, 0,0))
     empty = bpy.context.object
-    empty.name = ob.name +'_FloatAnimCage'
+    empty.name = ob.name +'_AOMController'
     empty.aom_data.floatcage = True
     empty.show_in_front = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)

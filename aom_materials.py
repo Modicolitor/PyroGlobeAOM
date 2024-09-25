@@ -204,7 +204,7 @@ class AOMMatHandler:
 
     def eevee_settings(self):
         REngine = self.context.scene.render.engine
-        self.context.scene.render.engine = 'BLENDER_EEVEE'
+        self.context.scene.render.engine = 'BLENDER_EEVEE_NEXT'
         # Better 'BLEND'??????????'HASHED'
         #self.context.object.active_material.blend_method = 'BLEND'
         self.context.scene.render.engine = REngine
@@ -219,7 +219,7 @@ class AOMMatHandler:
             ob.data.materials.append(self.material)
 
         ob.active_material.use_nodes = True
-        self.eevee_settings()
+        #self.eevee_settings()
 
     def water_31(self, node_tree):
         nodes = node_tree.nodes
