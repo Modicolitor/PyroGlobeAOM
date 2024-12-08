@@ -2707,7 +2707,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[10],  nodes['Map Range.001'].inputs[4])
         links.new( nodes['Group Input.001'].outputs[1],  nodes['Switch.001'].inputs[0])
         links.new( nodes['Switch.001'].outputs[0],  nodes['Store Named Attribute'].inputs[3]) #4
-        links.new( nodes['Named Attribute'].outputs[1],  nodes['Math.001'].inputs[1])
+        links.new( nodes['Named Attribute'].outputs[0],  nodes['Math.001'].inputs[1])
         links.new( nodes['Join Geometry'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['Reroute.006'].outputs[0],  nodes['Store Named Attribute'].inputs[2])
@@ -2732,7 +2732,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Object Info'].outputs[4],  nodes['Transform Geometry.002'].inputs[0]) #3
         links.new( nodes['Reroute.005'].outputs[0],  nodes['Reroute.004'].inputs[0])
         links.new( nodes['Math.001'].outputs[0],  nodes['Switch.001'].inputs[2]) # 3
-        links.new( nodes['Named Attribute'].outputs[1],  nodes['Switch.001'].inputs[2])
+        links.new( nodes['Named Attribute'].outputs[0],  nodes['Switch.001'].inputs[1])
 
         self.label_nodes
         return node_group
