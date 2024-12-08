@@ -2903,7 +2903,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[4],  nodes['Map Range.002'].inputs[3])
         links.new( nodes['Math'].outputs[0],  nodes['Store Named Attribute'].inputs[3])
         links.new( nodes['Map Range.002'].outputs[0],  nodes['Math'].inputs[0])
-        links.new( nodes['Named Attribute'].outputs[1],  nodes['Math'].inputs[1])
+        links.new( nodes['Named Attribute'].outputs[0],  nodes['Math'].inputs[1])
         links.new( nodes['Map Range.002'].outputs[0],  nodes['Viewer'].inputs[1])
         links.new( nodes['Switch'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[2])

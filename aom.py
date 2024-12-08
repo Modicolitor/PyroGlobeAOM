@@ -210,8 +210,8 @@ def initialize_addon(context):
     bpy.types.Object.aom_data = bpy.props.PointerProperty(
         type=AOMObjProperties)
 
-    context.scene.eevee.use_ssr = True
-    context.scene.eevee.use_ssr_refraction = True
+    #context.scene.eevee.use_ssr = True
+    #context.scene.eevee.use_ssr_refraction = True
 
 
 def remove_oceankeyframes(context, ocean):

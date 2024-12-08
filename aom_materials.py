@@ -243,20 +243,20 @@ class AOMMatHandler:
         node.inputs[4].default_value = 1.0
         node.inputs[6].default_value = 0.0
         node.inputs[7].default_value = 1.0
-        node.inputs[9].default_value = 0.10000000149011612
+        node.inputs[8].default_value = 0.10000000149011612
         node.inputs[10].default_value = 1.3329999446868896
         node.inputs[11].default_value = 0.0
         node.inputs[12].default_value = 0.1818181872367859
-        node.inputs[14].default_value = 0.0
-        node.inputs[15].default_value = 0.0
-        node.inputs[17].default_value = 0.3787878751754761
+        #node.inputs[14].default_value = 0.0
+        #node.inputs[15].default_value = 0.0
+        #node.inputs[17].default_value = 0.3787878751754761
         node.inputs[18].default_value = 0.0
-        node.inputs[19].default_value = 0.029999999329447746
-        node.inputs[20].default_value = 1.5
-        node.inputs[23].default_value = 0.0
-        node.inputs[24].default_value = 0.5
+        #node.inputs[19].default_value = 0.029999999329447746
+        #node.inputs[20].default_value = 1.5
+        #node.inputs[23].default_value = 0.0
+        #node.inputs[24].default_value = 0.5
         #node.inputs[26].default_value = (0.000000, 0.000000, 0.000000, 1.000000)
-        node.inputs[27].default_value = 0
+        #node.inputs[27].default_value = 0
 
         ##################################################
         node =  nodes.new('ShaderNodeLayerWeight')
@@ -307,7 +307,7 @@ class AOMMatHandler:
         links.new( nodes['LW_Water'].outputs['Fresnel'],  nodes['OceanColMix'].inputs['Fac'])
         links.new( nodes['OceanTint'].outputs['Color'],  nodes['OceanColMix'].inputs['Color2'])
         links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['Mix4Adj'].inputs['Factor'])
-        links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['OceanOut'].inputs[7])
+        links.new( nodes['OceanSubsurface'].outputs['Value'],  nodes['OceanOut'].inputs[8])
         links.new( nodes['OceanColMix'].outputs['Color'],  nodes['Mix4Adj'].inputs['A'])
         links.new( nodes['OceanTint'].outputs['Color'],  nodes['Mix4Adj'].inputs['B'])
         #################################################################
@@ -829,19 +829,19 @@ class AOMMatHandler:
         node.inputs[4].default_value = 1.0
         node.inputs[6].default_value = 0.0
         node.inputs[7].default_value = 1.0
-        node.inputs[9].default_value = 0.30000001192092896
+        node.inputs[8].default_value = 0.30000001192092896
         node.inputs[10].default_value = 1.399999976158142
-        node.inputs[11].default_value = 0.0
-        node.inputs[12].default_value = 0.20000000298023224
-        node.inputs[14].default_value = 0.0
-        node.inputs[15].default_value = 0.0
-        node.inputs[17].default_value = 0.0
-        node.inputs[18].default_value = 0.33250001072883606
-        node.inputs[19].default_value = 0.20000000298023224
-        node.inputs[20].default_value = 1.5
-        node.inputs[23].default_value = 0.0
-        node.inputs[24].default_value = 0.5
-        node.inputs[27].default_value = 1.0
+        node.inputs[10].default_value = 0.0
+        node.inputs[11].default_value = 0.20000000298023224
+        #node.inputs[14].default_value = 0.0
+        #node.inputs[15].default_value = 0.0
+        #node.inputs[17].default_value = 0.0
+        node.inputs[19].default_value = 0.33250001072883606
+        node.inputs[20].default_value = 0.20000000298023224
+        node.inputs[21].default_value = 1.5
+        #node.inputs[23].default_value = 0.0
+        #node.inputs[24].default_value = 0.5
+        #node.inputs[27].default_value = 1.0
 
         
         self.foam_ctl(node_tree)
@@ -2330,14 +2330,14 @@ class AOMMatHandler:
         links.new(nodes['FoamFacOut'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs[7])
+                  nodes['FoamOut'].inputs[8])
         links.new(nodes['FoamFacOut'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs[17])
+                  nodes['FoamOut'].inputs[18])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
@@ -2349,7 +2349,7 @@ class AOMMatHandler:
         links.new(nodes['FoamSubsurf'].outputs[0],
                   nodes['MRSubsurface'].inputs[4])
         links.new(nodes['FoamSubsurf'].outputs[0],
-                  nodes['FoamOut'].inputs[7])
+                  nodes['FoamOut'].inputs[10])
 
         links.new(nodes['FoamColor'].outputs[0],
                   nodes['FoamOut'].inputs[0])
@@ -2417,16 +2417,16 @@ class AOMMatHandler:
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs[7])
+                  nodes['FoamOut'].inputs[8])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs[9])
+                  nodes['FoamOut'].inputs[10])
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs[17])
+                  nodes['FoamOut'].inputs[18])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
@@ -2526,16 +2526,16 @@ class AOMMatHandler:
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['MRSubsurface'].inputs[0])
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs[9])#ss scale
+                  nodes['FoamOut'].inputs[10])#ss scale
         links.new(nodes['MRSubsurface'].outputs[0],
-                  nodes['FoamOut'].inputs[7])#ss scale
+                  nodes['FoamOut'].inputs[8])#ss scale
         links.new(nodes['FoamMatInfo'].outputs[0],
                   nodes['FoamBump'].inputs[2])
 
         links.new(nodes['CRFoamRough'].outputs[0],
                   nodes['FoamOut'].inputs['Roughness'])
         links.new(nodes['CRFoamTransmission'].outputs[0],
-                  nodes['FoamOut'].inputs[17])
+                  nodes['FoamOut'].inputs[18])
 
         # links.new(nodes['FoamBump'].outputs[0],
         #          nodes['FoamOut'].inputs['Normal'])
