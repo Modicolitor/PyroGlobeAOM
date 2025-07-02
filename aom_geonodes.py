@@ -558,17 +558,17 @@ class AOMGeoNodesHandler:
         node.location = (-1208, 338)
         node.transform_space = "ORIGINAL"
         node.inputs[1].default_value = False
-        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
-        node.outputs[1].default_value = (0.0, 0.0, 0.0,)
-        node.outputs[2].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[1].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[2].default_value = (0.0, 0.0, 0.0,)
         node.transform_space = 'RELATIVE'
 
         node = nodes.new("GeometryNodeProximity")
         node.name = "Geometry Proximity.001"
         node.location = (-968, 338)
-        node.inputs[1].default_value = (0.0, 0.0, 0.0,)
-        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
-        node.outputs[1].default_value = 0.0
+        #node.inputs[1].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[1].default_value = 0.0
 
         node = nodes.new("NodeReroute")
         node.name = "Reroute.002"
@@ -579,7 +579,7 @@ class AOMGeoNodesHandler:
         node = nodes.new("ShaderNodeValue")
         node.name = "Time"
         node.location = (-612, 338)
-        node.outputs[0].default_value = 0
+        #node.outputs[0].default_value = 0
         #self.add_driver(target, prop, dataPath)
         
 
@@ -591,7 +591,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.009"
@@ -601,7 +601,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.011"
@@ -611,7 +611,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.007"
@@ -621,7 +621,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 20.0
         node.inputs[1].default_value = 0.5
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.006"
@@ -631,7 +631,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.010"
@@ -641,7 +641,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.008"
@@ -651,7 +651,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMixRGB")
         node.name = "Mix"
@@ -661,7 +661,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = (0.5, 0.5, 0.5, 1.0,)
         node.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0,)
-        node.outputs[0].default_value = (0.0, 0.0, 0.0, 0.0,)
+        #node.outputs[0].default_value = (0.0, 0.0, 0.0, 0.0,)
 
         node = nodes.new("ShaderNodeMixRGB")
         node.name = "Mix.001"
@@ -671,7 +671,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = (0.0, 0.0, 0.0, 1.0,)
         node.inputs[2].default_value = (0.0, 0.0, 0.0, 1.0,)
-        node.outputs[0].default_value = (0.0, 0.0, 0.0, 0.0,)
+        #node.outputs[0].default_value = (0.0, 0.0, 0.0, 0.0,)
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.012"
@@ -681,7 +681,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.013"
@@ -691,7 +691,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMapRange")
         node.name = "Map Range"
@@ -704,7 +704,7 @@ class AOMGeoNodesHandler:
         node.inputs[3].default_value = 0.0
         node.inputs[4].default_value = 0.01
         node.inputs[5].default_value = 4.0
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeMath")
         node.name = "Math.014"
@@ -714,7 +714,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.5
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.5
-        node.outputs[0].default_value = 0.0
+        #node.outputs[0].default_value = 0.0
 
         node = nodes.new("ShaderNodeCombineXYZ")
         node.name = "Combine XYZ"
@@ -722,7 +722,7 @@ class AOMGeoNodesHandler:
         node.inputs[0].default_value = 0.0
         node.inputs[1].default_value = 0.0
         node.inputs[2].default_value = 0.0
-        node.outputs[0].default_value = (0.0, 0.0, 0.0,)
+        #node.outputs[0].default_value = (0.0, 0.0, 0.0,)
 
         node = nodes.new("GeometryNodeSetPosition")
         node.name = "Set Position"
