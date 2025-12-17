@@ -1333,8 +1333,8 @@ class AOMGeoNodesHandler:
         node.inputs[5].default_value = 0
         node.inputs[6].default_value = (0.0,0.0,0.0,)
         node.inputs[7].default_value = (0.0,0.0,0.0,)'''
-        node.inputs[3].default_value = (0.0,0.0,-1.0,)
-        node.inputs[4].default_value = 100.0
+        node.inputs[4].default_value = (0.0,0.0,-1.0,)
+        node.inputs[5].default_value = 100.0
         node.outputs[0].default_value = False
         '''node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
@@ -1373,8 +1373,8 @@ class AOMGeoNodesHandler:
         node.inputs[5].default_value = 0
         node.inputs[6].default_value = (0.0,0.0,0.0,)
         node.inputs[7].default_value = (0.0,0.0,0.0,)'''
-        node.inputs[3].default_value = (0.0,0.0,-1.0,)
-        node.inputs[4].default_value = 100.0
+        node.inputs[4].default_value = (0.0,0.0,-1.0,)
+        node.inputs[5].default_value = 100.0
         '''node.outputs[0].default_value = False
         node.outputs[1].default_value = (0.0,0.0,0.0,)
         node.outputs[2].default_value = (0.0,0.0,0.0,)
@@ -1631,8 +1631,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['DisplayFind1'].outputs[0],  nodes['DisplaySetP2'].inputs[1])
         links.new( nodes['DisplaySetP1'].outputs[0],  nodes['DisplaySetP2'].inputs[0])
         links.new( nodes['Reroute.012'].outputs[0],  nodes['DisplaySetP2'].inputs[2])
-        links.new( nodes['Reroute.011'].outputs[0],  nodes['RayP1'].inputs[2])
-        links.new( nodes['Reroute.012'].outputs[0],  nodes['RayP2'].inputs[2])
+        links.new( nodes['Reroute.011'].outputs[0],  nodes['RayP1'].inputs[3])
+        links.new( nodes['Reroute.012'].outputs[0],  nodes['RayP2'].inputs[3])
         links.new( nodes['Reroute.010'].outputs[0],  nodes['MoveMath2'].inputs[1])
         links.new( nodes['MarkDetectionline'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['RotMath3'].outputs[0],  nodes['Group Output'].inputs[1])
@@ -2481,9 +2481,9 @@ class AOMGeoNodesHandler:
         node.name = "Transform Geometry.002"
         node.parent = node_group.nodes["Frame.001"]
         node.location = (-706, 480)
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("GeometryNodeProximity" )
         node.name = "Geometry Proximity"
@@ -2595,9 +2595,9 @@ class AOMGeoNodesHandler:
         node.name = "Transform Geometry.001"
         node.parent = node_group.nodes["Frame.001"]
         node.location = (-114, 455)
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("ShaderNodeMapRange" )
         node.name = "Map Range.001"
@@ -2697,8 +2697,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute'].inputs[0])
         links.new( nodes['Group Input'].outputs[2],  nodes['Reroute.003'].inputs[0])
         links.new( nodes['Group Input'].outputs[3],  nodes['Vector Math.002'].inputs[0])
-        links.new( nodes['Group Input'].outputs[4],  nodes['Transform Geometry.002'].inputs[2])
-        links.new( nodes['Group Input'].outputs[5],  nodes['Transform Geometry.002'].inputs[3])
+        links.new( nodes['Group Input'].outputs[4],  nodes['Transform Geometry.002'].inputs[3])
+        links.new( nodes['Group Input'].outputs[5],  nodes['Transform Geometry.002'].inputs[4])
         links.new( nodes['Group Input'].outputs[6],  nodes['Named Attribute'].inputs[0])
         links.new( nodes['Group Input'].outputs[6],  nodes['Reroute.007'].inputs[0])
         links.new( nodes['Group Input'].outputs[7],  nodes['Object Info'].inputs[0])
@@ -2721,7 +2721,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Vector Math.002'].outputs[0],  nodes['Vector Rotate'].inputs[4])
         links.new( nodes['Position.001'].outputs[0],  nodes['Vector Rotate'].inputs[0])
         links.new( nodes['Vector Rotate'].outputs[0],  nodes['Set Position'].inputs[2])
-        links.new( nodes['Reroute.003'].outputs[0],  nodes['Transform Geometry.001'].inputs[1])
+        links.new( nodes['Reroute.003'].outputs[0],  nodes['Transform Geometry.001'].inputs[2])
         links.new( nodes['Math.002'].outputs[0],  nodes['Map Range.001'].inputs[0])
         links.new( nodes['Map Range.001'].outputs[0],  nodes['Math.001'].inputs[0])
         links.new( nodes['Transform Geometry.001'].outputs[0],  nodes['Geometry Proximity'].inputs[0])
@@ -2837,20 +2837,21 @@ class AOMGeoNodesHandler:
         #node.inputs[7].default_value = 0
         #node.inputs[8].default_value = (0.0,0.0,0.0,)
 
-        node = nodes.new("GeometryNodeViewer" )
-        node.name = "Viewer"
-        node.parent = node_group.nodes["Frame"]
-        node.location = (272, -63)
-        node.data_type = "FLOAT"
-        node.hide = False
-        node.mute = False
-        node.inputs[1].default_value = 0.0
+        
+        #node = nodes.new("GeometryNodeViewer" )
+        #node.name = "Viewer"
+        #node.parent = node_group.nodes["Frame"]
+        #node.location = (272, -63)
+        #node.data_type = "FLOAT"
+        #node.hide = False
+        #node.mute = False
+        #node.inputs[1].default_value = 0.0
         #node.inputs[2].default_value = (0.0,0.0,0.0,)
         #node.inputs[3].default_value = (0.0,0.0,0.0,0.0,)
         #node.inputs[4].default_value = 0
         #node.inputs[5].default_value = False
         #node.inputs[6].default_value = (0.0,0.0,0.0,)
-
+        
         node = nodes.new("GeometryNodeSwitch" )
         node.name = "Switch"
         node.location = (492, 159)
@@ -2895,7 +2896,7 @@ class AOMGeoNodesHandler:
         inp = node_group.interface.new_socket(name='DetectionSize', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
         inp = node_group.interface.new_socket(name='InputStrength', in_out='OUTPUT', socket_type = 'NodeSocketFloat')
         links.new( nodes['Group Input'].outputs[0],  nodes['Store Named Attribute'].inputs[0])
-        links.new( nodes['Group Input'].outputs[0],  nodes['Viewer'].inputs[0])
+        #links.new( nodes['Group Input'].outputs[0],  nodes['Viewer'].inputs[0])
         links.new( nodes['Group Input'].outputs[0],  nodes['Switch'].inputs[1]) ##14
         links.new( nodes['Group Input'].outputs[1],  nodes['Map Range.002'].inputs[0])
         links.new( nodes['Group Input'].outputs[2],  nodes['Switch'].inputs[0])
@@ -2904,7 +2905,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Math'].outputs[0],  nodes['Store Named Attribute'].inputs[3])
         links.new( nodes['Map Range.002'].outputs[0],  nodes['Math'].inputs[0])
         links.new( nodes['Named Attribute'].outputs[0],  nodes['Math'].inputs[1])
-        links.new( nodes['Map Range.002'].outputs[0],  nodes['Viewer'].inputs[1])
+        #links.new( nodes['Map Range.002'].outputs[0],  nodes['Viewer'].inputs[0])
         links.new( nodes['Switch'].outputs[0],  nodes['Group Output'].inputs[0])
         links.new( nodes['Store Named Attribute'].outputs[0],  nodes['Switch'].inputs[2])
         
@@ -2980,9 +2981,9 @@ class AOMGeoNodesHandler:
         node.location = (-441, 366)
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("ShaderNodeCombineXYZ" )
         node.name = "Combine XYZ"
@@ -3009,9 +3010,9 @@ class AOMGeoNodesHandler:
         node.location = (-261, 366)
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("GeometryNodeProximity" )
         node.name = "Geometry Proximity"
@@ -3162,9 +3163,9 @@ class AOMGeoNodesHandler:
         links.new( nodes['Vector Math'].outputs[0],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Vector Math.001'].outputs[0],  nodes['Reroute.002'].inputs[0])
         links.new( nodes['Object Info'].outputs[3],  nodes['Reroute.004'].inputs[0])#2
-        links.new( nodes['Object Info'].outputs[3],  nodes['Transform Geometry.002'].inputs[3])#2
-        links.new( nodes['Object Info'].outputs[2],  nodes['Transform Geometry.002'].inputs[2])#1
-        links.new( nodes['Object Info'].outputs[1],  nodes['Transform Geometry.002'].inputs[1])#0
+        links.new( nodes['Object Info'].outputs[3],  nodes['Transform Geometry.002'].inputs[4])#2
+        links.new( nodes['Object Info'].outputs[2],  nodes['Transform Geometry.002'].inputs[3])#1
+        links.new( nodes['Object Info'].outputs[1],  nodes['Transform Geometry.002'].inputs[2])#0
         links.new( nodes['Object Info.001'].outputs[4],  nodes['Transform Geometry.002'].inputs[0])#3
         links.new( nodes['Transform Geometry.003'].outputs[0],  nodes['Geometry Proximity'].inputs[0])
         links.new( nodes['Join Geometry'].outputs[0],  nodes['Switch'].inputs[2])
@@ -3173,7 +3174,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.006'].outputs[0],  nodes['Reroute.003'].inputs[0])
         links.new( nodes['Reroute.007'].outputs[0],  nodes['Reroute.005'].inputs[0])
         links.new( nodes['Transform Geometry.002'].outputs[0],  nodes['Transform Geometry.003'].inputs[0])
-        links.new( nodes['Combine XYZ'].outputs[0],  nodes['Transform Geometry.003'].inputs[1])
+        links.new( nodes['Combine XYZ'].outputs[0],  nodes['Transform Geometry.003'].inputs[2])
         links.new( nodes['Object Info'].outputs[1],  nodes['Vector Math.002'].inputs[0])#0
         links.new( nodes['Combine XYZ.001'].outputs[0],  nodes['Vector Math.002'].inputs[1])
         links.new( nodes['Reroute.008'].outputs[0],  nodes['Combine XYZ.001'].inputs[0])
@@ -3575,9 +3576,9 @@ class AOMGeoNodesHandler:
         node.location = (-676, 516)
         node.hide = False
         node.mute = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (1.5707963705062866,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.5707963705062866,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("ShaderNodeMath" )
         node.name = "Math.002"
@@ -4399,8 +4400,8 @@ class AOMGeoNodesHandler:
         links.new( nodes['Vector Math'].outputs[0],  nodes['Vector Rotate.001'].inputs[0])
         links.new( nodes['Switch'].outputs[0],  nodes['Join Geometry'].inputs[0])
         links.new( nodes['Switch.001'].outputs[0],  nodes['Join Geometry'].inputs[0])
-        links.new( nodes['Vector Math.002'].outputs[0],  nodes['Transform Geometry'].inputs[1])
-        links.new( nodes['Cylinder'].outputs[0],  nodes['Transform Geometry'].inputs[0])
+        links.new( nodes['Vector Math.002'].outputs[0],  nodes['Transform Geometry'].inputs[2])
+        links.new( nodes['Cylinder'].outputs[0],  nodes['Transform Geometry'].inputs[1])
         links.new( nodes['Transform Geometry'].outputs[0],  nodes['Extrude Mesh'].inputs[0])
         links.new( nodes['Index'].outputs[0],  nodes['Compare'].inputs[0])
         links.new( nodes['Compare'].outputs[0],  nodes['Extrude Mesh'].inputs[1])
@@ -4603,9 +4604,9 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["ShipInstancing"]
         node.location = (-1383, -2105)
         node.hide = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("NodeGroupInput" )
         node.name = "Group Input"
@@ -4616,9 +4617,9 @@ class AOMGeoNodesHandler:
         node.parent = node_group.nodes["ShipInstancing"]
         node.location = (-948, -2228)
         node.hide = False
-        node.inputs[1].default_value = (0.0,0.0,0.0,)
-        node.inputs[2].default_value = (0.0,0.0,0.0,)
-        node.inputs[3].default_value = (1.0,1.0,1.0,)
+        #node.inputs[1].default_value = (0.0,0.0,0.0,)
+        #node.inputs[2].default_value = (0.0,0.0,0.0,)
+        #node.inputs[3].default_value = (1.0,1.0,1.0,)
 
         node = nodes.new("NodeReroute" )
         node.name = "Reroute.001"
@@ -4641,7 +4642,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Group Input'].outputs[0],  nodes['Reroute.001'].inputs[0])
         links.new( nodes['Group Input'].outputs[1],  nodes['InstanceOnPoint'].inputs[5])
         links.new( nodes['Group Input'].outputs[2],  nodes['Reroute.007'].inputs[0])
-        links.new( nodes['Group Input'].outputs[3],  nodes['SetHeightRot'].inputs[1])
+        links.new( nodes['Group Input'].outputs[3],  nodes['SetHeightRot'].inputs[2])
         links.new( nodes['Group Input'].outputs[4],  nodes['Reroute.016'].inputs[0])
         links.new( nodes['Group Input'].outputs[5],  nodes['Reroute.019'].inputs[0])
         links.new( nodes['Group Input'].outputs[6],  nodes['Reroute.017'].inputs[0])
@@ -4650,7 +4651,7 @@ class AOMGeoNodesHandler:
         links.new( nodes['Reroute.019'].outputs[0],  nodes['FloatObj'].inputs[0])
         links.new( nodes['Switch'].outputs[0],  nodes['InstanceOnPoint'].inputs[2])
         links.new( nodes['Reroute.016'].outputs[0],  nodes['InstanceOnPoint'].inputs[6])
-        links.new( nodes['Reroute.007'].outputs[0],  nodes['Transform Geometry'].inputs[2])
+        links.new( nodes['Reroute.007'].outputs[0],  nodes['Transform Geometry'].inputs[3])
         links.new( nodes['Transform Geometry'].outputs[0],  nodes['SetHeightRot'].inputs[0])
         links.new( nodes['InstanceOnPoint'].outputs[0],  nodes['Transform Geometry'].inputs[0])
         links.new( nodes['Reroute.018'].outputs[0],  nodes['Switch'].inputs[0])

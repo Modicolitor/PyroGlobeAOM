@@ -216,9 +216,19 @@ def initialize_addon(context):
 
 def remove_oceankeyframes(context, ocean):
     if hasattr(ocean.animation_data, "action"):
+        action = ocean.animation_data.action
+        action_slot = ocean.animation_data.action_slot
+        from bpy_extras import anim_utils
+        channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
 
-        for fcu in ocean.animation_data.action.fcurves[:]:
-            ocean.animation_data.action.fcurves.remove(fcu)
+        # Now you can access the F-Curves in the channelbag:
+        for fcurve in channelbag.fcurves:
+            channelbag.fcurves.remove(fcurve)
+        
+        
+        
+        #for fcu in ocean.animation_data.action.fcurves[:]:
+        #    ocean.animation_data.action.fcurves.remove(fcu)
             #
             # for keyframe in fcu.keyframe_points:
             #    fcu.keyframe_points.remove(keyframe)
@@ -781,7 +791,7 @@ def CageVis(context, Bool):
     # print("Bool in function: " + str(Bool))
     for obj in objects:
         # wenn obj name hat FloatAnimCage im namen mach es aus
-        if obj.is_floatcage:       # "FloatAnimCage" in obj.name:
+        if obj.aom_data.is_floatcage:       # "FloatAnimCage" in obj.name:
             if Bool == False:
                 objects[obj.name].hide_viewport = True
             else:
@@ -792,6 +802,7 @@ def CageVis(context, Bool):
     for oc in oceans:
         for mod in oc.modifiers:
             if hasattr(mod, 'node_group'):
+                print('has node_group')
                 if mod.node_group.name == 'AOMGeoFloat':
                     #detectionlines
                     mod['Socket_7'] = Bool
@@ -837,7 +848,11 @@ class BE_OT_CageVisability(bpy.types.Operator):
         CageVisBool = True
 
         for obj in objects:
-            if obj.is_floatcage:
+            print(f'object is tested for floatcage {obj}')
+            #aom_data = obj.aom_data
+            #if hasattr(aom_data, "is_floatcage"):
+            if obj.aom_data.is_floatcage:
+                print(f'object is floatcage {obj}')
                 CageVisBool = objects[obj.name].hide_viewport
 
         # print("Cage Bool im Knopf" + str(CageVisBool))
@@ -983,7 +998,12 @@ def get_ocean_keyframes(context, ocean):
     if not hasattr(ocean.animation_data, "action"):
         return None
     else:
-        for fcu in ocean.animation_data.action.fcurves:
+        action = ocean.animation_data.action
+        action_slot = ocean.animation_data.action_slot
+        from bpy_extras import anim_utils
+        channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot) 
+        
+        for fcu in channelbag.fcurves:
             for keyframe in fcu.keyframe_points:
                 keyframes.append(keyframe.co)
     # print(keyframes)
@@ -998,21 +1018,37 @@ def set_ocean_keyframes(context, ocean, mod, start, end, is_extrapolate):
     # if not hasattr(ocean.animation_data, "action"):
     context.scene.frame_current = start[0]
     mod.time = start[1]
-    mod.keyframe_insert(data_path="time")
-
+    key = mod.keyframe_insert(data_path="time")
+    #key.interpolation = 'LINEAR'
+    
     context.scene.frame_current = end[0]
     mod.time = end[1]
-    mod.keyframe_insert(data_path="time")
+    key = mod.keyframe_insert(data_path="time")
+    #key.interpolation = 'LINEAR'
 
-    if hasattr(ocean.animation_data, 'action'):
+
+    
+    action = ocean.animation_data.action
+    action_slot = ocean.animation_data.action_slot
+    from bpy_extras import anim_utils
+    channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+
+    # Now you can access the F-Curves in the channelbag:
+    for fcurve in channelbag.fcurves:
+        fcurve.extrapolation = 'LINEAR'
+
+
+    #bpy.ops.graph.extrapolation_type(type='LINEAR')
+    ''' if hasattr(ocean.animation_data, 'action'):
         for fcu in ocean.animation_data.action.fcurves:
             for keyframe in fcu.keyframe_points:
                 keyframe.interpolation = 'LINEAR'
+    
 
     if is_extrapolate:
         for fcu in ocean.animation_data.action.fcurves:
             fcu.extrapolation = 'LINEAR'
-
+    '''
     context.scene.frame_current = oriframecurrent
 
 
@@ -1117,9 +1153,15 @@ def set_keyframes(context, path, target,  value, frame):
 
 def make_keyframes_linear(context, ob):
     if hasattr(ob.animation_data, "action"):
-        for fc in ob.animation_data.action.fcurves:
-            for key in fc.keyframe_points:
-                key.interpolation = 'LINEAR'
+        action = ob.animation_data.action
+        action_slot = ob.animation_data.action_slot
+        from bpy_extras import anim_utils
+        channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+
+        # Now you can access the F-Curves in the channelbag:
+        for fcurve in channelbag.fcurves:
+            fcurve.extrapolation = 'LINEAR'
+        
 
 
 def get_node_after(context, node_tree, name):
@@ -1167,7 +1209,15 @@ def get_keyframes_data_path(context, object, data_path):
     if hasattr(object.animation_data, "action"):
         keys = []
         action = object.animation_data.action
-        for fc in action.fcurves:
+        
+        action = ocean.animation_data.action
+        action_slot = ocean.animation_data.action_slot
+        from bpy_extras import anim_utils
+        channelbag = anim_utils.action_get_channelbag_for_slot(action, action_slot)
+
+    
+        
+        for fc in channelbag.fcurves:
             if fc.data_path == data_path:
                 for key in fc.keyframe_points:
                     keys.append(key)
@@ -1440,9 +1490,10 @@ def make_floatcage_geofloat(context, ob):
     bpy.ops.object.empty_add(type='SPHERE', align='WORLD', location=(ob.location[0], ob.location[1], 5), scale=(3, 3, 3), rotation = (3.14/2, 0,0))
     empty = bpy.context.object
     empty.name = ob.name +'_AOMController'
-    empty.aom_data.floatcage = True
+    empty.aom_data.is_floatcage = True
     empty.show_in_front = True
     bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    
 
     return empty
 
